@@ -34,6 +34,9 @@ kotlin {
             // Android-specific drivers / engines
             implementation(libs.sqldelight.android.driver)
             implementation(libs.ktor.client.okhttp)
+            // Koin Android integration
+            implementation(libs.koin.android)
+            implementation(libs.koin.androidx.compose)
         }
         commonMain.dependencies {
             implementation(compose.runtime)
