@@ -6,6 +6,8 @@ plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
+    alias(libs.plugins.sqldelight)
+    alias(libs.plugins.kotlinSerialization)
 }
 
 kotlin {
@@ -29,6 +31,9 @@ kotlin {
         androidMain.dependencies {
             implementation(compose.preview)
             implementation(libs.androidx.activity.compose)
+            // Android-specific drivers / engines
+            implementation(libs.sqldelight.android.driver)
+            implementation(libs.ktor.client.okhttp)
         }
         commonMain.dependencies {
             implementation(compose.runtime)
@@ -39,10 +44,30 @@ kotlin {
             implementation(compose.components.uiToolingPreview)
             implementation(libs.androidx.lifecycle.viewmodelCompose)
             implementation(libs.androidx.lifecycle.runtimeCompose)
+            // Networking
+            implementation(libs.ktor.client.core)
+            implementation(libs.ktor.client.content.negotiation)
+            implementation(libs.ktor.serialization.kotlinx.json)
+            // Serialization
+            implementation(libs.kotlinx.serialization.json)
+            // DI
+            implementation(libs.koin.core)
+            // SQLDelight runtime for common code
+            implementation(libs.sqldelight.runtime)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
         }
+        iosMain.dependencies {
+            implementation(libs.sqldelight.native.driver)
+            implementation(libs.ktor.client.darwin)
+        }
+    }
+}
+
+sqldelight {
+    database("AppDatabase") {
+        packageName = "xyz.sattar.javid.proqueue.db"
     }
 }
 
