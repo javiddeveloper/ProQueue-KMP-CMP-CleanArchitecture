@@ -1,4 +1,5 @@
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
+import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
@@ -6,12 +7,16 @@ plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
-    alias(libs.plugins.sqldelight)
     alias(libs.plugins.kotlinSerialization)
+    alias(libs.plugins.room)
+    alias(libs.plugins.ksp)
 }
 
 kotlin {
+    compilerOptions.freeCompilerArgs.add("-Xexpect-actual-classes") // avoid compilation warning on expect/actual classes
+
     androidTarget {
+        @OptIn(ExperimentalKotlinGradlePluginApi::class)
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_11)
         }
@@ -31,12 +36,9 @@ kotlin {
         androidMain.dependencies {
             implementation(compose.preview)
             implementation(libs.androidx.activity.compose)
-            // Android-specific drivers / engines
-            implementation(libs.sqldelight.android.driver)
-            implementation(libs.ktor.client.okhttp)
             // Koin Android integration
             implementation(libs.koin.android)
-            implementation(libs.koin.androidx.compose)
+            implementation(libs.koin.compose)
         }
         commonMain.dependencies {
             implementation(compose.runtime)
@@ -53,24 +55,19 @@ kotlin {
             implementation(libs.ktor.serialization.kotlinx.json)
             // Serialization
             implementation(libs.kotlinx.serialization.json)
-            // DI
-            implementation(libs.koin.core)
-            // SQLDelight runtime for common code
-            implementation(libs.sqldelight.runtime)
+            // Mark 2
+            implementation(libs.androidx.room.runtime)
+            implementation(libs.sqlite.bundled)
+            api(libs.koin.core)
+            implementation(libs.koin.compose)
+            implementation(libs.koin.compose.viewmodel)
+            implementation(compose.materialIconsExtended)
+            implementation(libs.kotlinx.datetime)
         }
-        commonTest.dependencies {
-            implementation(libs.kotlin.test)
-        }
-        iosMain.dependencies {
-            implementation(libs.sqldelight.native.driver)
-            implementation(libs.ktor.client.darwin)
-        }
-    }
-}
-
-sqldelight {
-    database("AppDatabase") {
-        packageName = "xyz.sattar.javid.proqueue.db"
+//        iosMain.dependencies {
+//            implementation(libs.sqldelight.native.driver)
+//            implementation(libs.ktor.client.darwin)
+//        }
     }
 }
 
@@ -103,5 +100,14 @@ android {
 
 dependencies {
     debugImplementation(compose.uiTooling)
+    // After running find ksp generated directories on: composeApp/build/generated/...
+    add("kspAndroid", libs.androidx.room.compiler) // Android
+    add("kspIosSimulatorArm64", libs.androidx.room.compiler) // Apple Silicon iOS Simulators
+//    add("kspIosX64", libs.androidx.room.compiler) // Intel-based iOS Simulators
+//    add("kspIosArm64", libs.androidx.room.compiler) // Real iOS Devices
+}
+
+room {
+    schemaDirectory("$projectDir/schemas")
 }
 
