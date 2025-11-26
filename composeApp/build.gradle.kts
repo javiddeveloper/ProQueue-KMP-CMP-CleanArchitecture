@@ -64,10 +64,10 @@ kotlin {
             implementation(compose.materialIconsExtended)
             implementation(libs.kotlinx.datetime)
         }
-//        iosMain.dependencies {
-//            implementation(libs.sqldelight.native.driver)
-//            implementation(libs.ktor.client.darwin)
-//        }
+        iosMain.dependencies {
+            implementation(libs.sqldelight.native.driver)
+            implementation(libs.ktor.client.darwin)
+        }
     }
 }
 
@@ -104,7 +104,10 @@ dependencies {
     add("kspAndroid", libs.androidx.room.compiler) // Android
     add("kspIosSimulatorArm64", libs.androidx.room.compiler) // Apple Silicon iOS Simulators
 //    add("kspIosX64", libs.androidx.room.compiler) // Intel-based iOS Simulators
-//    add("kspIosArm64", libs.androidx.room.compiler) // Real iOS Devices
+    add("kspIosArm64", libs.androidx.room.compiler) // Real iOS Devices
+//    add("kspDesktop", libs.androidx.room.compiler) // jvm
+
+
 }
 
 room {
