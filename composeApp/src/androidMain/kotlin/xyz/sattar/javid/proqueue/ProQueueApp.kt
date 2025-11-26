@@ -12,8 +12,7 @@ class ProQueueApp : Application() {
         super.onCreate()
         startKoin {
             androidContext(applicationContext)
-            dbModuleAndroid
-            appModule
+            modules(dbModuleAndroid, appModule)
         }
     }
 }
