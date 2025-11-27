@@ -11,6 +11,6 @@ data class BusinessEntity(
     val phone: String = "",
     val address: String = "",
     val logoPath: String = "",
-    val createTimeStamp: Long = 0,
+    val createTimeStamp: Long? = 0,
 )
 
