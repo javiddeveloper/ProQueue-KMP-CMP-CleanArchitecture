@@ -13,6 +13,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -39,6 +40,10 @@ fun CreateBusinessRoute(
     var phone by remember { mutableStateOf("") }
     var address by remember { mutableStateOf("") }
 
+
+    LaunchedEffect(Unit){
+        viewModel.sendIntent(CreateBusinessIntent.LoadBusiness)
+    }
 
     HandleEvents(
         events = viewModel.events,
@@ -136,6 +141,10 @@ fun CreateBusinessScreen(
                 color = MaterialTheme.colorScheme.error,
                 style = MaterialTheme.typography.bodyMedium
             )
+        }
+
+        if (uiState.business != null) {
+            Text(uiState.business.title)
         }
     }
 }

@@ -5,7 +5,8 @@ import xyz.sattar.javid.proqueue.domain.model.Visitor
 
 interface BusinessRepository {
 
-    fun upsertVisitor(visitor: Visitor): Boolean
+    suspend fun upsertVisitor(visitor: Visitor): Boolean
+    suspend fun upsertBusiness(business: Business): Boolean
 
-    fun upsertBusiness(business: Business): Boolean
+    suspend fun loadLastBusiness(): Business?
 }

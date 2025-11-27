@@ -6,4 +6,5 @@ sealed class CreateBusinessIntent {
         val phone: String,
         val address: String
     ) : CreateBusinessIntent()
+    object LoadBusiness : CreateBusinessIntent()
 }
