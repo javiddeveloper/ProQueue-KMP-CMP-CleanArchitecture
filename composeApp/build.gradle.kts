@@ -55,7 +55,7 @@ kotlin {
             implementation(libs.ktor.serialization.kotlinx.json)
             // Serialization
             implementation(libs.kotlinx.serialization.json)
-            // Mark 2
+            // koin
             implementation(libs.androidx.room.runtime)
             implementation(libs.sqlite.bundled)
             api(libs.koin.core)
@@ -63,6 +63,10 @@ kotlin {
             implementation(libs.koin.compose.viewmodel)
             implementation(compose.materialIconsExtended)
             implementation(libs.kotlinx.datetime)
+
+            // navigation
+            implementation(libs.navigation.compose)
+
         }
         iosMain.dependencies {
             implementation(libs.sqldelight.native.driver)
