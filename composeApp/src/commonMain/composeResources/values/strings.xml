@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="home_menu_item">خانه</string>
+    <string name="last_visitors_menu_item">آخرین نویت ها</string>
+    <string name="settings_menu_item">تنظیمات</string>
+    <string name="phone">تلفن</string>
+    <string name="business_name">نام کسب‌وکار</string>
+    <string name="address">آدرس</string>
+    <string name="default_time_service">زمان پیشقرض سرویس دهی (10 دقیقه)</string>
+    <string name="accept">ثبت</string>
+    <string name="create_business">ایجاد کسب‌وکار</string>
+</resources>
