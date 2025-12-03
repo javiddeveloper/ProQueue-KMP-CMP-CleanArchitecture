@@ -1,7 +1,7 @@
 package xyz.sattar.javid.proqueue.domain
 
-interface VisitorRepository {
-    fun upsertVisitor():Boolean
-    fun upsertBusiness():Boolean
+import xyz.sattar.javid.proqueue.domain.model.Visitor
 
+interface VisitorRepository {
+    suspend fun upsertVisitor(visitor: Visitor): Boolean
 }
