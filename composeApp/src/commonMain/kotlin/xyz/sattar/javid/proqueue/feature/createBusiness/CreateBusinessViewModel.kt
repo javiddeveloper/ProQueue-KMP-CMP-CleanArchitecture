@@ -23,6 +23,9 @@ class CreateBusinessViewModel(
             )
 
             CreateBusinessIntent.LoadBusiness -> loadBusiness()
+            CreateBusinessIntent.BackPress -> {
+                sendEvent(CreateBusinessEvent.BackPressed)
+            }
         }
     }
 

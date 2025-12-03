@@ -7,4 +7,5 @@ sealed class CreateBusinessIntent {
         val address: String
     ) : CreateBusinessIntent()
     object LoadBusiness : CreateBusinessIntent()
+    object BackPress : CreateBusinessIntent()
 }
