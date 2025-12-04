@@ -1,4 +1,4 @@
-package xyz.sattar.javid.proqueue.feature.main
+package xyz.sattar.javid.proqueue.core.navigation.navHost
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
@@ -19,9 +19,10 @@ import xyz.sattar.javid.proqueue.feature.lastVisitors.LastVisitorsScreen
 import xyz.sattar.javid.proqueue.feature.settings.SettingsScreen
 
 @Composable
-fun MainScreen(
+fun MainNavHost(
     onNavigateToCreateBusiness: () -> Unit = {},
-    onNavigateToCreateVisitor: () -> Unit = {}
+    onNavigateToCreateVisitor: () -> Unit = {},
+    onChangeBusiness: () -> Unit = {}
 ) {
     val navController = rememberNavController()
     var selectedTab by remember { mutableStateOf<MainTab>(MainTab.Home) }
@@ -82,9 +83,7 @@ fun MainScreen(
                     onNavigateToAbout = {
 
                     },
-                    onLogout = {
-
-                    }
+                    onChangeBusiness = onChangeBusiness
                 )
             }
         }
