@@ -15,6 +15,9 @@ import xyz.sattar.javid.proqueue.feature.createBusiness.CreateBusinessState
 import xyz.sattar.javid.proqueue.feature.createBusiness.CreateBusinessViewModel
 import xyz.sattar.javid.proqueue.feature.createVisitor.CreateVisitorState
 import xyz.sattar.javid.proqueue.feature.createVisitor.CreateVisitorViewModel
+import xyz.sattar.javid.proqueue.feature.home.HomeViewModel
+import xyz.sattar.javid.proqueue.feature.lastVisitors.LastVisitorsViewModel
+import xyz.sattar.javid.proqueue.feature.settings.SettingsViewModel
 
 val appModule: Module = module {
     single { get<AppDatabase>().businessDao() }
@@ -37,4 +40,9 @@ val appModule: Module = module {
         get(),
         get()
     ) }
+    
+    // Main tab ViewModels
+    viewModel { HomeViewModel() }
+    viewModel { LastVisitorsViewModel() }
+    viewModel { SettingsViewModel() }
 }
