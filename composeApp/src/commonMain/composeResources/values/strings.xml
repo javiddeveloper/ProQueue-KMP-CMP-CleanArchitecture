@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="appName">نوبت یار</string>
     <string name="home_menu_item">خانه</string>
     <string name="last_visitors_menu_item">آخرین نوبت ها</string>
     <string name="settings_menu_item">تنظیمات</string>
@@ -32,4 +33,15 @@
     <string name="about_app">درباره برنامه</string>
     <string name="more_info">اطلاعات بیشتر</string>
     <string name="logout">خروج از حساب کاربری</string>
+    
+    <!-- Business Selection -->
+    <string name="change_business">تغییر کسب‌وکار</string>
+    <string name="business_list">لیست کسب‌وکارها</string>
+    <string name="select_business">انتخاب کسب‌وکار</string>
+    <string name="no_business_found">کسب‌وکاری یافت نشده است</string>
+    <string name="create_first_business">اولین کسب‌وکار خود را ایجاد کنید</string>
+    <string name="delete_business">حذف کسب‌وکار</string>
+    <string name="delete_business_confirmation">آیا از حذف این کسب‌وکار و تمام نوبت‌های آن اطمینان دارید؟</string>
+    <string name="cancel">انصراف</string>
+    <string name="delete">حذف</string>
 </resources>
