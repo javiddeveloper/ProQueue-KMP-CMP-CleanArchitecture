@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="home_menu_item">خانه</string>
-    <string name="last_visitors_menu_item">آخرین نویت ها</string>
+    <string name="last_visitors_menu_item">آخرین نوبت ها</string>
     <string name="settings_menu_item">تنظیمات</string>
     <string name="phone">تلفن</string>
     <string name="business_name">نام کسب‌وکار</string>
@@ -9,4 +9,27 @@
     <string name="default_time_service">زمان پیشقرض سرویس دهی (10 دقیقه)</string>
     <string name="accept">ثبت</string>
     <string name="create_business">ایجاد کسب‌وکار</string>
+    <string name="visitor_name">نام و نام خانوادگی</string>
+    <string name="create_visitor">افزودن مشتری/سرویس گیرنده</string>
+    <string name="register_visitor">ثبت</string>
+
+    <!-- Home Screen -->
+    <string name="welcome_to_proqueue">به ProQueue خوش آمدید</string>
+    <string name="smart_queue_management">سیستم مدیریت نوبت‌دهی هوشمند</string>
+    <string name="quick_access">دسترسی سریع</string>
+    <string name="add_customer">افزودن مشتری</string>
+    
+    <!-- Last Visitors Screen -->
+    <string name="no_visitors_yet">هنوز مشتری ثبت نشده است</string>
+    <string name="visitors_will_show_here">مشتریان شما در اینجا نمایش داده می‌شوند</string>
+    
+    <!-- Settings Screen -->
+    <string name="app_version">نسخه %s</string>
+    <string name="theme_appearance">تم و ظاهر</string>
+    <string name="theme_settings">تنظیمات رنگ و تم</string>
+    <string name="notifications">اعلان‌ها</string>
+    <string name="manage_notifications">مدیریت اعلان‌ها</string>
+    <string name="about_app">درباره برنامه</string>
+    <string name="more_info">اطلاعات بیشتر</string>
+    <string name="logout">خروج از حساب کاربری</string>
 </resources>
