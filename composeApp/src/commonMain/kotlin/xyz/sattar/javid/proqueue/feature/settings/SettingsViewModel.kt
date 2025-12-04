@@ -3,15 +3,34 @@ package xyz.sattar.javid.proqueue.feature.settings
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import xyz.sattar.javid.proqueue.core.ui.BaseViewModel
+import xyz.sattar.javid.proqueue.domain.usecase.DeleteBusinessUseCase
 
-class SettingsViewModel : BaseViewModel<SettingsState, SettingsState.PartialState, SettingsEvent, SettingsIntent>(
+class SettingsViewModel(
+    private val deleteBusinessUseCase: DeleteBusinessUseCase
+) : BaseViewModel<SettingsState, SettingsState.PartialState, SettingsEvent, SettingsIntent>(
     initialState = SettingsState()
 ) {
     override fun handleIntent(intent: SettingsIntent): Flow<SettingsState.PartialState> {
         return when (intent) {
             SettingsIntent.LoadSettings -> loadSettings()
             SettingsIntent.OnAboutClick -> sendEvent(SettingsEvent.NavigateToAbout)
-            SettingsIntent.OnLogoutClick -> sendEvent(SettingsEvent.Logout)
+            SettingsIntent.OnChangeBusinessClick -> sendEvent(SettingsEvent.NavigateToBusinessSelection)
+            SettingsIntent.OnDeleteBusinessClick -> deleteBusiness()
+        }
+    }
+
+    private fun deleteBusiness(): Flow<SettingsState.PartialState> = flow {
+        val currentBusiness = xyz.sattar.javid.proqueue.core.state.BusinessStateHolder.selectedBusiness.value
+        if (currentBusiness != null) {
+            emit(SettingsState.PartialState.IsLoading(true))
+            try {
+                deleteBusinessUseCase(currentBusiness.id)
+                sendEvent(SettingsEvent.BusinessDeleted)
+            } catch (e: Exception) {
+                emit(SettingsState.PartialState.ShowMessage(e.message ?: "Error deleting business"))
+            } finally {
+                emit(SettingsState.PartialState.IsLoading(false))
+            }
         }
     }
 
