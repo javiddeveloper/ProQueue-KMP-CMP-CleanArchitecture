@@ -8,5 +8,6 @@ interface BusinessRepository {
     suspend fun upsertVisitor(visitor: Visitor): Boolean
     suspend fun upsertBusiness(business: Business): Boolean
 
-    suspend fun loadLastBusiness(): Business?
+    suspend fun loadAllBusiness(): List<Business>
+    suspend fun deleteBusiness(businessId: Int)
 }
