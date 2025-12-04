@@ -28,13 +28,15 @@ class BusinessRepositoryImpl(
         }
     }
 
-    override suspend fun loadLastBusiness(): Business? {
+    override suspend fun loadAllBusiness(): List<Business> {
         return try {
-            dao.loadLastBusiness().toDomain()
+            dao.loadAllBusiness().map { it.toDomain() }
         } catch (e: Exception) {
-            null
+            emptyList()
         }
     }
 
-
+    override suspend fun deleteBusiness(businessId: Int) {
+        dao.deleteBusinessAndQueue(businessId)
+    }
 }
