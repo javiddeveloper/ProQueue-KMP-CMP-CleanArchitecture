@@ -42,13 +42,26 @@ fun MainNavHost(
                     selectedTab = tab
                     when (tab) {
                         MainTab.Home -> navController.navigate(AppScreens.Home) {
-                            popUpTo(AppScreens.Home) { inclusive = true }
+                            popUpTo(AppScreens.Home) { 
+                                inclusive = true 
+                                saveState = true
+                            }
+                            launchSingleTop = true
+                            restoreState = true
                         }
                         MainTab.LastVisitors -> navController.navigate(AppScreens.Visitors) {
-                            popUpTo(AppScreens.Home)
+                            popUpTo(AppScreens.Home) {
+                                saveState = true
+                            }
+                            launchSingleTop = true
+                            restoreState = true
                         }
                         MainTab.Settings -> navController.navigate(AppScreens.Settings) {
-                            popUpTo(AppScreens.Home)
+                            popUpTo(AppScreens.Home) {
+                                saveState = true
+                            }
+                            launchSingleTop = true
+                            restoreState = true
                         }
                     }
                 }
