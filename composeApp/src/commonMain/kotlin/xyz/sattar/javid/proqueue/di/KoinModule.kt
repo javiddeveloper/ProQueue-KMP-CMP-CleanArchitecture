@@ -9,8 +9,10 @@ import xyz.sattar.javid.proqueue.data.repository.VisitorRepositoryImpl
 import xyz.sattar.javid.proqueue.domain.BusinessRepository
 import xyz.sattar.javid.proqueue.domain.VisitorRepository
 import xyz.sattar.javid.proqueue.domain.usecase.BusinessUpsertUseCase
-import xyz.sattar.javid.proqueue.domain.usecase.LoadBusinessUseCase
+import xyz.sattar.javid.proqueue.domain.usecase.DeleteBusinessUseCase
+import xyz.sattar.javid.proqueue.domain.usecase.LoadAllBusinessUseCase
 import xyz.sattar.javid.proqueue.domain.usecase.VisitorUpsertUseCase
+import xyz.sattar.javid.proqueue.feature.businessList.BusinessListViewModel
 import xyz.sattar.javid.proqueue.feature.createBusiness.CreateBusinessState
 import xyz.sattar.javid.proqueue.feature.createBusiness.CreateBusinessViewModel
 import xyz.sattar.javid.proqueue.feature.createVisitor.CreateVisitorState
@@ -25,12 +27,12 @@ val appModule: Module = module {
     single<VisitorRepository> { VisitorRepositoryImpl(get()) }
     
     factory { BusinessUpsertUseCase(get()) }
-    factory { LoadBusinessUseCase(get()) }
+    factory { LoadAllBusinessUseCase(get()) }
+    factory { DeleteBusinessUseCase(get()) }
     factory { VisitorUpsertUseCase(get()) }
     
     factory { CreateBusinessState() }
     viewModel { CreateBusinessViewModel(
-        get(),
         get(),
         get()
     ) }
@@ -44,5 +46,7 @@ val appModule: Module = module {
     // Main tab ViewModels
     viewModel { HomeViewModel() }
     viewModel { LastVisitorsViewModel() }
-    viewModel { SettingsViewModel() }
+    viewModel { SettingsViewModel(get()) }
+    
+    viewModel { BusinessListViewModel(get()) }
 }
