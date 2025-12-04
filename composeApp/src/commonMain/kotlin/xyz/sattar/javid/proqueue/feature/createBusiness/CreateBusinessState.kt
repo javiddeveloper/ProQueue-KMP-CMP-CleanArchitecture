@@ -12,7 +12,6 @@ data class CreateBusinessState (
 ){
     sealed class PartialState{
         data class IsLoading(val isLoading: Boolean): PartialState()
-        data class LoadLastBusiness(val business: Business?): PartialState()
         data class ShowMessage(val message: String): PartialState()
         object BusinessCreated: PartialState()
     }

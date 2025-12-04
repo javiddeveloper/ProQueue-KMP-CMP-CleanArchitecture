@@ -5,12 +5,10 @@ import kotlinx.coroutines.flow.flow
 import xyz.sattar.javid.proqueue.core.ui.BaseViewModel
 import xyz.sattar.javid.proqueue.domain.model.Business
 import xyz.sattar.javid.proqueue.domain.usecase.BusinessUpsertUseCase
-import xyz.sattar.javid.proqueue.domain.usecase.LoadBusinessUseCase
 
 class CreateBusinessViewModel(
     initialState: CreateBusinessState,
-    private val businessUpsertUseCase: BusinessUpsertUseCase,
-    private val loadBusinessUseCase: LoadBusinessUseCase
+    private val businessUpsertUseCase: BusinessUpsertUseCase
 ) : BaseViewModel<CreateBusinessState, CreateBusinessState.PartialState, CreateBusinessEvent, CreateBusinessIntent>(
     initialState
 ) {
@@ -22,7 +20,6 @@ class CreateBusinessViewModel(
                 intent.address
             )
 
-            CreateBusinessIntent.LoadBusiness -> loadBusiness()
             CreateBusinessIntent.BackPress -> {
                 sendEvent(CreateBusinessEvent.BackPressed)
             }
@@ -47,13 +44,6 @@ class CreateBusinessViewModel(
                     message = partialState.message
                 )
 
-            is CreateBusinessState.PartialState.LoadLastBusiness ->
-                currentState.copy(
-                    businessCreated = false,
-                    isLoading = false,
-                    message = null,
-                    business = partialState.business
-                )
         }
     }
 
@@ -77,10 +67,5 @@ class CreateBusinessViewModel(
         emit(CreateBusinessState.PartialState.BusinessCreated)
     }
 
-
-    private fun loadBusiness(): Flow<CreateBusinessState.PartialState> = flow {
-        emit(CreateBusinessState.PartialState.IsLoading(true))
-        emit(CreateBusinessState.PartialState.LoadLastBusiness(loadBusinessUseCase.invoke()))
-    }
 
 }

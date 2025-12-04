@@ -70,11 +70,6 @@ fun CreateBusinessRoute(
     var address by remember { mutableStateOf("") }
     var defaultProgress by remember { mutableStateOf("") }
 
-
-    LaunchedEffect(Unit) {
-        viewModel.sendIntent(CreateBusinessIntent.LoadBusiness)
-    }
-
     HandleEvents(
         events = viewModel.events,
         onContinue = onContinue,
