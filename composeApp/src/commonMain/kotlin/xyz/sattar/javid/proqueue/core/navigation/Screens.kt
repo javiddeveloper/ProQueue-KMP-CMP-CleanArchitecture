@@ -21,6 +21,9 @@ object AppNavHost {
 
     @Serializable
     data object MainNavHost
+
+    @Serializable
+    data object BusinessNavHost
 }
 
 sealed class AppScreens {
@@ -34,6 +37,10 @@ sealed class AppScreens {
     object Visitors : AppScreens()
     @Serializable
     object CreateBusiness : AppScreens()
+    @Serializable
+    object BusinessList : AppScreens()
+    @Serializable
+    object CreateVisitor : AppScreens()
 }
 
 

@@ -7,3 +7,6 @@ object MainRoute
 
 @Serializable
 object VisitorsRoute
+
+@Serializable
+object BusinessNavHostRoute
