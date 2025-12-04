@@ -2,6 +2,7 @@ package xyz.sattar.javid.proqueue.feature.home
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import xyz.sattar.javid.proqueue.core.state.BusinessStateHolder
 import xyz.sattar.javid.proqueue.core.ui.BaseViewModel
 
 class HomeViewModel : BaseViewModel<HomeState, HomeState.PartialState, HomeEvent, HomeIntent>(
@@ -25,7 +26,7 @@ class HomeViewModel : BaseViewModel<HomeState, HomeState.PartialState, HomeEvent
             is HomeState.PartialState.ShowMessage ->
                 currentState.copy(message = partialState.message, isLoading = false)
             is HomeState.PartialState.LoadBusinessName ->
-                currentState.copy(businessName = partialState.businessName, isLoading = false)
+                currentState.copy(business = partialState.business, isLoading = false)
         }
     }
 
@@ -34,7 +35,7 @@ class HomeViewModel : BaseViewModel<HomeState, HomeState.PartialState, HomeEvent
 
     private fun loadData(): Flow<HomeState.PartialState> = flow {
         emit(HomeState.PartialState.IsLoading(true))
-        // TODO: Load business data from repository
-        emit(HomeState.PartialState.IsLoading(false))
+        val business = BusinessStateHolder.selectedBusiness.value
+        emit(HomeState.PartialState.LoadBusinessName(business))
     }
 }

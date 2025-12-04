@@ -31,10 +31,8 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.viewmodel.koinViewModel
 import proqueue.composeapp.generated.resources.Res
 import proqueue.composeapp.generated.resources.add_customer
-import proqueue.composeapp.generated.resources.create_business
 import proqueue.composeapp.generated.resources.home_menu_item
 import proqueue.composeapp.generated.resources.quick_access
-import proqueue.composeapp.generated.resources.smart_queue_management
 import proqueue.composeapp.generated.resources.welcome_to_proqueue
 import xyz.sattar.javid.proqueue.core.ui.collectWithLifecycleAware
 import xyz.sattar.javid.proqueue.core.ui.components.AppButton
@@ -108,14 +106,22 @@ fun HomeScreenContent(
                         .padding(24.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
+                    uiState.business?.title?.ifEmpty { stringResource(Res.string.welcome_to_proqueue) }?.let {
+                        Text(
+                            text = it,
+                            style = MaterialTheme.typography.headlineSmall,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = stringResource(Res.string.welcome_to_proqueue),
-                        style = MaterialTheme.typography.headlineSmall,
+                        text = uiState.business?.address ?: "--",
+                        style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onPrimaryContainer
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = stringResource(Res.string.smart_queue_management),
+                        text = uiState.business?.phone ?: "--",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onPrimaryContainer
                     )
@@ -130,20 +136,6 @@ fun HomeScreenContent(
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.fillMaxWidth()
             )
-
-            // Create Business Button
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.secondaryContainer
-                )
-            ) {
-                AppButton(
-                    text = stringResource(Res.string.create_business),
-                    onClick = { onIntent(HomeIntent.NavigateToCreateBusiness) },
-                    modifier = Modifier.padding(16.dp)
-                )
-            }
 
             // Create Visitor Button
             Card(
