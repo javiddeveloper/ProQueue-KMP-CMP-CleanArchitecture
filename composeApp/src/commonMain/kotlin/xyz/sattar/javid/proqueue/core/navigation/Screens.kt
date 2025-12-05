@@ -41,6 +41,8 @@ sealed class AppScreens {
     object BusinessList : AppScreens()
     @Serializable
     object CreateVisitor : AppScreens()
+    @Serializable
+    object CreateAppointment : AppScreens()
 }
 
 

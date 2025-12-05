@@ -19,8 +19,14 @@ fun endOfTodayMillis(timeZone: TimeZone = TimeZone.currentSystemDefault()): Long
 }
 
 @OptIn(ExperimentalTime::class)
+fun systemCurrentMilliseconds(): Long =
+    Clock.System.now().toEpochMilliseconds()
+
+
+@OptIn(ExperimentalTime::class)
 fun formatMillisDateOnly(millis: Long): String {
-    val dateTime = Instant.fromEpochMilliseconds(millis).toLocalDateTime(TimeZone.currentSystemDefault())
+    val dateTime =
+        Instant.fromEpochMilliseconds(millis).toLocalDateTime(TimeZone.currentSystemDefault())
 
     val day = dateTime.day.toString().padStart(2, '0')
     val month = dateTime.month.name.lowercase()
@@ -32,9 +38,31 @@ fun formatMillisDateOnly(millis: Long): String {
 }
 
 @OptIn(ExperimentalTime::class)
+fun formatTimeNow(): String {
+    val currentMillis: Long = Clock.System.now().toEpochMilliseconds()
+    val dateTime = Instant.fromEpochMilliseconds(currentMillis)
+        .toLocalDateTime(TimeZone.currentSystemDefault())
+    val hour = if (dateTime.hour % 12 == 0) 12 else dateTime.hour % 12
+    val minute = dateTime.minute.toString().padStart(2, '0')
+    val amPm = if (dateTime.hour < 12) "AM" else "PM"
+    return "$hour:$minute $amPm" // 00:00 AM
+}
+
+@OptIn(ExperimentalTime::class)
+fun formatTime(currentMillis: Long): String {
+    val dateTime = Instant.fromEpochMilliseconds(currentMillis)
+        .toLocalDateTime(TimeZone.currentSystemDefault())
+    val hour = if (dateTime.hour % 12 == 0) 12 else dateTime.hour % 12
+    val minute = dateTime.minute.toString().padStart(2, '0')
+    val amPm = if (dateTime.hour < 12) "AM" else "PM"
+    return "$hour:$minute $amPm" // 00:00 AM
+}
+
+@OptIn(ExperimentalTime::class)
 fun formatMillisWithTimeNow(): String {
     val currentMillis: Long = Clock.System.now().toEpochMilliseconds()
-    val dateTime = Instant.fromEpochMilliseconds(currentMillis).toLocalDateTime(TimeZone.currentSystemDefault())
+    val dateTime = Instant.fromEpochMilliseconds(currentMillis)
+        .toLocalDateTime(TimeZone.currentSystemDefault())
 
     val hour = if (dateTime.hour % 12 == 0) 12 else dateTime.hour % 12
     val minute = dateTime.minute.toString().padStart(2, '0')

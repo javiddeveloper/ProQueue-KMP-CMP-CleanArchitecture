@@ -14,6 +14,8 @@ import androidx.navigation.compose.rememberNavController
 import xyz.sattar.javid.proqueue.core.navigation.AppScreens
 import xyz.sattar.javid.proqueue.core.navigation.MainTab
 import xyz.sattar.javid.proqueue.core.ui.components.BottomNavigationBar
+import xyz.sattar.javid.proqueue.feature.createAppointment.CreateAppointmentScreen
+import xyz.sattar.javid.proqueue.feature.createVisitor.CreateVisitorRoute
 import xyz.sattar.javid.proqueue.feature.home.HomeScreen
 import xyz.sattar.javid.proqueue.feature.lastVisitors.LastVisitorsScreen
 import xyz.sattar.javid.proqueue.feature.settings.SettingsScreen
@@ -84,8 +86,12 @@ fun MainNavHost(
             composable<AppScreens.Visitors> {
                 selectedTab = MainTab.LastVisitors
                 LastVisitorsScreen(
-                    onNavigateToVisitorDetail = { visitorId ->
-
+                    onNavigateToCreateAppointment = {
+                        // Navigate to CreateVisitor first
+                        navController.navigate(AppScreens.CreateVisitor)
+                    },
+                    onNavigateToEditAppointment = { appointmentId ->
+                        // TODO: Navigate to edit appointment
                     }
                 )
             }
@@ -99,6 +105,41 @@ fun MainNavHost(
                     onChangeBusiness = onChangeBusiness
                 )
             }
+
+            // CreateVisitor Route - First step in appointment creation flow
+            composable<AppScreens.CreateVisitor> {
+                CreateVisitorRoute(
+                    onContinue = {
+                        // After creating visitor, navigate to CreateAppointment
+                        navController.navigate(AppScreens.CreateAppointment) {
+                            popUpTo(AppScreens.CreateVisitor) {
+                                inclusive = true
+                            }
+                        }
+                    },
+                    onNavigateBack = {
+                        navController.popBackStack()
+                    }
+                )
+            }
+
+            // CreateAppointment Route - Second step in appointment creation flow
+            composable<AppScreens.CreateAppointment> {
+                CreateAppointmentScreen(
+                    onNavigateBack = {
+                        navController.popBackStack()
+                    },
+                    onAppointmentCreated = {
+                        // After creating appointment, go back to Visitors list
+                        navController.navigate(AppScreens.Visitors) {
+                            popUpTo(AppScreens.Visitors) {
+                                inclusive = true
+                            }
+                        }
+                    }
+                )
+            }
         }
     }
 }
+
