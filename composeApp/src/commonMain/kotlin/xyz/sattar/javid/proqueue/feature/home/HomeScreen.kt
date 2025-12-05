@@ -1,13 +1,17 @@
 package xyz.sattar.javid.proqueue.feature.home
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -26,6 +30,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
+import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.viewmodel.koinViewModel
@@ -36,6 +41,7 @@ import proqueue.composeapp.generated.resources.quick_access
 import proqueue.composeapp.generated.resources.welcome_to_proqueue
 import xyz.sattar.javid.proqueue.core.ui.collectWithLifecycleAware
 import xyz.sattar.javid.proqueue.core.ui.components.AppButton
+import xyz.sattar.javid.proqueue.core.ui.formatTime
 import xyz.sattar.javid.proqueue.ui.theme.AppTheme
 
 @Composable
@@ -84,71 +90,216 @@ fun HomeScreenContent(
             )
         }
     ) { paddingValues ->
-        Column(
+        LazyColumn(
             modifier = modifier
                 .fillMaxSize()
                 .background(MaterialTheme.colorScheme.background)
                 .padding(paddingValues)
-                .padding(24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
+                .padding(horizontal = 16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Welcome Card
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer
-                )
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(24.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
+            item {
+                // Welcome Card
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.primaryContainer
+                    )
                 ) {
-                    uiState.business?.title?.ifEmpty { stringResource(Res.string.welcome_to_proqueue) }?.let {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(24.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        uiState.business?.title?.ifEmpty { stringResource(Res.string.welcome_to_proqueue) }?.let {
+                            Text(
+                                text = it,
+                                style = MaterialTheme.typography.headlineSmall,
+                                color = MaterialTheme.colorScheme.onPrimaryContainer
+                            )
+                        }
+                        Spacer(modifier = Modifier.height(8.dp))
                         Text(
-                            text = it,
-                            style = MaterialTheme.typography.headlineSmall,
+                            text = uiState.business?.address ?: "--",
+                            style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onPrimaryContainer
                         )
                     }
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = uiState.business?.address ?: "--",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = uiState.business?.phone ?: "--",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer
-                    )
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            item {
+                // Dashboard Stats
+                DashboardStatsSection(stats = uiState.stats)
+            }
 
-            // Quick Actions
-            Text(
-                text = stringResource(Res.string.quick_access),
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.fillMaxWidth()
-            )
+            item {
+                // Quick Actions
+                Text(
+                    text = stringResource(Res.string.quick_access),
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
 
-            // Create Visitor Button
-            Card(
+            item {
+                // Create Visitor Button
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.tertiaryContainer
+                    )
+                ) {
+                    AppButton(
+                        text = stringResource(Res.string.add_customer),
+                        onClick = { onIntent(HomeIntent.NavigateToCreateVisitor) },
+                        modifier = Modifier.padding(16.dp)
+                    )
+                }
+            }
+            
+            item {
+                 Text(
+                    text = "Queue", // TODO: Add string resource
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+
+            items(uiState.queue) { queueItem ->
+                QueueItemCard(
+                    item = queueItem,
+                    onRemove = { onIntent(HomeIntent.RemoveAppointment(queueItem.appointment.id)) },
+                    onComplete = { onIntent(HomeIntent.MarkAppointmentCompleted(queueItem.appointment.id)) },
+                    onNoShow = { onIntent(HomeIntent.MarkAppointmentNoShow(queueItem.appointment.id)) },
+                    onSendMessage = { type -> onIntent(HomeIntent.SendMessage(queueItem.appointment.id, type)) }
+                )
+            }
+            
+            item {
+                Spacer(modifier = Modifier.height(80.dp)) // Bottom padding for FAB/Nav
+            }
+        }
+    }
+}
+
+@Composable
+fun DashboardStatsSection(stats: DashboardStats) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        StatCard(
+            modifier = Modifier.weight(1f),
+            title = "Total", // TODO: Res
+            value = stats.totalVisitors.toString(),
+            color = MaterialTheme.colorScheme.secondaryContainer
+        )
+        StatCard(
+            modifier = Modifier.weight(1f),
+            title = "Cancelled", // TODO: Res
+            value = stats.cancelledVisitors.toString(),
+            color = MaterialTheme.colorScheme.errorContainer
+        )
+    }
+    Spacer(modifier = Modifier.height(8.dp))
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+         StatCard(
+            modifier = Modifier.weight(1f),
+            title = "Avg/Day", // TODO: Res
+            value = stats.avgVisitorsPerDay.toString(),
+            color = MaterialTheme.colorScheme.surfaceVariant
+        )
+        StatCard(
+            modifier = Modifier.weight(1f),
+            title = "Peak", // TODO: Res
+            value = stats.peakHours,
+            color = MaterialTheme.colorScheme.surfaceVariant
+        )
+    }
+}
+
+@Composable
+fun StatCard(
+    modifier: Modifier = Modifier,
+    title: String,
+    value: String,
+    color: androidx.compose.ui.graphics.Color
+) {
+    Card(
+        modifier = modifier,
+        colors = CardDefaults.cardColors(containerColor = color)
+    ) {
+        Column(
+            modifier = Modifier.padding(12.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(text = value, style = MaterialTheme.typography.titleLarge)
+            Text(text = title, style = MaterialTheme.typography.bodySmall)
+        }
+    }
+}
+
+@Composable
+fun QueueItemCard(
+    item: QueueItem,
+    onRemove: () -> Unit,
+    onComplete: () -> Unit,
+    onNoShow: () -> Unit,
+    onSendMessage: (String) -> Unit
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Row(
                 modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.tertiaryContainer
-                )
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                AppButton(
-                    text = stringResource(Res.string.add_customer),
-                    onClick = { onIntent(HomeIntent.NavigateToCreateVisitor) },
-                    modifier = Modifier.padding(16.dp)
-                )
+                Column {
+                    Text(text = item.visitorName, style = MaterialTheme.typography.titleMedium)
+                    Text(text = item.visitorPhone, style = MaterialTheme.typography.bodyMedium)
+                }
+                Column(horizontalAlignment = Alignment.End) {
+                    Text(
+                        text = formatTime(item.estimatedStartTime),
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                    Text(
+                        text = "to ${formatTime(item.estimatedEndTime)}",
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
+            }
+            
+            Spacer(modifier = Modifier.height(12.dp))
+            
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                // Message Actions
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                     // TODO: Add Icons for SMS, WhatsApp, Telegram
+                     // For now using Text placeholders
+                     Text("SMS", modifier = Modifier.clickable { onSendMessage("SMS") })
+                     Text("WA", modifier = Modifier.clickable { onSendMessage("WHATSAPP") })
+                     Text("TG", modifier = Modifier.clickable { onSendMessage("TELEGRAM") })
+                }
+                
+                // Queue Actions
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text("Done", modifier = Modifier.clickable { onComplete() }, color = MaterialTheme.colorScheme.primary)
+                    Text("NoShow", modifier = Modifier.clickable { onNoShow() }, color = MaterialTheme.colorScheme.error)
+                    Text("Del", modifier = Modifier.clickable { onRemove() })
+                }
             }
         }
     }
