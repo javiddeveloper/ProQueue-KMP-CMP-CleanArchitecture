@@ -62,6 +62,14 @@ class CreateBusinessViewModel(
                 phone = phone,
                 address = address,
                 logoPath = "Sample_path.jpg",
+                id = 0,
+                defaultServiceDuration = 15,
+                workStartHour = 9,
+                workEndHour = 17,
+                notificationEnabled = false,
+                notificationTypes = "",
+                notificationMinutesBefore = 30,
+                createdAt = 0L
             )
         )
         emit(CreateBusinessState.PartialState.BusinessCreated)
