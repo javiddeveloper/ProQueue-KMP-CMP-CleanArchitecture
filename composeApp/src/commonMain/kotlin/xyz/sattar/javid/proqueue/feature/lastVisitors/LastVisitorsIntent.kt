@@ -1,6 +1,11 @@
 package xyz.sattar.javid.proqueue.feature.lastVisitors
 
 sealed interface LastVisitorsIntent {
-    data object LoadVisitors : LastVisitorsIntent
-    data class OnVisitorClick(val visitorId: String) : LastVisitorsIntent
+    data object LoadAppointments : LastVisitorsIntent
+    data class OnAppointmentOptionsClick(val appointmentId: Long) : LastVisitorsIntent
+    data object OnCreateAppointmentClick : LastVisitorsIntent
+    data class OnEditAppointment(val appointmentId: Long) : LastVisitorsIntent
+    data class OnDeleteAppointment(val appointmentId: Long) : LastVisitorsIntent
+    data object DismissDialog : LastVisitorsIntent
 }
+

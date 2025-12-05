@@ -1,5 +1,7 @@
 package xyz.sattar.javid.proqueue.feature.lastVisitors
 
 sealed interface LastVisitorsEvent {
-    data class NavigateToVisitorDetail(val visitorId: String) : LastVisitorsEvent
+    data object NavigateToCreateAppointment : LastVisitorsEvent
+    data class NavigateToEditAppointment(val appointmentId: Long) : LastVisitorsEvent
 }
+

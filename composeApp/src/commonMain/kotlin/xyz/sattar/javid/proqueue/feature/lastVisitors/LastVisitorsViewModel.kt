@@ -2,17 +2,35 @@ package xyz.sattar.javid.proqueue.feature.lastVisitors
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import xyz.sattar.javid.proqueue.core.state.BusinessStateHolder
 import xyz.sattar.javid.proqueue.core.ui.BaseViewModel
+import xyz.sattar.javid.proqueue.core.ui.systemCurrentMilliseconds
+import xyz.sattar.javid.proqueue.domain.usecase.GetTodayAppointmentsUseCase
+import xyz.sattar.javid.proqueue.domain.usecase.RemoveAppointmentUseCase
+import kotlin.time.Clock
+import kotlin.time.ExperimentalTime
 
-class LastVisitorsViewModel : BaseViewModel<LastVisitorsState, LastVisitorsState.PartialState, LastVisitorsEvent, LastVisitorsIntent>(
+class LastVisitorsViewModel(
+    private val getTodayAppointmentsUseCase: GetTodayAppointmentsUseCase,
+    private val removeAppointmentUseCase: RemoveAppointmentUseCase
+) : BaseViewModel<LastVisitorsState, LastVisitorsState.PartialState, LastVisitorsEvent, LastVisitorsIntent>(
     initialState = LastVisitorsState()
 ) {
+
     override fun handleIntent(intent: LastVisitorsIntent): Flow<LastVisitorsState.PartialState> {
         return when (intent) {
-            LastVisitorsIntent.LoadVisitors -> loadVisitors()
-            is LastVisitorsIntent.OnVisitorClick -> sendEvent(
-                LastVisitorsEvent.NavigateToVisitorDetail(intent.visitorId)
-            )
+            LastVisitorsIntent.LoadAppointments -> loadAppointments()
+            is LastVisitorsIntent.OnAppointmentOptionsClick -> flow {
+                emit(LastVisitorsState.PartialState.ShowOptionsDialog(intent.appointmentId))
+            }
+            LastVisitorsIntent.OnCreateAppointmentClick -> sendEvent(LastVisitorsEvent.NavigateToCreateAppointment)
+            is LastVisitorsIntent.OnEditAppointment -> {
+                sendEvent(LastVisitorsEvent.NavigateToEditAppointment(intent.appointmentId))
+            }
+            is LastVisitorsIntent.OnDeleteAppointment -> deleteAppointment(intent.appointmentId)
+            LastVisitorsIntent.DismissDialog -> flow {
+                emit(LastVisitorsState.PartialState.ShowOptionsDialog(null))
+            }
         }
     }
 
@@ -25,23 +43,69 @@ class LastVisitorsViewModel : BaseViewModel<LastVisitorsState, LastVisitorsState
                 currentState.copy(isLoading = partialState.isLoading)
             is LastVisitorsState.PartialState.ShowMessage ->
                 currentState.copy(message = partialState.message, isLoading = false)
-            is LastVisitorsState.PartialState.LoadVisitors ->
-                currentState.copy(visitors = partialState.visitors, isLoading = false)
+            is LastVisitorsState.PartialState.LoadAppointments ->
+                currentState.copy(
+                    appointments = partialState.appointments,
+                    totalCount = partialState.totalCount,
+                    isLoading = false
+                )
+            is LastVisitorsState.PartialState.ShowOptionsDialog ->
+                currentState.copy(
+                    selectedAppointmentId = partialState.appointmentId,
+                    showOptionsDialog = partialState.appointmentId != null
+                )
         }
     }
 
     override fun createErrorState(message: String): LastVisitorsState.PartialState =
         LastVisitorsState.PartialState.ShowMessage(message)
 
-    private fun loadVisitors(): Flow<LastVisitorsState.PartialState> = flow {
+    @OptIn(ExperimentalTime::class)
+    private fun loadAppointments(): Flow<LastVisitorsState.PartialState> = flow {
         emit(LastVisitorsState.PartialState.IsLoading(true))
-        // TODO: Load visitors from repository
-        // For now, using mock data
-        val mockVisitors = listOf(
-            VisitorItem("1", "علی احمدی", "09121234567", "1403/09/13 - 14:30"),
-            VisitorItem("2", "سارا محمدی", "09129876543", "1403/09/13 - 15:00"),
-            VisitorItem("3", "رضا کریمی", "09123456789", "1403/09/12 - 10:15")
-        )
-        emit(LastVisitorsState.PartialState.LoadVisitors(mockVisitors))
+        try {
+            val business = BusinessStateHolder.selectedBusiness.value
+            if (business != null) {
+                val today = systemCurrentMilliseconds()
+                val appointments = getTodayAppointmentsUseCase(business.id, today)
+                emit(
+                    LastVisitorsState.PartialState.LoadAppointments(
+                        appointments = appointments,
+                        totalCount = appointments.size
+                    )
+                )
+            } else {
+                emit(LastVisitorsState.PartialState.ShowMessage("لطفاً ابتدا یک کسب‌وکار انتخاب کنید"))
+            }
+        } catch (e: Exception) {
+            emit(LastVisitorsState.PartialState.ShowMessage(e.message ?: "خطا در بارگذاری نوبت‌ها"))
+        }
+    }
+
+    private fun deleteAppointment(appointmentId: Long): Flow<LastVisitorsState.PartialState> = flow {
+        try {
+            val success = removeAppointmentUseCase(appointmentId)
+            if (success) {
+                emit(LastVisitorsState.PartialState.ShowOptionsDialog(null))
+                // Reload appointments
+                val business = BusinessStateHolder.selectedBusiness.value
+                if (business != null) {
+                    @OptIn(ExperimentalTime::class)
+                    val today = Clock.System.now().toEpochMilliseconds()
+                    val appointments = getTodayAppointmentsUseCase(business.id, today)
+                    emit(
+                        LastVisitorsState.PartialState.LoadAppointments(
+                            appointments = appointments,
+                            totalCount = appointments.size
+                        )
+                    )
+                }
+            } else {
+                emit(LastVisitorsState.PartialState.ShowMessage("خطا در حذف نوبت"))
+            }
+        } catch (e: Exception) {
+            emit(LastVisitorsState.PartialState.ShowMessage(e.message ?: "خطا در حذف نوبت"))
+        }
     }
 }
+
