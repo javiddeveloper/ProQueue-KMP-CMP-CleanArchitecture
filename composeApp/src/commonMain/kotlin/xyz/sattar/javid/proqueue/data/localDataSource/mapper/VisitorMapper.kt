@@ -7,15 +7,13 @@ fun VisitorEntity.toDomain() = Visitor(
     id = id,
     fullName = fullName,
     phoneNumber = phoneNumber,
-    statusInQueue = statusInQueue,
-    updateTimeStamp = updateTimeStamp,
+    createdAt = createdAt,
 )
 
 fun Visitor.toEntity() = VisitorEntity(
     id = id,
     fullName = fullName,
     phoneNumber = phoneNumber,
-    statusInQueue = statusInQueue,
-    updateTimeStamp = updateTimeStamp,
+    createdAt = createdAt,
 )
 

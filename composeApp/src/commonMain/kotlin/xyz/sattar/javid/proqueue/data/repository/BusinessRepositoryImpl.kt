@@ -5,23 +5,13 @@ import xyz.sattar.javid.proqueue.data.localDataSource.mapper.toDomain
 import xyz.sattar.javid.proqueue.data.localDataSource.mapper.toEntity
 import xyz.sattar.javid.proqueue.domain.BusinessRepository
 import xyz.sattar.javid.proqueue.domain.model.Business
-import xyz.sattar.javid.proqueue.domain.model.Visitor
 
 class BusinessRepositoryImpl(
-    private val dao: BusinessDao
+    private val businessDao: BusinessDao
 ) : BusinessRepository {
-    override suspend fun upsertVisitor(visitor: Visitor): Boolean {
-        return try {
-            dao.upsertVisitor(visitor.toEntity())
-            true
-        } catch (e: Exception) {
-            false
-        }
-    }
-
     override suspend fun upsertBusiness(business: Business): Boolean {
         return try {
-            dao.upsertBusiness(business.toEntity())
+            businessDao.upsertBusiness(business.toEntity())
             true
         } catch (e: Exception) {
             false
@@ -30,13 +20,26 @@ class BusinessRepositoryImpl(
 
     override suspend fun loadAllBusiness(): List<Business> {
         return try {
-            dao.loadAllBusiness().map { it.toDomain() }
+            businessDao.loadAllBusiness().map { it.toDomain() }
         } catch (e: Exception) {
             emptyList()
         }
     }
 
-    override suspend fun deleteBusiness(businessId: Int) {
-        dao.deleteBusinessAndQueue(businessId)
+    override suspend fun getBusinessById(businessId: Long): Business? {
+        return try {
+            businessDao.getBusinessById(businessId)?.toDomain()
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    override suspend fun deleteBusiness(businessId: Long): Boolean {
+        return try {
+            businessDao.deleteBusiness(businessId)
+            true
+        } catch (e: Exception) {
+            false
+        }
     }
 }

@@ -6,11 +6,17 @@ import androidx.room.PrimaryKey
 @Entity(tableName = "Business")
 data class BusinessEntity(
     @PrimaryKey(autoGenerate = true)
-    val id: Int = 0,
-    val title: String = "",
-    val phone: String = "",
-    val address: String = "",
+    val id: Long = 0,
+    val title: String,
+    val phone: String,
+    val address: String,
     val logoPath: String = "",
-    val createTimeStamp: Long? = 0,
+    val defaultServiceDuration: Int,
+    val workStartHour: Int, // 0-23
+    val workEndHour: Int, // 0-23
+    val notificationEnabled: Boolean = true,
+    val notificationTypes: String = "SMS", // "SMS,WHATSAPP,TELEGRAM"
+    val notificationMinutesBefore: Int = 30,
+    val createdAt: Long
 )
 

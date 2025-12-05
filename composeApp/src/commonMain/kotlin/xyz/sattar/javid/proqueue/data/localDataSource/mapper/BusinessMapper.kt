@@ -9,7 +9,13 @@ fun BusinessEntity.toDomain() = Business(
     phone = phone,
     address = address,
     logoPath = logoPath,
-    createTimeStamp = createTimeStamp,
+    defaultServiceDuration = defaultServiceDuration,
+    workStartHour = workStartHour,
+    workEndHour = workEndHour,
+    notificationEnabled = notificationEnabled,
+    notificationTypes = notificationTypes,
+    notificationMinutesBefore = notificationMinutesBefore,
+    createdAt = createdAt,
 )
 
 fun Business.toEntity() = BusinessEntity(
@@ -18,6 +24,12 @@ fun Business.toEntity() = BusinessEntity(
     phone = phone,
     address = address,
     logoPath = logoPath,
-    createTimeStamp = createTimeStamp,
+    defaultServiceDuration = defaultServiceDuration,
+    workStartHour = workStartHour,
+    workEndHour = workEndHour,
+    notificationEnabled = notificationEnabled,
+    notificationTypes = notificationTypes,
+    notificationMinutesBefore = notificationMinutesBefore,
+    createdAt = createdAt,
 )
 
