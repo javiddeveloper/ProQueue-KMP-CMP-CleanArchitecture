@@ -18,7 +18,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Remove
@@ -51,6 +50,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
+import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.viewmodel.koinViewModel
 import xyz.sattar.javid.proqueue.core.ui.collectWithLifecycleAware
@@ -62,6 +62,7 @@ import kotlin.time.ExperimentalTime
 @Composable
 fun CreateAppointmentScreen(
     visitorId: Long? = null,
+    appointmentId: Long? = null,
     viewModel: CreateAppointmentViewModel = koinViewModel<CreateAppointmentViewModel>(),
     onNavigateBack: () -> Unit = {},
     onAppointmentCreated: () -> Unit = {}
@@ -70,7 +71,9 @@ fun CreateAppointmentScreen(
 
     LaunchedEffect(Unit) {
         viewModel.sendIntent(CreateAppointmentIntent.LoadVisitors)
-        if (visitorId != null) {
+        if (appointmentId != null) {
+            viewModel.sendIntent(CreateAppointmentIntent.LoadAppointment(appointmentId))
+        } else if (visitorId != null) {
             viewModel.sendIntent(CreateAppointmentIntent.SelectVisitor(visitorId))
         }
     }
@@ -100,8 +103,26 @@ fun CreateAppointmentScreenContent(
     var selectedDate by remember { mutableStateOf(Clock.System.now().toEpochMilliseconds()) }
     var selectedTime by remember { mutableStateOf("09:00") }
     var serviceDuration by remember { mutableStateOf("30") }
-    var showVisitorDialog by remember { mutableStateOf(false) }
     var showTimeDialog by remember { mutableStateOf(false) }
+
+    LaunchedEffect(uiState) {
+        if (uiState.selectedVisitorId != null) {
+            selectedVisitorId = uiState.selectedVisitorId
+        }
+        if (uiState.appointmentDate != 0L) {
+            selectedDate = uiState.appointmentDate
+            // Extract time from timestamp
+            val instant = kotlinx.datetime.Instant.fromEpochMilliseconds(uiState.appointmentDate)
+            val localDateTime =
+                instant.toLocalDateTime(kotlinx.datetime.TimeZone.currentSystemDefault())
+            val hour = localDateTime.hour.toString().padStart(2, '0')
+            val minute = localDateTime.minute.toString().padStart(2, '0')
+            selectedTime = "$hour:$minute"
+        }
+        if (uiState.serviceDuration != null) {
+            serviceDuration = uiState.serviceDuration.toString()
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -153,8 +174,7 @@ fun CreateAppointmentScreenContent(
 
                     OutlinedCard(
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable { showVisitorDialog = true },
+                            .fillMaxWidth(),
                         colors = CardDefaults.outlinedCardColors(
                             containerColor = MaterialTheme.colorScheme.surface
                         )
@@ -162,7 +182,7 @@ fun CreateAppointmentScreenContent(
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(16.dp),
+                                .padding(14.dp),
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
@@ -170,9 +190,9 @@ fun CreateAppointmentScreenContent(
                                 Text(
                                     text = if (selectedVisitorId != null) {
                                         uiState.visitors.find { it.id == selectedVisitorId }?.fullName
-                                            ?: "انتخاب کنید"
+                                            ?: "--"
                                     } else {
-                                        "انتخاب کنید"
+                                        "--"
                                     },
                                     style = MaterialTheme.typography.bodyLarge
                                 )
@@ -186,10 +206,6 @@ fun CreateAppointmentScreenContent(
                                     }
                                 }
                             }
-                            Icon(
-                                imageVector = Icons.Default.ArrowDropDown,
-                                contentDescription = null
-                            )
                         }
                     }
 
@@ -259,26 +275,13 @@ fun CreateAppointmentScreenContent(
 
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    // Create Button
+                    // Create/Update Button
                     AppButton(
-                        text = "ایجاد نوبت",
+                        text = if (uiState.editingAppointmentId != null) "ویرایش نوبت" else "ایجاد نوبت",
                         onClick = {
                             selectedVisitorId?.let { visitorId ->
                                 // Parse time and create timestamp
-                                val timeParts = selectedTime.split(":")
-                                val hour = timeParts[0].toIntOrNull() ?: 9
-                                val minute = timeParts[1].toIntOrNull() ?: 0
-
-//                                val calendar = Calendar.getInstance()
-//                                calendar.timeInMillis = selectedDate
-//                                calendar.set(Calendar.HOUR_OF_DAY, hour)
-//                                calendar.set(Calendar.MINUTE, minute)
-//                                calendar.set(Calendar.SECOND, 0)
-//                                calendar.set(Calendar.MILLISECOND, 0)
-
-//                                val appointmentTimestamp = calendar.timeInMillis
                                 val duration = serviceDuration.toIntOrNull()
-
                                 onIntent(
                                     CreateAppointmentIntent.CreateAppointment(
                                         visitorId = visitorId,
@@ -296,19 +299,6 @@ fun CreateAppointmentScreenContent(
                 }
             }
 
-            // Visitor Selection Dialog
-            if (showVisitorDialog) {
-                VisitorSelectionDialog(
-                    visitors = uiState.visitors,
-                    selectedVisitorId = selectedVisitorId,
-                    onVisitorSelected = { visitorId ->
-                        selectedVisitorId = visitorId
-                        showVisitorDialog = false
-                    },
-                    onDismiss = { showVisitorDialog = false }
-                )
-            }
-
             // Time Selection Dialog
             if (showTimeDialog) {
                 TimeSelectionDialog(
@@ -322,71 +312,6 @@ fun CreateAppointmentScreenContent(
             }
         }
     }
-}
-
-@Composable
-fun VisitorSelectionDialog(
-    visitors: List<VisitorOption>,
-    selectedVisitorId: Long?,
-    onVisitorSelected: (Long) -> Unit,
-    onDismiss: () -> Unit
-) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text("انتخاب مراجع") },
-        text = {
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                if (visitors.isEmpty()) {
-                    Text(
-                        text = "هیچ مراجعی ثبت نشده است",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                } else {
-                    visitors.forEach { visitor ->
-                        OutlinedCard(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable { onVisitorSelected(visitor.id) },
-                            colors = CardDefaults.outlinedCardColors(
-                                containerColor = if (visitor.id == selectedVisitorId) {
-                                    MaterialTheme.colorScheme.primaryContainer
-                                } else {
-                                    MaterialTheme.colorScheme.surface
-                                }
-                            )
-                        ) {
-                            Column(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(12.dp)
-                            ) {
-                                Text(
-                                    text = visitor.fullName,
-                                    style = MaterialTheme.typography.titleSmall,
-                                    fontWeight = FontWeight.SemiBold
-                                )
-                                Text(
-                                    text = visitor.phoneNumber,
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        confirmButton = {},
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text("بستن")
-            }
-        }
-    )
 }
 
 @Composable

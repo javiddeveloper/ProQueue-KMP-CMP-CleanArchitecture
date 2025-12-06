@@ -6,16 +6,21 @@ import xyz.sattar.javid.proqueue.core.state.BusinessStateHolder
 import xyz.sattar.javid.proqueue.core.ui.BaseViewModel
 import xyz.sattar.javid.proqueue.domain.usecase.CreateAppointmentUseCase
 import xyz.sattar.javid.proqueue.domain.usecase.GetAllVisitorsUseCase
+import xyz.sattar.javid.proqueue.domain.usecase.GetAppointmentByIdUseCase
+import xyz.sattar.javid.proqueue.domain.usecase.UpdateAppointmentUseCase
 
 class CreateAppointmentViewModel(
     private val getAllVisitorsUseCase: GetAllVisitorsUseCase,
-    private val createAppointmentUseCase: CreateAppointmentUseCase
+    private val createAppointmentUseCase: CreateAppointmentUseCase,
+    private val getAppointmentByIdUseCase: GetAppointmentByIdUseCase,
+    private val updateAppointmentUseCase: UpdateAppointmentUseCase
 ) : BaseViewModel<CreateAppointmentState, CreateAppointmentState.PartialState, CreateAppointmentEvent, CreateAppointmentIntent>(
     initialState = CreateAppointmentState()
 ) {
     override fun handleIntent(intent: CreateAppointmentIntent): Flow<CreateAppointmentState.PartialState> {
         return when (intent) {
             CreateAppointmentIntent.LoadVisitors -> loadVisitors()
+            is CreateAppointmentIntent.LoadAppointment -> loadAppointment(intent.appointmentId)
             is CreateAppointmentIntent.SelectVisitor -> flow {
                 // We don't need to do anything here as the UI handles the selection state
                 // But if we wanted to pre-select in VM, we could emit a state change
@@ -55,6 +60,14 @@ class CreateAppointmentViewModel(
                 currentState.copy(message = partialState.message, isLoading = false)
             is CreateAppointmentState.PartialState.LoadVisitors ->
                 currentState.copy(visitors = partialState.visitors, isLoading = false)
+            is CreateAppointmentState.PartialState.LoadAppointmentDetails ->
+                currentState.copy(
+                    selectedVisitorId = partialState.visitorId,
+                    appointmentDate = partialState.appointmentDate,
+                    serviceDuration = partialState.serviceDuration,
+                    editingAppointmentId = partialState.appointmentId,
+                    isLoading = false
+                )
             CreateAppointmentState.PartialState.AppointmentCreated ->
                 currentState.copy(isLoading = false)
         }
@@ -80,6 +93,38 @@ class CreateAppointmentViewModel(
         }
     }
 
+    private fun loadAppointment(appointmentId: Long): Flow<CreateAppointmentState.PartialState> = flow {
+        emit(CreateAppointmentState.PartialState.IsLoading(true))
+        try {
+            // Ensure visitors are loaded first so we can select the correct one
+            val visitors = getAllVisitorsUseCase()
+            val visitorOptions = visitors.map {
+                VisitorOption(
+                    id = it.id,
+                    fullName = it.fullName,
+                    phoneNumber = it.phoneNumber
+                )
+            }
+            emit(CreateAppointmentState.PartialState.LoadVisitors(visitorOptions))
+
+            val appointment = getAppointmentByIdUseCase(appointmentId)
+            if (appointment != null) {
+                emit(
+                    CreateAppointmentState.PartialState.LoadAppointmentDetails(
+                        visitorId = appointment.visitorId,
+                        appointmentDate = appointment.appointmentDate,
+                        serviceDuration = appointment.serviceDuration,
+                        appointmentId = appointment.id
+                    )
+                )
+            } else {
+                emit(CreateAppointmentState.PartialState.ShowMessage("نوبت یافت نشد"))
+            }
+        } catch (e: Exception) {
+            emit(CreateAppointmentState.PartialState.ShowMessage(e.message ?: "خطا در بارگذاری نوبت"))
+        }
+    }
+
     private fun createAppointment(
         visitorId: Long,
         appointmentDate: Long,
@@ -93,21 +138,30 @@ class CreateAppointmentViewModel(
                 return@flow
             }
 
-            val success = createAppointmentUseCase(
-                businessId = business.id,
-                visitorId = visitorId,
-                appointmentDate = appointmentDate,
-                serviceDuration = serviceDuration
-            )
+            val editingId = uiState.value.editingAppointmentId
+            val success = if (editingId != null) {
+                updateAppointmentUseCase(
+                    appointmentId = editingId,
+                    date = appointmentDate,
+                    duration = serviceDuration
+                )
+            } else {
+                createAppointmentUseCase(
+                    businessId = business.id,
+                    visitorId = visitorId,
+                    appointmentDate = appointmentDate,
+                    serviceDuration = serviceDuration
+                )
+            }
 
             if (success) {
                 emit(CreateAppointmentState.PartialState.AppointmentCreated)
                 sendEvent(CreateAppointmentEvent.AppointmentCreated)
             } else {
-                emit(CreateAppointmentState.PartialState.ShowMessage("این مراجع قبلاً برای امروز نوبت دارد"))
+                emit(CreateAppointmentState.PartialState.ShowMessage("خطا در ذخیره نوبت"))
             }
         } catch (e: Exception) {
-            emit(CreateAppointmentState.PartialState.ShowMessage(e.message ?: "خطا در ایجاد نوبت"))
+            emit(CreateAppointmentState.PartialState.ShowMessage(e.message ?: "خطا در عملیات"))
         }
     }
 }
