@@ -77,6 +77,9 @@ interface AppointmentDao {
     @Query("UPDATE Appointment SET status = :status, updatedAt = :updatedAt WHERE id = :appointmentId")
     suspend fun updateAppointmentStatus(appointmentId: Long, status: String, updatedAt: Long)
 
+    @Query("UPDATE Appointment SET appointmentDate = :date, serviceDuration = :duration, updatedAt = :updatedAt WHERE id = :appointmentId")
+    suspend fun updateAppointment(appointmentId: Long, date: Long, duration: Int?, updatedAt: Long)
+
     @Query("""
         UPDATE Appointment 
         SET queuePosition = queuePosition - 1, updatedAt = :updatedAt 
