@@ -4,10 +4,9 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import xyz.sattar.javid.proqueue.core.state.BusinessStateHolder
 import xyz.sattar.javid.proqueue.core.ui.BaseViewModel
-import xyz.sattar.javid.proqueue.core.ui.systemCurrentMilliseconds
+import xyz.sattar.javid.proqueue.core.utils.DateTimeUtils
 import xyz.sattar.javid.proqueue.domain.usecase.GetTodayAppointmentsUseCase
 import xyz.sattar.javid.proqueue.domain.usecase.RemoveAppointmentUseCase
-import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 
 class LastVisitorsViewModel(
@@ -66,7 +65,7 @@ class LastVisitorsViewModel(
         try {
             val business = BusinessStateHolder.selectedBusiness.value
             if (business != null) {
-                val today = systemCurrentMilliseconds()
+                val today = DateTimeUtils.systemCurrentMilliseconds()
                 val appointments = getTodayAppointmentsUseCase(business.id, today)
                 emit(
                     LastVisitorsState.PartialState.LoadAppointments(
@@ -91,7 +90,7 @@ class LastVisitorsViewModel(
                 val business = BusinessStateHolder.selectedBusiness.value
                 if (business != null) {
                     @OptIn(ExperimentalTime::class)
-                    val today = Clock.System.now().toEpochMilliseconds()
+                    val today = DateTimeUtils.systemCurrentMilliseconds()
                     val appointments = getTodayAppointmentsUseCase(business.id, today)
                     emit(
                         LastVisitorsState.PartialState.LoadAppointments(

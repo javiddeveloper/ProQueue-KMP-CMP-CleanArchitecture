@@ -24,11 +24,11 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.EventNote
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -37,14 +37,16 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -55,8 +57,7 @@ import kotlinx.coroutines.launch
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.viewmodel.koinViewModel
 import xyz.sattar.javid.proqueue.core.ui.collectWithLifecycleAware
-import xyz.sattar.javid.proqueue.core.ui.formatTime
-import xyz.sattar.javid.proqueue.core.ui.systemCurrentMilliseconds
+import xyz.sattar.javid.proqueue.core.utils.DateTimeUtils
 import xyz.sattar.javid.proqueue.domain.model.Appointment
 import xyz.sattar.javid.proqueue.domain.model.AppointmentWithDetails
 import xyz.sattar.javid.proqueue.domain.model.Business
@@ -147,27 +148,15 @@ fun LastVisitorsScreenContent(
                         // Appointments list
                         AppointmentsList(
                             appointments = uiState.appointments,
-                            onOptionsClick = { appointmentId ->
-                                onIntent(LastVisitorsIntent.OnAppointmentOptionsClick(appointmentId))
+                            onEditClick = { appointmentId ->
+                                onIntent(LastVisitorsIntent.OnEditAppointment(appointmentId))
+                            },
+                            onDeleteClick = { appointmentId ->
+                                onIntent(LastVisitorsIntent.OnDeleteAppointment(appointmentId))
                             }
                         )
                     }
                 }
-            }
-
-            // Options Dialog
-            if (uiState.showOptionsDialog && uiState.selectedAppointmentId != null) {
-                AppointmentOptionsDialog(
-                    onEdit = {
-                        onIntent(LastVisitorsIntent.OnEditAppointment(uiState.selectedAppointmentId))
-                    },
-                    onDelete = {
-                        onIntent(LastVisitorsIntent.OnDeleteAppointment(uiState.selectedAppointmentId))
-                    },
-                    onDismiss = {
-                        onIntent(LastVisitorsIntent.DismissDialog)
-                    }
-                )
             }
         }
     }
@@ -209,7 +198,8 @@ fun TotalCountHeader(count: Int) {
 @Composable
 fun AppointmentsList(
     appointments: List<AppointmentWithDetails>,
-    onOptionsClick: (Long) -> Unit
+    onEditClick: (Long) -> Unit,
+    onDeleteClick: (Long) -> Unit
 ) {
     val listState = rememberLazyListState()
 
@@ -225,7 +215,8 @@ fun AppointmentsList(
         items(appointments) { appointmentWithDetails ->
             AppointmentCard(
                 appointmentWithDetails = appointmentWithDetails,
-                onOptionsClick = { onOptionsClick(appointmentWithDetails.appointment.id) }
+                onEditClick = { onEditClick(appointmentWithDetails.appointment.id) },
+                onDeleteClick = { onDeleteClick(appointmentWithDetails.appointment.id) }
             )
         }
 
@@ -236,10 +227,12 @@ fun AppointmentsList(
 @Composable
 fun AppointmentCard(
     appointmentWithDetails: AppointmentWithDetails,
-    onOptionsClick: () -> Unit
+    onEditClick: () -> Unit,
+    onDeleteClick: () -> Unit
 ) {
     val appointment = appointmentWithDetails.appointment
     val visitor = appointmentWithDetails.visitor
+    var showMenu by remember { mutableStateOf(false) }
 
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -283,29 +276,36 @@ fun AppointmentCard(
                     color = MaterialTheme.colorScheme.onSurface
                 )
                 Spacer(modifier = Modifier.height(4.dp))
+                
+                // Waiting Time
+            val waitingTime = DateTimeUtils.calculateWaitingTime(appointment.appointmentDate)
+            Text(
+                text = waitingTime,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.primary
+            )
+
+            Spacer(modifier = Modifier.height(4.dp))
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector = Icons.Default.AccessTime,
+                    contentDescription = null,
+                    modifier = Modifier.size(16.dp),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Spacer(modifier = Modifier.width(4.dp))
+
+                // Date and Time
+                val dateTime = DateTimeUtils.formatDateTime(appointment.appointmentDate)
                 Text(
-                    text = visitor.phoneNumber,
-                    style = MaterialTheme.typography.bodyMedium,
+                    text = dateTime,
+                    style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
-                Spacer(modifier = Modifier.height(4.dp))
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.AccessTime,
-                        contentDescription = null,
-                        modifier = Modifier.size(16.dp),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text(
-                        text = formatTime(appointment.appointmentDate) ?: "--:--",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
 
-                    appointment.serviceDuration?.let { duration ->
+                appointment.serviceDuration?.let { duration ->
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
                             text = "• $duration دقیقه",
@@ -320,13 +320,55 @@ fun AppointmentCard(
                 StatusBadge(status = appointment.status)
             }
 
-            // Options Button
-            IconButton(onClick = onOptionsClick) {
-                Icon(
-                    imageVector = Icons.Default.MoreVert,
-                    contentDescription = "گزینه‌ها",
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+            // Options Button with Popup Menu
+            Box {
+                IconButton(onClick = { showMenu = true }) {
+                    Icon(
+                        imageVector = Icons.Default.MoreVert,
+                        contentDescription = "گزینه‌ها",
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                
+                DropdownMenu(
+                    expanded = showMenu,
+                    onDismissRequest = { showMenu = false }
+                ) {
+                    DropdownMenuItem(
+                        text = { Text("تغییر نوبت") },
+                        onClick = {
+                            showMenu = false
+                            onEditClick()
+                        },
+                        leadingIcon = {
+                            Icon(
+                                imageVector = Icons.Default.Edit,
+                                contentDescription = null,
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
+                    )
+                    DropdownMenuItem(
+                        text = { 
+                            Text(
+                                "حذف نوبت",
+                                color = MaterialTheme.colorScheme.error
+                            ) 
+                        },
+                        onClick = {
+                            showMenu = false
+                            onDeleteClick()
+                        },
+                        leadingIcon = {
+                            Icon(
+                                imageVector = Icons.Default.Delete,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.error,
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
+                    )
+                }
             }
         }
     }
@@ -355,62 +397,7 @@ fun StatusBadge(status: String) {
     }
 }
 
-@Composable
-fun AppointmentOptionsDialog(
-    onEdit: () -> Unit,
-    onDelete: () -> Unit,
-    onDismiss: () -> Unit
-) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = {
-            Text("مدیریت نوبت")
-        },
-        text = {
-            Column {
-                TextButton(
-                    onClick = {
-                        onEdit()
-                        onDismiss()
-                    },
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Edit,
-                        contentDescription = null,
-                        modifier = Modifier.size(20.dp)
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("تغییر نوبت")
-                }
 
-                TextButton(
-                    onClick = {
-                        onDelete()
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = ButtonDefaults.textButtonColors(
-                        contentColor = MaterialTheme.colorScheme.error
-                    )
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Delete,
-                        contentDescription = null,
-                        modifier = Modifier.size(20.dp)
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("حذف نوبت")
-                }
-            }
-        },
-        confirmButton = {},
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text("بستن")
-            }
-        }
-    )
-}
 
 @Composable
 fun EmptyState(modifier: Modifier = Modifier) {
@@ -476,7 +463,7 @@ fun PreviewLastVisitorsScreen() {
                             id = 1,
                             businessId = 1,
                             visitorId = 1,
-                            appointmentDate = systemCurrentMilliseconds(),
+                            appointmentDate = DateTimeUtils.systemCurrentMilliseconds(),
                             serviceDuration = 30,
                             status = "WAITING",
                             queuePosition = 1,
