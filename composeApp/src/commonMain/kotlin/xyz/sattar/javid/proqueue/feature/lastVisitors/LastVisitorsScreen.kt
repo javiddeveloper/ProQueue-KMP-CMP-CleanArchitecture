@@ -99,7 +99,7 @@ fun LastVisitorsScreenContent(
             TopAppBar(
                 title = {
                     Text(
-                        "نوبت‌های امروز",
+                        "نوبت های اخیر",
                         style = MaterialTheme.typography.titleLarge
                     )
                 },
