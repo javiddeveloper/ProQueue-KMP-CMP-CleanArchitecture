@@ -30,7 +30,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
-import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.viewmodel.koinViewModel
@@ -41,7 +40,7 @@ import proqueue.composeapp.generated.resources.quick_access
 import proqueue.composeapp.generated.resources.welcome_to_proqueue
 import xyz.sattar.javid.proqueue.core.ui.collectWithLifecycleAware
 import xyz.sattar.javid.proqueue.core.ui.components.AppButton
-import xyz.sattar.javid.proqueue.core.ui.formatTime
+import xyz.sattar.javid.proqueue.core.utils.DateTimeUtils
 import xyz.sattar.javid.proqueue.ui.theme.AppTheme
 
 @Composable
@@ -268,12 +267,12 @@ fun QueueItemCard(
                 }
                 Column(horizontalAlignment = Alignment.End) {
                     Text(
-                        text = formatTime(item.estimatedStartTime),
+                        text = DateTimeUtils.formatTime(item.estimatedStartTime),
                         style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.primary
                     )
                     Text(
-                        text = "to ${formatTime(item.estimatedEndTime)}",
+                        text = "to ${DateTimeUtils.formatTime(item.estimatedEndTime)}",
                         style = MaterialTheme.typography.bodySmall
                     )
                 }
