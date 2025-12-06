@@ -53,7 +53,7 @@ import xyz.sattar.javid.proqueue.ui.theme.AppTheme
 @Composable
 fun CreateVisitorRoute(
     viewModel: CreateVisitorViewModel = koinViewModel<CreateVisitorViewModel>(),
-    onContinue: () -> Unit,
+    onContinue: (Long) -> Unit,
     onNavigateBack: () -> Unit = {},
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -197,15 +197,15 @@ fun CreateVisitorScreen(
 @Composable
 fun HandleEvents(
     events: Flow<CreateVisitorEvent>,
-    onContinue: () -> Unit,
+    onContinue: (Long) -> Unit,
     onNavigateBack: () -> Unit
 ) {
     val scope = rememberCoroutineScope()
     events.collectWithLifecycleAware {
         when (it) {
-            CreateVisitorEvent.NavigateToQueue -> {
+            is CreateVisitorEvent.VisitorCreated -> {
                 scope.launch {
-                    onContinue()
+                    onContinue(it.visitorId)
                 }
             }
 
