@@ -19,6 +19,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Business
 import androidx.compose.material.icons.filled.ChevronLeft
+import androidx.compose.material.icons.filled.Factory
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -159,9 +160,9 @@ fun BusinessItem(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
-                imageVector = Icons.Default.Business,
+                imageVector = Icons.Default.Factory,
                 contentDescription = null,
-                modifier = Modifier.size(40.dp),
+                modifier = Modifier.size(30.dp),
                 tint = MaterialTheme.colorScheme.primary
             )
             
@@ -199,9 +200,9 @@ fun EmptyBusinessState(modifier: Modifier = Modifier) {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Icon(
-            imageVector = Icons.Default.Business,
+            imageVector = Icons.Default.Factory,
             contentDescription = null,
-            modifier = Modifier.size(64.dp),
+            modifier = Modifier.size(50.dp),
             tint = MaterialTheme.colorScheme.onSurfaceVariant
         )
         Spacer(modifier = Modifier.height(16.dp))
