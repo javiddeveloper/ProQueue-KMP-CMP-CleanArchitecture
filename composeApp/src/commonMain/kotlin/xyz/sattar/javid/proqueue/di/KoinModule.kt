@@ -35,6 +35,8 @@ import xyz.sattar.javid.proqueue.feature.home.HomeViewModel
 import xyz.sattar.javid.proqueue.feature.lastVisitors.LastVisitorsViewModel
 import xyz.sattar.javid.proqueue.feature.settings.SettingsViewModel
 
+import xyz.sattar.javid.proqueue.feature.visitorSelection.VisitorSelectionViewModel
+
 val appModule: Module = module {
     // DAOs
     single { get<AppDatabase>().businessDao() }
@@ -94,6 +96,7 @@ val appModule: Module = module {
             get()  // RemoveAppointmentUseCase
         )
     }
+    viewModel { VisitorSelectionViewModel(get()) }
     viewModel { SettingsViewModel(get()) }
     viewModel { BusinessListViewModel(get()) }
 }
