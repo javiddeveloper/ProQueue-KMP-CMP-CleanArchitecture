@@ -8,7 +8,7 @@ import xyz.sattar.javid.proqueue.data.localDataSource.entity.VisitorEntity
 @Dao
 interface VisitorDao {
     @Upsert
-    suspend fun upsertVisitor(visitor: VisitorEntity)
+    suspend fun upsertVisitor(visitor: VisitorEntity): Long
 
     @Query("SELECT * FROM Visitor WHERE phoneNumber = :phone")
     suspend fun getVisitorByPhone(phone: String): VisitorEntity?

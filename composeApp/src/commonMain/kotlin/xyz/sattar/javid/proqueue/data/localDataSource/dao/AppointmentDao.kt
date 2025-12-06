@@ -36,7 +36,6 @@ interface AppointmentDao {
         SELECT * FROM Appointment 
         WHERE businessId = :businessId 
         ORDER BY appointmentDate DESC, queuePosition ASC
-        LIMIT 50
     """)
     suspend fun getTodayAppointments(businessId: Long): List<AppointmentWithDetailsEntity>
 
