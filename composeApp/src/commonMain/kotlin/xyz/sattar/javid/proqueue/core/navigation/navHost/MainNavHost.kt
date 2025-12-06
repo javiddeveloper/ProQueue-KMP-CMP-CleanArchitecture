@@ -93,7 +93,7 @@ fun MainNavHost(
                         navController.navigate(AppScreens.VisitorSelection)
                     },
                     onNavigateToEditAppointment = { appointmentId ->
-                        // TODO: Navigate to edit appointment
+                        navController.navigate(AppScreens.CreateAppointment(appointmentId = appointmentId))
                     }
                 )
             }
@@ -144,6 +144,7 @@ fun MainNavHost(
                 val args = backStackEntry.toRoute<AppScreens.CreateAppointment>()
                 CreateAppointmentScreen(
                     visitorId = args.visitorId,
+                    appointmentId = args.appointmentId,
                     onNavigateBack = {
                         navController.popBackStack()
                     },
