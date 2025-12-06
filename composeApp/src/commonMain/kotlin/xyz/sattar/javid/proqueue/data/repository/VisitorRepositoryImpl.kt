@@ -9,12 +9,11 @@ import xyz.sattar.javid.proqueue.domain.model.Visitor
 class VisitorRepositoryImpl(
     private val visitorDao: VisitorDao
 ) : VisitorRepository {
-    override suspend fun upsertVisitor(visitor: Visitor): Boolean {
+    override suspend fun upsertVisitor(visitor: Visitor): Long {
         return try {
             visitorDao.upsertVisitor(visitor.toEntity())
-            true
         } catch (e: Exception) {
-            false
+            -1L
         }
     }
 
