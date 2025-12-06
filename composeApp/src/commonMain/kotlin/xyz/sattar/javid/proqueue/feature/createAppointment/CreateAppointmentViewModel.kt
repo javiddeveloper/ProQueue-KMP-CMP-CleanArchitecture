@@ -16,6 +16,25 @@ class CreateAppointmentViewModel(
     override fun handleIntent(intent: CreateAppointmentIntent): Flow<CreateAppointmentState.PartialState> {
         return when (intent) {
             CreateAppointmentIntent.LoadVisitors -> loadVisitors()
+            is CreateAppointmentIntent.SelectVisitor -> flow {
+                // We don't need to do anything here as the UI handles the selection state
+                // But if we wanted to pre-select in VM, we could emit a state change
+                // For now, let's just reload visitors to ensure we have the latest list including the new one
+                emit(CreateAppointmentState.PartialState.IsLoading(true))
+                try {
+                    val visitors = getAllVisitorsUseCase()
+                    val visitorOptions = visitors.map {
+                        VisitorOption(
+                            id = it.id,
+                            fullName = it.fullName,
+                            phoneNumber = it.phoneNumber
+                        )
+                    }
+                    emit(CreateAppointmentState.PartialState.LoadVisitors(visitorOptions))
+                } catch (e: Exception) {
+                    emit(CreateAppointmentState.PartialState.ShowMessage(e.message ?: "خطا در بارگذاری لیست مراجعین"))
+                }
+            }
             is CreateAppointmentIntent.CreateAppointment -> createAppointment(
                 intent.visitorId,
                 intent.appointmentDate,

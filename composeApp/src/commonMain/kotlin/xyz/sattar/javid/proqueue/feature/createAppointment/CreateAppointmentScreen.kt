@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
@@ -60,6 +61,7 @@ import kotlin.time.ExperimentalTime
 
 @Composable
 fun CreateAppointmentScreen(
+    visitorId: Long? = null,
     viewModel: CreateAppointmentViewModel = koinViewModel<CreateAppointmentViewModel>(),
     onNavigateBack: () -> Unit = {},
     onAppointmentCreated: () -> Unit = {}
@@ -68,6 +70,9 @@ fun CreateAppointmentScreen(
 
     LaunchedEffect(Unit) {
         viewModel.sendIntent(CreateAppointmentIntent.LoadVisitors)
+        if (visitorId != null) {
+            viewModel.sendIntent(CreateAppointmentIntent.SelectVisitor(visitorId))
+        }
     }
 
     HandleEvents(
@@ -78,7 +83,8 @@ fun CreateAppointmentScreen(
 
     CreateAppointmentScreenContent(
         uiState = uiState,
-        onIntent = viewModel::sendIntent
+        onIntent = viewModel::sendIntent,
+        initialVisitorId = visitorId
     )
 }
 
@@ -87,9 +93,10 @@ fun CreateAppointmentScreen(
 fun CreateAppointmentScreenContent(
     modifier: Modifier = Modifier,
     uiState: CreateAppointmentState,
-    onIntent: (CreateAppointmentIntent) -> Unit
+    onIntent: (CreateAppointmentIntent) -> Unit,
+    initialVisitorId: Long? = null
 ) {
-    var selectedVisitorId by remember { mutableStateOf<Long?>(null) }
+    var selectedVisitorId by remember { mutableStateOf<Long?>(initialVisitorId) }
     var selectedDate by remember { mutableStateOf(Clock.System.now().toEpochMilliseconds()) }
     var selectedTime by remember { mutableStateOf("09:00") }
     var serviceDuration by remember { mutableStateOf("30") }
@@ -108,7 +115,7 @@ fun CreateAppointmentScreenContent(
                 navigationIcon = {
                     IconButton(onClick = { onIntent(CreateAppointmentIntent.BackPress) }) {
                         Icon(
-                            imageVector = Icons.Default.ArrowBack,
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "بازگشت"
                         )
                     }
