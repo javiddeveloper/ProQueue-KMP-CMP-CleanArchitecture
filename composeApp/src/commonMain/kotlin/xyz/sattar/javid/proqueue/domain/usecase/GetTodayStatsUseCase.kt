@@ -1,6 +1,6 @@
 package xyz.sattar.javid.proqueue.domain.usecase
 
-import xyz.sattar.javid.proqueue.core.ui.systemCurrentMilliseconds
+import xyz.sattar.javid.proqueue.core.utils.DateTimeUtils
 import xyz.sattar.javid.proqueue.domain.AppointmentRepository
 import xyz.sattar.javid.proqueue.feature.home.DashboardStats
 import kotlin.time.ExperimentalTime
@@ -16,7 +16,7 @@ class GetTodayStatsUseCase(private val repository: AppointmentRepository) {
         // Ideally, DashboardStats should be in domain/model.
         
         // Let's fetch appointments for today and calculate stats
-        val today = systemCurrentMilliseconds()
+        val today = DateTimeUtils.systemCurrentMilliseconds()
         val appointments = repository.getWaitingQueue(businessId, today) // This gets waiting queue, we might need all appointments for stats
         
         // Mocking stats for now as we don't have a dedicated "getStats" repository method yet
