@@ -40,9 +40,11 @@ sealed class AppScreens {
     @Serializable
     object BusinessList : AppScreens()
     @Serializable
+    object VisitorSelection : AppScreens()
+    @Serializable
     object CreateVisitor : AppScreens()
     @Serializable
-    object CreateAppointment : AppScreens()
+    data class CreateAppointment(val visitorId: Long? = null) : AppScreens()
 }
 
 

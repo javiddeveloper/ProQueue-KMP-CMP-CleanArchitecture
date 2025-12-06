@@ -18,7 +18,9 @@ import xyz.sattar.javid.proqueue.feature.createAppointment.CreateAppointmentScre
 import xyz.sattar.javid.proqueue.feature.createVisitor.CreateVisitorRoute
 import xyz.sattar.javid.proqueue.feature.home.HomeScreen
 import xyz.sattar.javid.proqueue.feature.lastVisitors.LastVisitorsScreen
+import xyz.sattar.javid.proqueue.feature.visitorSelection.VisitorSelectionScreen
 import xyz.sattar.javid.proqueue.feature.settings.SettingsScreen
+import androidx.navigation.toRoute
 
 @Composable
 fun MainNavHost(
@@ -87,11 +89,25 @@ fun MainNavHost(
                 selectedTab = MainTab.LastVisitors
                 LastVisitorsScreen(
                     onNavigateToCreateAppointment = {
-                        // Navigate to CreateVisitor first
-                        navController.navigate(AppScreens.CreateVisitor)
+                        // Navigate to VisitorSelection first
+                        navController.navigate(AppScreens.VisitorSelection)
                     },
                     onNavigateToEditAppointment = { appointmentId ->
                         // TODO: Navigate to edit appointment
+                    }
+                )
+            }
+            
+            composable<AppScreens.VisitorSelection> {
+                VisitorSelectionScreen(
+                    onNavigateToCreateAppointment = { visitorId ->
+                         navController.navigate(AppScreens.CreateAppointment(visitorId))
+                    },
+                    onNavigateToCreateVisitor = {
+                        navController.navigate(AppScreens.CreateVisitor)
+                    },
+                    onNavigateBack = {
+                        navController.popBackStack()
                     }
                 )
             }
@@ -109,10 +125,10 @@ fun MainNavHost(
             // CreateVisitor Route - First step in appointment creation flow
             composable<AppScreens.CreateVisitor> {
                 CreateVisitorRoute(
-                    onContinue = {
+                    onContinue = { visitorId ->
                         // After creating visitor, navigate to CreateAppointment
-                        navController.navigate(AppScreens.CreateAppointment) {
-                            popUpTo(AppScreens.CreateVisitor) {
+                        navController.navigate(AppScreens.CreateAppointment(visitorId)) {
+                            popUpTo(AppScreens.VisitorSelection) {
                                 inclusive = true
                             }
                         }
@@ -124,8 +140,10 @@ fun MainNavHost(
             }
 
             // CreateAppointment Route - Second step in appointment creation flow
-            composable<AppScreens.CreateAppointment> {
+            composable<AppScreens.CreateAppointment> { backStackEntry ->
+                val args = backStackEntry.toRoute<AppScreens.CreateAppointment>()
                 CreateAppointmentScreen(
+                    visitorId = args.visitorId,
                     onNavigateBack = {
                         navController.popBackStack()
                     },
