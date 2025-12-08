@@ -14,20 +14,26 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.ImportContacts
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.PersonAdd
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -46,6 +52,7 @@ import kotlinx.coroutines.launch
 import org.koin.compose.viewmodel.koinViewModel
 import xyz.sattar.javid.proqueue.core.ui.collectWithLifecycleAware
 import xyz.sattar.javid.proqueue.domain.model.Visitor
+import xyz.sattar.javid.proqueue.feature.lastVisitors.LastVisitorsIntent
 
 @Composable
 fun VisitorSelectionScreen(
@@ -81,6 +88,19 @@ fun VisitorSelectionScreenContent(
     onIntent: (VisitorSelectionIntent) -> Unit
 ) {
     Scaffold(
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = {
+                    onIntent(VisitorSelectionIntent.CreateNewVisitor)
+                },
+                containerColor = MaterialTheme.colorScheme.primary
+            ) {
+                Icon(
+                    imageVector = Icons.Default.PersonAdd,
+                    contentDescription = "ایجاد نوبت جدید"
+                )
+            }
+        },
         topBar = {
             TopAppBar(
                 title = {
@@ -94,14 +114,6 @@ fun VisitorSelectionScreenContent(
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "بازگشت"
-                        )
-                    }
-                },
-                actions = {
-                    IconButton(onClick = { onIntent(VisitorSelectionIntent.CreateNewVisitor) }) {
-                        Icon(
-                            imageVector = Icons.Default.Add,
-                            contentDescription = "افزودن مراجع جدید"
                         )
                     }
                 },
@@ -131,6 +143,16 @@ fun VisitorSelectionScreenContent(
                         contentDescription = null
                     )
                 },
+
+                maxLines = 1,
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = MaterialTheme.colorScheme.primary,
+                    unfocusedBorderColor = MaterialTheme.colorScheme.outline,
+                    errorBorderColor = MaterialTheme.colorScheme.error,
+                    focusedContainerColor = MaterialTheme.colorScheme.surface,
+                    unfocusedContainerColor = MaterialTheme.colorScheme.surface
+                ),
+                shape = RoundedCornerShape(12.dp),
                 singleLine = true
             )
 
@@ -142,7 +164,10 @@ fun VisitorSelectionScreenContent(
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
                     verticalArrangement = Arrangement.spacedBy(8.dp),
-                    contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 16.dp, vertical = 8.dp)
+                    contentPadding = androidx.compose.foundation.layout.PaddingValues(
+                        horizontal = 16.dp,
+                        vertical = 8.dp
+                    )
                 ) {
                     items(uiState.filteredVisitors) { visitor ->
                         VisitorItem(
@@ -214,11 +239,13 @@ fun HandleEvents(
                     onNavigateToCreateAppointment(it.visitorId)
                 }
             }
+
             VisitorSelectionEvent.NavigateToCreateVisitor -> {
                 scope.launch {
                     onNavigateToCreateVisitor()
                 }
             }
+
             VisitorSelectionEvent.NavigateBack -> {
                 scope.launch {
                     onNavigateBack()
