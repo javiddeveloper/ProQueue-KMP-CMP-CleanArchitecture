@@ -3,6 +3,7 @@ package xyz.sattar.javid.proqueue.feature.createVisitor
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import xyz.sattar.javid.proqueue.core.ui.BaseViewModel
+import xyz.sattar.javid.proqueue.core.utils.DateTimeUtils
 import xyz.sattar.javid.proqueue.domain.model.Visitor
 import xyz.sattar.javid.proqueue.domain.usecase.VisitorUpsertUseCase
 
@@ -78,7 +79,7 @@ class CreateVisitorViewModel(
     ): Flow<CreateVisitorState.PartialState> = flow {
         emit(CreateVisitorState.PartialState.IsLoading(true))
         
-        val currentTime = 0L // TODO: Use actual time if needed, but for update it might not matter
+        val currentTime = DateTimeUtils.systemCurrentMilliseconds()
         val visitorId = visitorUpsertUseCase.invoke(
             Visitor(
                 id = id,
