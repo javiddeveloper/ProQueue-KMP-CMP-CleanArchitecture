@@ -40,4 +40,12 @@ class VisitorRepositoryImpl(
             emptyList()
         }
     }
+
+    override suspend fun deleteVisitor(visitorId: Long) {
+        try {
+            visitorDao.deleteVisitor(visitorId)
+        } catch (e: Exception) {
+            // Log error
+        }
+    }
 }

@@ -16,4 +16,5 @@ interface AppointmentRepository {
     suspend fun getTodayStats(businessId: Long, date: Long): DashboardStats
     suspend fun getAppointmentById(appointmentId: Long): Appointment?
     suspend fun getAllWaitingAppointments(businessId: Long): List<AppointmentWithDetails>
+    suspend fun deleteAppointmentsByVisitorId(visitorId: Long)
 }

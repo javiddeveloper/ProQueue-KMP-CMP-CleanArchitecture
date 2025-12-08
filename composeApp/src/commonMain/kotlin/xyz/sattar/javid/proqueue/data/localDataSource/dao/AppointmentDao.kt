@@ -152,4 +152,6 @@ interface AppointmentDao {
         )
     """)
     suspend fun hasActiveAppointment(businessId: Long, visitorId: Long, date: Long): Boolean
+    @Query("DELETE FROM Appointment WHERE visitorId = :visitorId")
+    suspend fun deleteAppointmentsByVisitorId(visitorId: Long)
 }

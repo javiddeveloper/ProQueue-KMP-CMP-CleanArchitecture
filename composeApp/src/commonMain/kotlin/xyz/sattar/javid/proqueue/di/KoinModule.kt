@@ -15,9 +15,11 @@ import xyz.sattar.javid.proqueue.domain.VisitorRepository
 import xyz.sattar.javid.proqueue.domain.usecase.BusinessUpsertUseCase
 import xyz.sattar.javid.proqueue.domain.usecase.CreateAppointmentUseCase
 import xyz.sattar.javid.proqueue.domain.usecase.DeleteBusinessUseCase
+import xyz.sattar.javid.proqueue.domain.usecase.DeleteVisitorUseCase
 import xyz.sattar.javid.proqueue.domain.usecase.GetAllVisitorsUseCase
 import xyz.sattar.javid.proqueue.domain.usecase.GetTodayAppointmentsUseCase
 import xyz.sattar.javid.proqueue.domain.usecase.GetTodayStatsUseCase
+import xyz.sattar.javid.proqueue.domain.usecase.GetVisitorByIdUseCase
 import xyz.sattar.javid.proqueue.domain.usecase.GetWaitingQueueUseCase
 import xyz.sattar.javid.proqueue.domain.usecase.LoadAllBusinessUseCase
 import xyz.sattar.javid.proqueue.domain.usecase.MarkAppointmentCompletedUseCase
@@ -75,6 +77,8 @@ val appModule: Module = module {
     // Visitor UseCases
     factory { VisitorUpsertUseCase(get()) }
     factory { GetAllVisitorsUseCase(get()) }
+    factory { GetVisitorByIdUseCase(get()) }
+    factory { DeleteVisitorUseCase(get(), get()) }
 
     // States
     factory { CreateBusinessState() }
@@ -82,7 +86,7 @@ val appModule: Module = module {
 
     // ViewModels
     viewModel { CreateBusinessViewModel(get(), get()) }
-    viewModel { CreateVisitorViewModel(get(), get()) }
+    viewModel { CreateVisitorViewModel(get(), get(), get()) }
     viewModel { CreateAppointmentViewModel(get(), get(), get(), get()) }
     viewModel { 
         HomeViewModel(
@@ -100,7 +104,7 @@ val appModule: Module = module {
             get()  // RemoveAppointmentUseCase
         )
     }
-    viewModel { VisitorSelectionViewModel(get()) }
+    viewModel { VisitorSelectionViewModel(get(), get()) }
     viewModel { SettingsViewModel(get()) }
     viewModel { BusinessListViewModel(get()) }
 }

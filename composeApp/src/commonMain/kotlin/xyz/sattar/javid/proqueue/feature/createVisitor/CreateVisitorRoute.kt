@@ -25,6 +25,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -52,6 +53,7 @@ import xyz.sattar.javid.proqueue.ui.theme.AppTheme
 
 @Composable
 fun CreateVisitorRoute(
+    visitorId: Long? = null,
     viewModel: CreateVisitorViewModel = koinViewModel<CreateVisitorViewModel>(),
     onContinue: (Long) -> Unit,
     onNavigateBack: () -> Unit = {},
@@ -61,6 +63,19 @@ fun CreateVisitorRoute(
     var fullName by remember { mutableStateOf("") }
     var phoneNumber by remember { mutableStateOf("") }
 
+    LaunchedEffect(visitorId) {
+        if (visitorId != null) {
+            viewModel.sendIntent(CreateVisitorIntent.LoadVisitor(visitorId))
+        }
+    }
+
+    LaunchedEffect(uiState.loadedVisitor) {
+        uiState.loadedVisitor?.let {
+            fullName = it.fullName
+            phoneNumber = it.phoneNumber
+        }
+    }
+
     HandleEvents(
         events = viewModel.events,
         onContinue = onContinue,
@@ -69,11 +84,18 @@ fun CreateVisitorRoute(
 
     CreateVisitorScreen(
         uiState = uiState,
-        onIntent = viewModel::sendIntent,
+        onIntent = { intent ->
+            if (intent is CreateVisitorIntent.CreateVisitor) {
+                viewModel.sendIntent(intent.copy(id = visitorId ?: 0))
+            } else {
+                viewModel.sendIntent(intent)
+            }
+        },
         fullName = fullName,
         phoneNumber = phoneNumber,
         onFullName = { fullName = it },
-        onPhoneNumber = { phoneNumber = it }
+        onPhoneNumber = { phoneNumber = it },
+        isEditing = visitorId != null
     )
 }
 
@@ -86,14 +108,15 @@ fun CreateVisitorScreen(
     fullName: String,
     phoneNumber: String,
     onFullName: (String) -> Unit,
-    onPhoneNumber: (String) -> Unit
+    onPhoneNumber: (String) -> Unit,
+    isEditing: Boolean = false
 ) {
     Scaffold(
         topBar = {
             TopAppBar(
                 title = {
                     Text(
-                        stringResource(Res.string.create_visitor),
+                        if (isEditing) "ویرایش مراجع" else stringResource(Res.string.create_visitor),
                         style = MaterialTheme.typography.titleMedium
                     )
                 },
@@ -172,7 +195,7 @@ fun CreateVisitorScreen(
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 AppButton(
-                    text = stringResource(Res.string.register_visitor),
+                    text = if (isEditing) "ویرایش" else stringResource(Res.string.register_visitor),
                     onClick = {
                         onIntent(CreateVisitorIntent.CreateVisitor(fullName, phoneNumber))
                     },

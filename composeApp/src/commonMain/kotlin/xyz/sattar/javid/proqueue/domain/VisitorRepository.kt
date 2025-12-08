@@ -7,4 +7,5 @@ interface VisitorRepository {
     suspend fun getVisitorByPhone(phone: String): Visitor?
     suspend fun getVisitorById(visitorId: Long): Visitor?
     suspend fun getAllVisitors(): List<Visitor>
+    suspend fun deleteVisitor(visitorId: Long)
 }

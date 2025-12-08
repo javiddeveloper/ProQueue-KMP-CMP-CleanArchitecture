@@ -155,4 +155,12 @@ class AppointmentRepositoryImpl(
             emptyList()
         }
     }
+
+    override suspend fun deleteAppointmentsByVisitorId(visitorId: Long) {
+        try {
+            appointmentDao.deleteAppointmentsByVisitorId(visitorId)
+        } catch (e: Exception) {
+            // Log error
+        }
+    }
 }

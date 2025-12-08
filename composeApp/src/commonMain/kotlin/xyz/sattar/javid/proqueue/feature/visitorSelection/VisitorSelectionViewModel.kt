@@ -3,10 +3,12 @@ package xyz.sattar.javid.proqueue.feature.visitorSelection
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import xyz.sattar.javid.proqueue.core.ui.BaseViewModel
+import xyz.sattar.javid.proqueue.domain.usecase.DeleteVisitorUseCase
 import xyz.sattar.javid.proqueue.domain.usecase.GetAllVisitorsUseCase
 
 class VisitorSelectionViewModel(
-    private val getAllVisitorsUseCase: GetAllVisitorsUseCase
+    private val getAllVisitorsUseCase: GetAllVisitorsUseCase,
+    private val deleteVisitorUseCase: DeleteVisitorUseCase
 ) : BaseViewModel<VisitorSelectionState, VisitorSelectionState.PartialState, VisitorSelectionEvent, VisitorSelectionIntent>(
     initialState = VisitorSelectionState()
 ) {
@@ -21,6 +23,10 @@ class VisitorSelectionViewModel(
             }
             VisitorSelectionIntent.CreateNewVisitor -> {
                 sendEvent(VisitorSelectionEvent.NavigateToCreateVisitor)
+            }
+            is VisitorSelectionIntent.DeleteVisitor -> deleteVisitor(intent.visitorId)
+            is VisitorSelectionIntent.EditVisitor -> {
+                sendEvent(VisitorSelectionEvent.NavigateToEditVisitor(intent.visitorId))
             }
             VisitorSelectionIntent.BackPress -> {
                 sendEvent(VisitorSelectionEvent.NavigateBack)
@@ -61,6 +67,17 @@ class VisitorSelectionViewModel(
             emit(VisitorSelectionState.PartialState.LoadVisitors(visitors))
         } catch (e: Exception) {
             emit(VisitorSelectionState.PartialState.ShowMessage(e.message ?: "خطا در بارگذاری لیست مراجعین"))
+        }
+    }
+
+    private fun deleteVisitor(visitorId: Long): Flow<VisitorSelectionState.PartialState> = flow {
+        emit(VisitorSelectionState.PartialState.IsLoading(true))
+        try {
+            deleteVisitorUseCase(visitorId)
+            val visitors = getAllVisitorsUseCase()
+            emit(VisitorSelectionState.PartialState.LoadVisitors(visitors))
+        } catch (e: Exception) {
+            emit(VisitorSelectionState.PartialState.ShowMessage(e.message ?: "خطا در حذف مراجع"))
         }
     }
 
