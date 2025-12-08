@@ -267,7 +267,7 @@ fun QueueItemCard(
                 }
                 Column(horizontalAlignment = Alignment.End) {
                     Text(
-                        text = DateTimeUtils.formatTime(item.estimatedStartTime),
+                        text = DateTimeUtils.formatDateTime(item.estimatedStartTime),
                         style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.primary
                     )
