@@ -55,6 +55,7 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.viewmodel.koinViewModel
 import xyz.sattar.javid.proqueue.core.ui.collectWithLifecycleAware
 import xyz.sattar.javid.proqueue.core.ui.components.AppButton
+import xyz.sattar.javid.proqueue.core.utils.DateTimeUtils
 import xyz.sattar.javid.proqueue.ui.theme.AppTheme
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
@@ -285,7 +286,7 @@ fun CreateAppointmentScreenContent(
                                 onIntent(
                                     CreateAppointmentIntent.CreateAppointment(
                                         visitorId = visitorId,
-                                        appointmentDate = 11L,
+                                        appointmentDate = DateTimeUtils.combineDateAndTime(selectedDate, selectedTime),
                                         serviceDuration = duration
                                     )
                                 )
