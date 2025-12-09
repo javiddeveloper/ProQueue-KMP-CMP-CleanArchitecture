@@ -17,7 +17,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Business
 import androidx.compose.material.icons.filled.ChevronLeft
 import androidx.compose.material.icons.filled.Factory
 import androidx.compose.material3.Card
@@ -42,6 +41,7 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
+import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.viewmodel.koinViewModel
 import proqueue.composeapp.generated.resources.Res
 import proqueue.composeapp.generated.resources.business_list
@@ -240,5 +240,15 @@ fun HandleEvents(
                 }
             }
         }
+    }
+}
+@Preview(showBackground = true)
+@Composable
+fun PreviewHomeScreen() {
+    AppTheme {
+        BusinessListScreenContent(
+            uiState = BusinessListState(),
+            onIntent = {}
+        )
     }
 }
