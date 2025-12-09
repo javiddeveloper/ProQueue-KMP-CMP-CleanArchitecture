@@ -63,6 +63,7 @@ import xyz.sattar.javid.proqueue.domain.model.AppointmentWithDetails
 import xyz.sattar.javid.proqueue.domain.model.Business
 import xyz.sattar.javid.proqueue.domain.model.Visitor
 import xyz.sattar.javid.proqueue.ui.theme.AppTheme
+import androidx.compose.foundation.layout.WindowInsets
 
 @Composable
 fun LastVisitorsScreen(
@@ -96,6 +97,7 @@ fun LastVisitorsScreenContent(
     onIntent: (LastVisitorsIntent) -> Unit
 ) {
     Scaffold(
+        contentWindowInsets = WindowInsets(0),
         topBar = {
             TopAppBar(
                 title = {
@@ -276,38 +278,44 @@ fun AppointmentCard(
                     color = MaterialTheme.colorScheme.onSurface
                 )
                 Spacer(modifier = Modifier.height(4.dp))
-                
-                val durationMinutesForWait = appointment.serviceDuration ?: appointmentWithDetails.business.defaultServiceDuration
-                val endTimeForWait = appointment.appointmentDate + durationMinutesForWait * 60 * 1000L
-                val isOverdueForWait = DateTimeUtils.systemCurrentMilliseconds() > endTimeForWait && appointment.status == "WAITING"
-                val waitingOrOverdueText = if (isOverdueForWait) "زمان رد شده" else DateTimeUtils.calculateWaitingTime(appointment.appointmentDate)
+
+                val durationMinutesForWait = appointment.serviceDuration
+                    ?: appointmentWithDetails.business.defaultServiceDuration
+                val endTimeForWait =
+                    appointment.appointmentDate + durationMinutesForWait * 60 * 1000L
+                val isOverdueForWait =
+                    DateTimeUtils.systemCurrentMilliseconds() > endTimeForWait && appointment.status == "WAITING"
+                val waitingOrOverdueText =
+                    if (isOverdueForWait) "زمان رد شده" else DateTimeUtils.calculateWaitingTime(
+                        appointment.appointmentDate
+                    )
                 Text(
                     text = waitingOrOverdueText,
                     style = MaterialTheme.typography.bodyMedium,
                     color = if (isOverdueForWait) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
                 )
 
-            Spacer(modifier = Modifier.height(4.dp))
-            Row(
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Icon(
-                    imageVector = Icons.Default.AccessTime,
-                    contentDescription = null,
-                    modifier = Modifier.size(16.dp),
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Spacer(modifier = Modifier.width(4.dp))
+                Spacer(modifier = Modifier.height(4.dp))
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.AccessTime,
+                        contentDescription = null,
+                        modifier = Modifier.size(16.dp),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
 
-                // Date and Time
-                val dateTime = DateTimeUtils.formatDateTime(appointment.appointmentDate)
-                Text(
-                    text = dateTime,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+                    // Date and Time
+                    val dateTime = DateTimeUtils.formatDateTime(appointment.appointmentDate)
+                    Text(
+                        text = dateTime,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
 
-                appointment.serviceDuration?.let { duration ->
+                    appointment.serviceDuration?.let { duration ->
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
                             text = "• $duration دقیقه",
@@ -318,7 +326,8 @@ fun AppointmentCard(
                 }
 
                 Spacer(modifier = Modifier.height(4.dp))
-                val durationMinutes = appointment.serviceDuration ?: appointmentWithDetails.business.defaultServiceDuration
+                val durationMinutes = appointment.serviceDuration
+                    ?: appointmentWithDetails.business.defaultServiceDuration
                 val endTime = appointment.appointmentDate + durationMinutes * 60 * 1000L
                 val overdue = DateTimeUtils.systemCurrentMilliseconds() > endTime
                 StatusBadge(status = appointment.status, overdue = overdue)
@@ -333,7 +342,7 @@ fun AppointmentCard(
                         tint = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
-                
+
                 DropdownMenu(
                     expanded = showMenu,
                     onDismissRequest = { showMenu = false }
@@ -353,11 +362,11 @@ fun AppointmentCard(
                         }
                     )
                     DropdownMenuItem(
-                        text = { 
+                        text = {
                             Text(
                                 "حذف نوبت",
                                 color = MaterialTheme.colorScheme.error
-                            ) 
+                            )
                         },
                         onClick = {
                             showMenu = false
@@ -401,7 +410,6 @@ fun StatusBadge(status: String, overdue: Boolean) {
         )
     }
 }
-
 
 
 @Composable
