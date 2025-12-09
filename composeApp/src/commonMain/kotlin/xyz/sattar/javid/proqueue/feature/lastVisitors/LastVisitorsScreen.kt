@@ -277,13 +277,15 @@ fun AppointmentCard(
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 
-                // Waiting Time
-            val waitingTime = DateTimeUtils.calculateWaitingTime(appointment.appointmentDate)
-            Text(
-                text = waitingTime,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.primary
-            )
+                val durationMinutesForWait = appointment.serviceDuration ?: appointmentWithDetails.business.defaultServiceDuration
+                val endTimeForWait = appointment.appointmentDate + durationMinutesForWait * 60 * 1000L
+                val isOverdueForWait = DateTimeUtils.systemCurrentMilliseconds() > endTimeForWait && appointment.status == "WAITING"
+                val waitingOrOverdueText = if (isOverdueForWait) "زمان رد شده" else DateTimeUtils.calculateWaitingTime(appointment.appointmentDate)
+                Text(
+                    text = waitingOrOverdueText,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = if (isOverdueForWait) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
+                )
 
             Spacer(modifier = Modifier.height(4.dp))
             Row(
@@ -315,9 +317,11 @@ fun AppointmentCard(
                     }
                 }
 
-                // Status Badge
                 Spacer(modifier = Modifier.height(4.dp))
-                StatusBadge(status = appointment.status)
+                val durationMinutes = appointment.serviceDuration ?: appointmentWithDetails.business.defaultServiceDuration
+                val endTime = appointment.appointmentDate + durationMinutes * 60 * 1000L
+                val overdue = DateTimeUtils.systemCurrentMilliseconds() > endTime
+                StatusBadge(status = appointment.status, overdue = overdue)
             }
 
             // Options Button with Popup Menu
@@ -375,12 +379,13 @@ fun AppointmentCard(
 }
 
 @Composable
-fun StatusBadge(status: String) {
-    val (text, color) = when (status) {
-        "WAITING" -> "در انتظار" to MaterialTheme.colorScheme.primary
-        "COMPLETED" -> "تکمیل شده" to MaterialTheme.colorScheme.tertiary
-        "NO_SHOW" -> "عدم حضور" to MaterialTheme.colorScheme.error
-        "CANCELLED" -> "لغو شده" to MaterialTheme.colorScheme.error
+fun StatusBadge(status: String, overdue: Boolean) {
+    val (text, color) = when {
+        status == "WAITING" && overdue -> "زمان رد شده" to MaterialTheme.colorScheme.error
+        status == "WAITING" -> "در انتظار" to MaterialTheme.colorScheme.primary
+        status == "COMPLETED" -> "تکمیل شده" to MaterialTheme.colorScheme.tertiary
+        status == "NO_SHOW" -> "عدم حضور" to MaterialTheme.colorScheme.error
+        status == "CANCELLED" -> "لغو شده" to MaterialTheme.colorScheme.error
         else -> status to MaterialTheme.colorScheme.onSurfaceVariant
     }
 
