@@ -277,9 +277,19 @@ fun QueueItemCard(
                     )
                 }
             }
-            
+
             Spacer(modifier = Modifier.height(12.dp))
-            
+
+            val overdue = DateTimeUtils.systemCurrentMilliseconds() > item.estimatedEndTime && item.appointment.status == "WAITING"
+            if (overdue) {
+                Text(
+                    text = "زمان رد شده",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.error
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+            }
+
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
