@@ -1,5 +1,6 @@
 package xyz.sattar.javid.proqueue.core.navigation.navHost
 
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
@@ -68,7 +69,7 @@ fun MainNavHost(
         NavHost(
             navController = navController,
             startDestination = AppScreens.Home,
-            modifier = Modifier.padding(paddingValues)
+            modifier = Modifier.fillMaxSize().padding(bottom = paddingValues.calculateBottomPadding())
         ) {
             composable<AppScreens.Home> {
                 selectedTab = MainTab.Home
@@ -90,11 +91,11 @@ fun MainNavHost(
                     }
                 )
             }
-            
+
             composable<AppScreens.VisitorSelection> {
                 VisitorSelectionScreen(
                     onNavigateToCreateAppointment = { visitorId ->
-                         navController.navigate(AppScreens.CreateAppointment(visitorId))
+                        navController.navigate(AppScreens.CreateAppointment(visitorId))
                     },
                     onNavigateToCreateVisitor = {
                         navController.navigate(AppScreens.CreateVisitor)
