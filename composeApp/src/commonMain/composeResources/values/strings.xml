@@ -20,6 +20,10 @@
     <string name="quick_access">دسترسی سریع</string>
     <string name="add_customer">افزودن مشتری</string>
     <string name="queue_title">صف</string>
+    <string name="today_total_appointments">کل نوبت‌های امروز</string>
+    <string name="completed_visitors">تکمیل‌شده‌ها</string>
+    <string name="queue_tab">صف</string>
+    <string name="visitors_tab">مراجعین</string>
     
     <!-- Last Visitors Screen -->
     <string name="no_visitors_yet">هنوز مشتری ثبت نشده است</string>
