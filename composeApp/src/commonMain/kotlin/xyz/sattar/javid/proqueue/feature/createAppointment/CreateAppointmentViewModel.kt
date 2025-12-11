@@ -1,6 +1,7 @@
 package xyz.sattar.javid.proqueue.feature.createAppointment
 
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
 import xyz.sattar.javid.proqueue.core.state.BusinessStateHolder
 import xyz.sattar.javid.proqueue.core.ui.BaseViewModel
@@ -8,6 +9,7 @@ import xyz.sattar.javid.proqueue.domain.usecase.CreateAppointmentUseCase
 import xyz.sattar.javid.proqueue.domain.usecase.GetAppointmentByIdUseCase
 import xyz.sattar.javid.proqueue.domain.usecase.GetVisitorByIdUseCase
 import xyz.sattar.javid.proqueue.domain.usecase.UpdateAppointmentUseCase
+import xyz.sattar.javid.proqueue.feature.createAppointment.CreateAppointmentState.PartialState.*
 
 class CreateAppointmentViewModel(
     private val getVisitorByIdUseCase: GetVisitorByIdUseCase,
@@ -21,28 +23,32 @@ class CreateAppointmentViewModel(
         return when (intent) {
             is CreateAppointmentIntent.LoadAppointment -> loadAppointment(intent.appointmentId)
             is CreateAppointmentIntent.SelectVisitor -> flow {
-                emit(CreateAppointmentState.PartialState.IsLoading(true))
+                emit(IsLoading(true))
                 try {
                     val visitor = getVisitorByIdUseCase(intent.visitorId)
                     visitor?.let {
-                        emit(CreateAppointmentState.PartialState.LoadVisitor(visitor))
+                        emit(LoadVisitor(visitor))
                     }
                 } catch (e: Exception) {
                     emit(
-                        CreateAppointmentState.PartialState.ShowMessage(
+                        ShowMessage(
                             e.message ?: "خطا در بارگذاری لیست مراجعین"
                         )
                     )
                 }
             }
 
-            is CreateAppointmentIntent.CreateAppointment -> createAppointment(
-                intent.visitorId,
-                intent.appointmentDate,
-                intent.serviceDuration
-            )
-
+            is CreateAppointmentIntent.CreateAppointment -> flow {
+                emitAll(
+                    createAppointment(
+                        intent.visitorId,
+                        intent.appointmentDate,
+                        intent.serviceDuration
+                    )
+                )
+            }
             CreateAppointmentIntent.BackPress -> sendEvent(CreateAppointmentEvent.NavigateBack)
+            CreateAppointmentIntent.AppointmentCreated -> sendEvent(CreateAppointmentEvent.AppointmentCreated)
         }
     }
 

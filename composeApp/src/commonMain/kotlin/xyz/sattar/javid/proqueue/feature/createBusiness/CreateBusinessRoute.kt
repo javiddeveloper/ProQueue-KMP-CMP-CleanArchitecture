@@ -18,6 +18,7 @@ import androidx.compose.material.icons.filled.AddLocation
 import androidx.compose.material.icons.filled.Factory
 import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material.icons.filled.Timer
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -74,11 +75,11 @@ fun CreateBusinessRoute(
         onContinue = onContinue,
         onNavigateBack = onNavigateBack
     )
-    LaunchedEffect(uiState.businessCreated){
-        if(uiState.businessCreated){
-            onContinue()
-        }
-    }
+//    LaunchedEffect(uiState.businessCreated){
+//        if(uiState.businessCreated){
+//            onContinue()
+//        }
+//    }
     CreateBusinessScreen(
         uiState = uiState,
         onIntent = viewModel::sendIntent,
@@ -141,6 +142,11 @@ fun CreateBusinessScreen(
             )
         }
     ) { paddingValues ->
+        if (uiState.isLoading) {
+            CircularProgressIndicator()
+        } else if (uiState.businessCreated) {
+            onIntent(CreateBusinessIntent.BusinessCreated)
+        }
         Column(
             modifier = modifier
                 .fillMaxSize()
@@ -244,7 +250,14 @@ fun CreateBusinessScreen(
                 AppButton(
                     text = stringResource(Res.string.accept),
                     onClick = {
-                        onIntent(CreateBusinessIntent.CreateBusiness(title, phone, address,defaultProgress))
+                        onIntent(
+                            CreateBusinessIntent.CreateBusiness(
+                                title,
+                                phone,
+                                address,
+                                defaultProgress
+                            )
+                        )
                     },
                     modifier = Modifier.weight(1f),
                     enabled = !uiState.isLoading && title.isNotBlank()
@@ -277,16 +290,12 @@ fun HandleEvents(
     val scope = rememberCoroutineScope()
     events.collectWithLifecycleAware {
         when (it) {
-            CreateBusinessEvent. NavigateToBusiness -> {
-                scope.launch {
-                    onContinue()
-                }
+            CreateBusinessEvent.NavigateToBusiness -> {
+                onContinue()
             }
 
             CreateBusinessEvent.BackPressed -> {
-                scope.launch {
-                    onNavigateBack()
-                }
+                onNavigateBack()
             }
         }
     }

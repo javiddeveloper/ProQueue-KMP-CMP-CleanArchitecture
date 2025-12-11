@@ -170,12 +170,9 @@ fun MainNavHost(
                     },
                     onAppointmentCreated = {
                         navController.navigate(AppScreens.Visitors) {
-                            popUpTo(AppScreens.Home) {
-                                inclusive = false
-                                saveState = true
+                            popUpTo(AppScreens.Visitors) {
+                                inclusive = true
                             }
-                            launchSingleTop = true
-                            restoreState = true
                         }
                     }
                 )

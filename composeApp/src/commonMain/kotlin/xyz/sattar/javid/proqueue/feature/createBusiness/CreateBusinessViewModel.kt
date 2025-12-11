@@ -23,9 +23,8 @@ class CreateBusinessViewModel(
                 )
             }
 
-            CreateBusinessIntent.BackPress -> {
-                sendEvent(CreateBusinessEvent.BackPressed)
-            }
+            CreateBusinessIntent.BackPress -> sendEvent(CreateBusinessEvent.BackPressed)
+            CreateBusinessIntent.BusinessCreated -> sendEvent(CreateBusinessEvent.NavigateToBusiness)
         }
     }
 

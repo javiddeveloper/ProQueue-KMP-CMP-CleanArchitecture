@@ -77,11 +77,11 @@ fun CreateAppointmentScreen(
             viewModel.sendIntent(CreateAppointmentIntent.SelectVisitor(visitorId))
         }
     }
-    LaunchedEffect(uiState.appointmentCreated) {
-        if (uiState.appointmentCreated) {
-            onAppointmentCreated()
-        }
-    }
+//    LaunchedEffect(uiState.appointmentCreated) {
+//        if (uiState.appointmentCreated) {
+//            onAppointmentCreated()
+//        }
+//    }
 
     HandleEvents(
         events = viewModel.events,
@@ -160,7 +160,9 @@ fun CreateAppointmentScreenContent(
                 .background(MaterialTheme.colorScheme.background)
                 .padding(paddingValues)
         ) {
-            if (uiState.isLoading) {
+            if (uiState.appointmentCreated) {
+                onIntent(CreateAppointmentIntent.AppointmentCreated)
+            } else if (uiState.isLoading) {
                 CircularProgressIndicator(
                     modifier = Modifier.align(Alignment.Center)
                 )
@@ -418,15 +420,12 @@ fun HandleEvents(
     events.collectWithLifecycleAware {
         when (it) {
             CreateAppointmentEvent.NavigateBack -> {
-                scope.launch {
-                    onNavigateBack()
-                }
+                onNavigateBack()
+
             }
 
             CreateAppointmentEvent.AppointmentCreated -> {
-                scope.launch {
-                    onAppointmentCreated()
-                }
+                onAppointmentCreated()
             }
         }
     }

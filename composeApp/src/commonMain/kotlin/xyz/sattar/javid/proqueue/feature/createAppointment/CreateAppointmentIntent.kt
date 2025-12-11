@@ -9,4 +9,5 @@ sealed interface CreateAppointmentIntent {
         val serviceDuration: Int?
     ) : CreateAppointmentIntent
     data object BackPress : CreateAppointmentIntent
+    data object AppointmentCreated : CreateAppointmentIntent
 }

@@ -8,4 +8,5 @@ sealed class CreateBusinessIntent {
         val defaultProgress: String
     ) : CreateBusinessIntent()
     object BackPress : CreateBusinessIntent()
+    object BusinessCreated : CreateBusinessIntent()
 }
