@@ -56,6 +56,7 @@ import kotlinx.coroutines.launch
 import org.koin.compose.viewmodel.koinViewModel
 import xyz.sattar.javid.proqueue.core.ui.collectWithLifecycleAware
 import xyz.sattar.javid.proqueue.domain.model.Visitor
+import androidx.compose.foundation.layout.WindowInsets
 
 @Composable
 fun VisitorSelectionScreen(
@@ -121,6 +122,7 @@ fun VisitorSelectionScreenContent(
     }
 
     Scaffold(
+        contentWindowInsets = WindowInsets(0),
         floatingActionButton = {
             FloatingActionButton(
                 onClick = {

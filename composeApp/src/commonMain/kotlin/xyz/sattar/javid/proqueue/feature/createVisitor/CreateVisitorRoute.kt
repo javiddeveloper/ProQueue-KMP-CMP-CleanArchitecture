@@ -50,6 +50,7 @@ import xyz.sattar.javid.proqueue.core.ui.collectWithLifecycleAware
 import xyz.sattar.javid.proqueue.core.ui.components.AppButton
 import xyz.sattar.javid.proqueue.core.ui.components.AppTextField
 import xyz.sattar.javid.proqueue.ui.theme.AppTheme
+import androidx.compose.foundation.layout.WindowInsets
 
 @Composable
 fun CreateVisitorRoute(
@@ -112,6 +113,7 @@ fun CreateVisitorScreen(
     isEditing: Boolean = false
 ) {
     Scaffold(
+        contentWindowInsets = WindowInsets(0),
         topBar = {
             TopAppBar(
                 title = {

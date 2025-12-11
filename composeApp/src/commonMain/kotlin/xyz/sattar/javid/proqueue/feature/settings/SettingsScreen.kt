@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Business
 import androidx.compose.material.icons.filled.ChevronLeft
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Factory
@@ -150,8 +149,8 @@ fun SettingsScreenContent(
             modifier = modifier
                 .fillMaxSize()
                 .background(MaterialTheme.colorScheme.background)
-                .padding(paddingValues)
                 .verticalScroll(rememberScrollState())
+                .padding(paddingValues)
                 .padding(start = 16.dp, end = 16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
