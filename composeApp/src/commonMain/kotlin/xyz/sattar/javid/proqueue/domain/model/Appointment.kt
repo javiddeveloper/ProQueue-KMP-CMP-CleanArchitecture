@@ -7,7 +7,6 @@ data class Appointment(
     val appointmentDate: Long,
     val serviceDuration: Int?,
     val status: String,
-    val queuePosition: Int,
     val createdAt: Long,
     val updatedAt: Long,
 )

@@ -1,7 +1,7 @@
 package xyz.sattar.javid.proqueue.domain.model
 
 data class Business(
-    val id: Long,
+    val id: Long = 0,
     val title: String,
     val phone: String,
     val address: String,
@@ -11,7 +11,7 @@ data class Business(
     val workEndHour: Int,
     val notificationEnabled: Boolean,
     val notificationTypes: String,
-    val notificationMinutesBefore: Int,
-    val createdAt: Long,
+    val notificationMinutesBefore: Int = 0,
+    val createdAt: Long = 0,
 )
 

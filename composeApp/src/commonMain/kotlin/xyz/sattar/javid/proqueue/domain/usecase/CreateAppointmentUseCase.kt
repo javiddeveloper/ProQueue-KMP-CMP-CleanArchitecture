@@ -21,7 +21,6 @@ class CreateAppointmentUseCase(private val repository: AppointmentRepository) {
             appointmentDate = appointmentDate,
             serviceDuration = serviceDuration,
             status = "WAITING",
-            queuePosition = 0, // Will be set by repository
             createdAt = now,
             updatedAt = now
         )
