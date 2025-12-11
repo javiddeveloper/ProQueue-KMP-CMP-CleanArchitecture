@@ -1,5 +1,8 @@
 package xyz.sattar.javid.proqueue.core.navigation.navHost
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
@@ -11,6 +14,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import xyz.sattar.javid.proqueue.core.navigation.AppScreens
 import xyz.sattar.javid.proqueue.core.navigation.MainTab
@@ -30,6 +34,17 @@ fun MainNavHost(
     onChangeBusiness: () -> Unit = {}
 ) {
     val navController = rememberNavController()
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry?.destination?.route
+
+    val screensWithBottomBar = setOf(
+        AppScreens.Home::class.qualifiedName,
+        AppScreens.Visitors::class.qualifiedName,
+        AppScreens.Settings::class.qualifiedName
+    )
+
+    val shouldShowBottomBar = currentRoute in screensWithBottomBar
+
     var selectedTab by remember { mutableStateOf<MainTab>(MainTab.Home) }
 
     val tabs = listOf(
@@ -40,36 +55,57 @@ fun MainNavHost(
 
     Scaffold(
         bottomBar = {
-            BottomNavigationBar(
-                tabs = tabs,
-                selectedTab = selectedTab,
-                onTabSelected = { tab ->
-                    selectedTab = tab
-                    when (tab) {
-                        MainTab.Home -> navController.navigate(AppScreens.Home) {
-                            popUpTo(AppScreens.Home) { saveState = true }
-                            launchSingleTop = true
-                            restoreState = true
-                        }
-                        MainTab.LastVisitors -> navController.navigate(AppScreens.Visitors) {
-                            popUpTo(AppScreens.Home) { saveState = true }
-                            launchSingleTop = true
-                            restoreState = true
-                        }
-                        MainTab.Settings -> navController.navigate(AppScreens.Settings) {
-                            popUpTo(AppScreens.Home) { saveState = true }
-                            launchSingleTop = true
-                            restoreState = true
+            AnimatedVisibility(
+                visible = shouldShowBottomBar,
+                enter = slideInVertically(
+                    initialOffsetY = { it }
+                ),
+                exit = slideOutVertically(
+                    targetOffsetY = { it }
+                )
+            ) {
+                BottomNavigationBar(
+                    tabs = tabs,
+                    selectedTab = selectedTab,
+                    onTabSelected = { tab ->
+                        selectedTab = tab
+                        when (tab) {
+                            MainTab.Home -> navController.navigate(AppScreens.Home) {
+                                popUpTo(AppScreens.Home) {
+                                    inclusive = false
+                                    saveState = true
+                                }
+                                launchSingleTop = true
+                                restoreState = true
+                            }
+                            MainTab.LastVisitors -> navController.navigate(AppScreens.Visitors) {
+                                popUpTo(AppScreens.Home) {
+                                    inclusive = false
+                                    saveState = true
+                                }
+                                launchSingleTop = true
+                                restoreState = true
+                            }
+                            MainTab.Settings -> navController.navigate(AppScreens.Settings) {
+                                popUpTo(AppScreens.Home) {
+                                    inclusive = false
+                                    saveState = true
+                                }
+                                launchSingleTop = true
+                                restoreState = true
+                            }
                         }
                     }
-                }
-            )
+                )
+            }
         }
     ) { paddingValues ->
         NavHost(
             navController = navController,
             startDestination = AppScreens.Home,
-            modifier = Modifier.fillMaxSize().padding(bottom = paddingValues.calculateBottomPadding())
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(bottom = if (shouldShowBottomBar) paddingValues.calculateBottomPadding() else paddingValues.calculateBottomPadding())
         ) {
             composable<AppScreens.Home> {
                 selectedTab = MainTab.Home
@@ -83,7 +119,6 @@ fun MainNavHost(
                 selectedTab = MainTab.LastVisitors
                 LastVisitorsScreen(
                     onNavigateToCreateAppointment = {
-                        // Navigate to VisitorSelection first
                         navController.navigate(AppScreens.VisitorSelection)
                     },
                     onNavigateToEditAppointment = { appointmentId ->
@@ -101,12 +136,7 @@ fun MainNavHost(
                         navController.navigate(AppScreens.CreateVisitor)
                     },
                     onNavigateBack = {
-                        selectedTab = MainTab.Home
-                        navController.navigate(AppScreens.Home) {
-                            popUpTo(AppScreens.Home) { saveState = true }
-                            launchSingleTop = true
-                            restoreState = true
-                        }
+                        navController.popBackStack()
                     }
                 )
             }
@@ -114,50 +144,36 @@ fun MainNavHost(
             composable<AppScreens.Settings> {
                 selectedTab = MainTab.Settings
                 SettingsScreen(
-                    onNavigateToAbout = {
-
-                    },
+                    onNavigateToAbout = {},
                     onChangeBusiness = onChangeBusiness
                 )
             }
 
-            // CreateVisitor Route - First step in appointment creation flow
             composable<AppScreens.CreateVisitor> {
                 CreateVisitorRoute(
                     onContinue = { visitorId ->
-                        // After creating visitor, navigate to CreateAppointment
                         navController.navigate(AppScreens.CreateAppointment(visitorId))
                     },
                     onNavigateBack = {
-                        selectedTab = MainTab.Home
-                        navController.navigate(AppScreens.Home) {
-                            popUpTo(AppScreens.Home) { saveState = true }
-                            launchSingleTop = true
-                            restoreState = true
-                        }
+                        navController.popBackStack()
                     }
                 )
             }
 
-            // CreateAppointment Route - Second step in appointment creation flow
             composable<AppScreens.CreateAppointment> { backStackEntry ->
                 val args = backStackEntry.toRoute<AppScreens.CreateAppointment>()
                 CreateAppointmentScreen(
                     visitorId = args.visitorId,
                     appointmentId = args.appointmentId,
                     onNavigateBack = {
-                        selectedTab = MainTab.Home
-                        navController.navigate(AppScreens.Home) {
-                            popUpTo(AppScreens.Home) { saveState = true }
-                            launchSingleTop = true
-                            restoreState = true
-                        }
+                        navController.popBackStack()
                     },
                     onAppointmentCreated = {
-                        // After creating appointment, go back to Visitors list
-                        selectedTab = MainTab.LastVisitors
                         navController.navigate(AppScreens.Visitors) {
-                            popUpTo(AppScreens.Home) { saveState = true }
+                            popUpTo(AppScreens.Home) {
+                                inclusive = false
+                                saveState = true
+                            }
                             launchSingleTop = true
                             restoreState = true
                         }
