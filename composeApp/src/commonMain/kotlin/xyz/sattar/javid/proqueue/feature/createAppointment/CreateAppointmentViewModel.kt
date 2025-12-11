@@ -58,7 +58,13 @@ class CreateAppointmentViewModel(
                 currentState.copy(message = partialState.message, isLoading = false)
 
             is CreateAppointmentState.PartialState.LoadVisitor ->
-                currentState.copy(visitor = partialState.visitor, isLoading = false)
+                currentState.copy(
+                    visitor = partialState.visitor,
+                    selectedVisitorId = partialState.visitor.id,
+                    serviceDuration = currentState.serviceDuration
+                        ?: BusinessStateHolder.selectedBusiness.value?.defaultServiceDuration,
+                    isLoading = false
+                )
 
             is CreateAppointmentState.PartialState.LoadAppointmentDetails ->
                 currentState.copy(
