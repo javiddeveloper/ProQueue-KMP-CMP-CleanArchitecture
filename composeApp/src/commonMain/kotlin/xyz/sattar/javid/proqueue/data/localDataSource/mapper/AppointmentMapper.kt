@@ -12,7 +12,6 @@ fun AppointmentEntity.toDomain() = Appointment(
     appointmentDate = appointmentDate,
     serviceDuration = serviceDuration,
     status = status,
-    queuePosition = queuePosition,
     createdAt = createdAt,
     updatedAt = updatedAt,
 )
@@ -24,7 +23,6 @@ fun Appointment.toEntity() = AppointmentEntity(
     appointmentDate = appointmentDate,
     serviceDuration = serviceDuration,
     status = status,
-    queuePosition = queuePosition,
     createdAt = createdAt,
     updatedAt = updatedAt,
 )

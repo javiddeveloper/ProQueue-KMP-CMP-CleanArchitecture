@@ -18,7 +18,7 @@ interface AppointmentDao {
         WHERE businessId = :businessId 
         AND DATE(appointmentDate/1000, 'unixepoch') = DATE(:date/1000, 'unixepoch')
         AND status = 'WAITING'
-        ORDER BY queuePosition ASC
+        ORDER BY createdAt ASC
     """)
     suspend fun getWaitingQueue(businessId: Long, date: Long): List<AppointmentWithDetailsEntity>
 
@@ -27,7 +27,7 @@ interface AppointmentDao {
         SELECT * FROM Appointment 
         WHERE businessId = :businessId 
         AND status = 'WAITING'
-        ORDER BY appointmentDate ASC, queuePosition ASC
+        ORDER BY appointmentDate ASC
     """)
     suspend fun getAllWaitingAppointments(businessId: Long): List<AppointmentWithDetailsEntity>
 
@@ -35,7 +35,7 @@ interface AppointmentDao {
     @Query("""
         SELECT * FROM Appointment 
         WHERE businessId = :businessId 
-        ORDER BY appointmentDate DESC, queuePosition ASC
+        ORDER BY appointmentDate DESC
     """)
     suspend fun getTodayAppointments(businessId: Long): List<AppointmentWithDetailsEntity>
 
@@ -49,8 +49,8 @@ interface AppointmentDao {
     @Query("""
         SELECT * FROM Appointment 
         WHERE businessId = :businessId 
-        ORDER BY appointmentDate DESC, queuePosition ASC
-        LIMIT 50
+        ORDER BY appointmentDate DESC
+        LIMIT 100
     """)
     suspend fun getAllAppointmentsForBusiness(businessId: Long): List<AppointmentWithDetailsEntity>
 
@@ -67,7 +67,7 @@ interface AppointmentDao {
     suspend fun upsertAppointment(appointment: AppointmentEntity)
 
     @Query("""
-        SELECT MAX(queuePosition) FROM Appointment 
+        SELECT MAX(appointmentDate) FROM Appointment 
         WHERE businessId = :businessId 
         AND DATE(appointmentDate/1000, 'unixepoch') = DATE(:date/1000, 'unixepoch')
         AND status = 'WAITING'
@@ -82,13 +82,12 @@ interface AppointmentDao {
 
     @Query("""
         UPDATE Appointment 
-        SET queuePosition = queuePosition - 1, updatedAt = :updatedAt 
+        SET updatedAt = :updatedAt 
         WHERE businessId = :businessId 
         AND DATE(appointmentDate/1000, 'unixepoch') = DATE(:date/1000, 'unixepoch')
-        AND queuePosition > :removedPosition
         AND status = 'WAITING'
     """)
-    suspend fun reorderQueueAfterRemoval(businessId: Long, date: Long, removedPosition: Int, updatedAt: Long)
+    suspend fun reorderQueueAfterRemoval(businessId: Long, date: Long, updatedAt: Long)
 
     @Query("DELETE FROM Appointment WHERE id = :appointmentId")
     suspend fun deleteAppointment(appointmentId: Long)
@@ -134,7 +133,6 @@ interface AppointmentDao {
         reorderQueueAfterRemoval(
             appointment.businessId,
             appointment.appointmentDate,
-            appointment.queuePosition,
             updatedAt
         )
     }
