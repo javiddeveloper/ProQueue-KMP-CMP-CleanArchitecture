@@ -18,7 +18,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.Timer
@@ -57,7 +56,6 @@ import xyz.sattar.javid.proqueue.core.ui.collectWithLifecycleAware
 import xyz.sattar.javid.proqueue.core.ui.components.AppButton
 import xyz.sattar.javid.proqueue.core.utils.DateTimeUtils
 import xyz.sattar.javid.proqueue.ui.theme.AppTheme
-import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 import androidx.compose.foundation.layout.WindowInsets
 
@@ -72,7 +70,6 @@ fun CreateAppointmentScreen(
     val uiState by viewModel.uiState.collectAsState()
 
     LaunchedEffect(Unit) {
-        viewModel.sendIntent(CreateAppointmentIntent.LoadVisitors)
         if (appointmentId != null) {
             viewModel.sendIntent(CreateAppointmentIntent.LoadAppointment(appointmentId))
         } else if (visitorId != null) {
@@ -101,10 +98,10 @@ fun CreateAppointmentScreenContent(
     onIntent: (CreateAppointmentIntent) -> Unit,
     initialVisitorId: Long? = null
 ) {
-    var selectedVisitorId by remember { mutableStateOf<Long?>(initialVisitorId) }
-    var selectedDate by remember { mutableStateOf(Clock.System.now().toEpochMilliseconds()) }
+    var selectedVisitorId by remember { mutableStateOf(initialVisitorId) }
+    var selectedDate by remember { mutableStateOf(DateTimeUtils.systemCurrentMilliseconds()) }
     var selectedTime by remember { mutableStateOf("09:00") }
-    var serviceDuration by remember { mutableStateOf("30") }
+    var serviceDuration by remember { mutableStateOf(uiState.serviceDuration?.toString() ?: "30") }
     var showTimeDialog by remember { mutableStateOf(false) }
 
     LaunchedEffect(uiState) {
@@ -192,7 +189,7 @@ fun CreateAppointmentScreenContent(
                             Column {
                                 Text(
                                     text = if (selectedVisitorId != null) {
-                                        uiState.visitors.find { it.id == selectedVisitorId }?.fullName
+                                        uiState.visitor?.fullName
                                             ?: "--"
                                     } else {
                                         "--"
@@ -200,7 +197,7 @@ fun CreateAppointmentScreenContent(
                                     style = MaterialTheme.typography.bodyLarge
                                 )
                                 selectedVisitorId?.let { id ->
-                                    uiState.visitors.find { it.id == id }?.phoneNumber?.let { phone ->
+                                    uiState.visitor?.phoneNumber?.let { phone ->
                                         Text(
                                             text = phone,
                                             style = MaterialTheme.typography.bodySmall,
