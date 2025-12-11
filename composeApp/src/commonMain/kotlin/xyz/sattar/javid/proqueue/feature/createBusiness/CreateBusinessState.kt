@@ -16,10 +16,3 @@ data class CreateBusinessState (
         object BusinessCreated: PartialState()
     }
 }
-
-data class CreateBusinessErrors(
-    val title: String? = null,
-    val phone: String? = null,
-    val address: String? = null,
-    val logoPath: String? = null,
-)

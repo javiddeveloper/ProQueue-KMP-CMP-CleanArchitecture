@@ -10,6 +10,7 @@ data class CreateAppointmentState(
     val visitor: Visitor? = null,
     val selectedVisitorId: Long? = null,
     val appointmentDate: Long = 0L,
+    val appointmentCreated: Boolean = false,
     val serviceDuration: Int? = null,
     val editingAppointmentId: Long? = null
 ) {

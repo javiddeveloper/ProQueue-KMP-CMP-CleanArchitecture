@@ -76,7 +76,10 @@ class CreateAppointmentViewModel(
                 )
 
             CreateAppointmentState.PartialState.AppointmentCreated ->
-                currentState.copy(isLoading = false)
+                currentState.copy(
+                    appointmentCreated = true,
+                    isLoading = false
+                )
         }
     }
 
@@ -140,7 +143,6 @@ class CreateAppointmentViewModel(
             }
             if (success) {
                 emit(CreateAppointmentState.PartialState.AppointmentCreated)
-                sendEvent(CreateAppointmentEvent.AppointmentCreated)
             } else {
                 emit(CreateAppointmentState.PartialState.ShowMessage("خطا در ذخیره نوبت"))
             }

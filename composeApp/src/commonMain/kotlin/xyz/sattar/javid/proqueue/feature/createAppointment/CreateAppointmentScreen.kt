@@ -58,6 +58,7 @@ import xyz.sattar.javid.proqueue.core.utils.DateTimeUtils
 import xyz.sattar.javid.proqueue.ui.theme.AppTheme
 import kotlin.time.ExperimentalTime
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.ui.graphics.Color
 
 @Composable
 fun CreateAppointmentScreen(
@@ -74,6 +75,11 @@ fun CreateAppointmentScreen(
             viewModel.sendIntent(CreateAppointmentIntent.LoadAppointment(appointmentId))
         } else if (visitorId != null) {
             viewModel.sendIntent(CreateAppointmentIntent.SelectVisitor(visitorId))
+        }
+    }
+    LaunchedEffect(uiState.appointmentCreated) {
+        if (uiState.appointmentCreated) {
+            onAppointmentCreated()
         }
     }
 
@@ -145,8 +151,9 @@ fun CreateAppointmentScreenContent(
                     containerColor = MaterialTheme.colorScheme.background
                 )
             )
-        }
-    ) { paddingValues ->
+        },
+
+        ) { paddingValues ->
         Box(
             modifier = modifier
                 .fillMaxSize()
@@ -275,6 +282,14 @@ fun CreateAppointmentScreenContent(
 
                     Spacer(modifier = Modifier.height(16.dp))
 
+                    if (uiState.message != null) {
+                        Text(
+                            uiState.message,
+                            modifier = Modifier.fillMaxWidth().padding(16.dp),
+                            color = Color.Red
+                        )
+                    }
+
                     // Create/Update Button
                     AppButton(
                         text = if (uiState.editingAppointmentId != null) "ویرایش نوبت" else "ایجاد نوبت",
@@ -285,7 +300,10 @@ fun CreateAppointmentScreenContent(
                                 onIntent(
                                     CreateAppointmentIntent.CreateAppointment(
                                         visitorId = visitorId,
-                                        appointmentDate = DateTimeUtils.combineDateAndTime(selectedDate, selectedTime),
+                                        appointmentDate = DateTimeUtils.combineDateAndTime(
+                                            selectedDate,
+                                            selectedTime
+                                        ),
                                         serviceDuration = duration
                                     )
                                 )
