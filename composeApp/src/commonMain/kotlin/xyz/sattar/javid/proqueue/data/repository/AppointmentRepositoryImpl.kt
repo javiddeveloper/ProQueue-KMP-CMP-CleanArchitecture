@@ -32,7 +32,7 @@ class AppointmentRepositoryImpl(
             ) ?: 0
 
             appointmentDao.upsertAppointment(
-                appointment.toEntity().copy(queuePosition = lastPosition + 1)
+                appointment.toEntity()
             )
             true
         } catch (e: Exception) {
