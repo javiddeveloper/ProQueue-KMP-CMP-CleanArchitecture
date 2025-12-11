@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Card
@@ -24,32 +25,25 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.viewmodel.koinViewModel
 import proqueue.composeapp.generated.resources.Res
-import proqueue.composeapp.generated.resources.add_customer
 import proqueue.composeapp.generated.resources.home_menu_item
-import proqueue.composeapp.generated.resources.quick_access
-import proqueue.composeapp.generated.resources.welcome_to_proqueue
 import proqueue.composeapp.generated.resources.queue_title
 import proqueue.composeapp.generated.resources.to_label
+import proqueue.composeapp.generated.resources.welcome_to_proqueue
 import xyz.sattar.javid.proqueue.core.ui.collectWithLifecycleAware
-import xyz.sattar.javid.proqueue.core.ui.components.AppButton
 import xyz.sattar.javid.proqueue.core.utils.DateTimeUtils
 import xyz.sattar.javid.proqueue.ui.theme.AppTheme
 
 @Composable
 fun HomeScreen(
     viewModel: HomeViewModel = koinViewModel<HomeViewModel>(),
-    onNavigateToCreateBusiness: () -> Unit = {},
-    onNavigateToCreateVisitor: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
@@ -58,9 +52,7 @@ fun HomeScreen(
     }
 
     HandleEvents(
-        events = viewModel.events,
-        onNavigateToCreateBusiness = onNavigateToCreateBusiness,
-        onNavigateToCreateVisitor = onNavigateToCreateVisitor
+        events = viewModel.events
     )
 
     HomeScreenContent(
@@ -95,7 +87,8 @@ fun HomeScreenContent(
             modifier = modifier
                 .fillMaxSize()
                 .background(MaterialTheme.colorScheme.background)
-                .padding(horizontal = 16.dp),
+                .padding(horizontal = 16.dp)
+                .padding(paddingValues),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             item {
@@ -108,17 +101,17 @@ fun HomeScreenContent(
                 ) {
                     Column(
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(24.dp),
+                            .fillMaxWidth().wrapContentHeight(),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        uiState.business?.title?.ifEmpty { stringResource(Res.string.welcome_to_proqueue) }?.let {
-                            Text(
-                                text = it,
-                                style = MaterialTheme.typography.headlineSmall,
-                                color = MaterialTheme.colorScheme.onPrimaryContainer
-                            )
-                        }
+                        uiState.business?.title?.ifEmpty { stringResource(Res.string.welcome_to_proqueue) }
+                            ?.let {
+                                Text(
+                                    text = it,
+                                    style = MaterialTheme.typography.headlineSmall,
+                                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                                )
+                            }
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
                             text = uiState.business?.address ?: "--",
@@ -135,31 +128,6 @@ fun HomeScreenContent(
             }
 
             item {
-                // Quick Actions
-                Text(
-                    text = stringResource(Res.string.quick_access),
-                    style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
-
-            item {
-                // Create Visitor Button
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.tertiaryContainer
-                    )
-                ) {
-                    AppButton(
-                        text = stringResource(Res.string.add_customer),
-                        onClick = { onIntent(HomeIntent.NavigateToCreateVisitor) },
-                        modifier = Modifier.padding(16.dp)
-                    )
-                }
-            }
-            
-            item {
                 Text(
                     text = stringResource(Res.string.queue_title),
                     style = MaterialTheme.typography.titleMedium,
@@ -173,12 +141,19 @@ fun HomeScreenContent(
                     onRemove = { onIntent(HomeIntent.RemoveAppointment(queueItem.appointment.id)) },
                     onComplete = { onIntent(HomeIntent.MarkAppointmentCompleted(queueItem.appointment.id)) },
                     onNoShow = { onIntent(HomeIntent.MarkAppointmentNoShow(queueItem.appointment.id)) },
-                    onSendMessage = { type -> onIntent(HomeIntent.SendMessage(queueItem.appointment.id, type)) }
+                    onSendMessage = { type ->
+                        onIntent(
+                            HomeIntent.SendMessage(
+                                queueItem.appointment.id,
+                                type
+                            )
+                        )
+                    }
                 )
             }
-            
+
             item {
-                Spacer(modifier = Modifier.height(80.dp)) // Bottom padding for FAB/Nav
+                Spacer(modifier = Modifier.height(30.dp))
             }
         }
     }
@@ -208,7 +183,7 @@ fun DashboardStatsSection(stats: DashboardStats) {
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-         StatCard(
+        StatCard(
             modifier = Modifier.weight(1f),
             title = "Avg/Day", // TODO: Res
             value = stats.avgVisitorsPerDay.toString(),
@@ -273,7 +248,11 @@ fun QueueItemCard(
                         color = MaterialTheme.colorScheme.primary
                     )
                     Text(
-                        text = "${stringResource(Res.string.to_label)} ${DateTimeUtils.formatTime(item.estimatedEndTime)}",
+                        text = "${stringResource(Res.string.to_label)} ${
+                            DateTimeUtils.formatTime(
+                                item.estimatedEndTime
+                            )
+                        }",
                         style = MaterialTheme.typography.bodySmall
                     )
                 }
@@ -281,7 +260,8 @@ fun QueueItemCard(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            val overdue = DateTimeUtils.systemCurrentMilliseconds() > item.estimatedEndTime && item.appointment.status == "WAITING"
+            val overdue =
+                DateTimeUtils.systemCurrentMilliseconds() > item.estimatedEndTime && item.appointment.status == "WAITING"
             if (overdue) {
                 Text(
                     text = "زمان رد شده",
@@ -297,17 +277,25 @@ fun QueueItemCard(
             ) {
                 // Message Actions
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                     // TODO: Add Icons for SMS, WhatsApp, Telegram
-                     // For now using Text placeholders
-                     Text("SMS", modifier = Modifier.clickable { onSendMessage("SMS") })
-                     Text("WA", modifier = Modifier.clickable { onSendMessage("WHATSAPP") })
-                     Text("TG", modifier = Modifier.clickable { onSendMessage("TELEGRAM") })
+                    // TODO: Add Icons for SMS, WhatsApp, Telegram
+                    // For now using Text placeholders
+                    Text("SMS", modifier = Modifier.clickable { onSendMessage("SMS") })
+                    Text("WA", modifier = Modifier.clickable { onSendMessage("WHATSAPP") })
+                    Text("TG", modifier = Modifier.clickable { onSendMessage("TELEGRAM") })
                 }
-                
+
                 // Queue Actions
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("Done", modifier = Modifier.clickable { onComplete() }, color = MaterialTheme.colorScheme.primary)
-                    Text("NoShow", modifier = Modifier.clickable { onNoShow() }, color = MaterialTheme.colorScheme.error)
+                    Text(
+                        "Done",
+                        modifier = Modifier.clickable { onComplete() },
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                    Text(
+                        "NoShow",
+                        modifier = Modifier.clickable { onNoShow() },
+                        color = MaterialTheme.colorScheme.error
+                    )
                     Text("Del", modifier = Modifier.clickable { onRemove() })
                 }
             }
@@ -317,25 +305,9 @@ fun QueueItemCard(
 
 @Composable
 fun HandleEvents(
-    events: Flow<HomeEvent>,
-    onNavigateToCreateBusiness: () -> Unit,
-    onNavigateToCreateVisitor: () -> Unit
+    events: Flow<HomeEvent>
 ) {
-    val scope = rememberCoroutineScope()
-    events.collectWithLifecycleAware {
-        when (it) {
-            HomeEvent.NavigateToCreateBusiness -> {
-                scope.launch {
-                    onNavigateToCreateBusiness()
-                }
-            }
-            HomeEvent.NavigateToCreateVisitor -> {
-                scope.launch {
-                    onNavigateToCreateVisitor()
-                }
-            }
-        }
-    }
+    events.collectWithLifecycleAware {}
 }
 
 @Preview(showBackground = true)

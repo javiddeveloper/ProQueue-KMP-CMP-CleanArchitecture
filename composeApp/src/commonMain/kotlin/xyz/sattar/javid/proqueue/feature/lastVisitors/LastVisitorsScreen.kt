@@ -193,21 +193,24 @@ fun TotalCountHeader(count: Int) {
     ) {
         Row(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
+                .fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
+                modifier = Modifier
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
                 text = stringResource(Res.string.total_appointments_today),
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onPrimaryContainer
             )
             Text(
+                modifier = Modifier
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
                 text = count.toString(),
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.primary
+                color = MaterialTheme.colorScheme.onPrimaryContainer
             )
         }
     }

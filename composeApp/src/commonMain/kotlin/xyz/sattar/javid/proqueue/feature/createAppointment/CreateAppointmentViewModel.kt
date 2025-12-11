@@ -76,7 +76,8 @@ class CreateAppointmentViewModel(
                 currentState.copy(
                     selectedVisitorId = partialState.visitorId,
                     appointmentDate = partialState.appointmentDate,
-                    serviceDuration = partialState.serviceDuration,
+                    serviceDuration = partialState.serviceDuration
+                        ?: BusinessStateHolder.selectedBusiness.value?.defaultServiceDuration,
                     editingAppointmentId = partialState.appointmentId,
                     isLoading = false
                 )
@@ -149,6 +150,7 @@ class CreateAppointmentViewModel(
             }
             if (success) {
                 emit(CreateAppointmentState.PartialState.AppointmentCreated)
+                sendEvent(CreateAppointmentEvent.AppointmentCreated)
             } else {
                 emit(CreateAppointmentState.PartialState.ShowMessage("خطا در ذخیره نوبت"))
             }

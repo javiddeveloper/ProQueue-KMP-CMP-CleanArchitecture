@@ -24,8 +24,6 @@ class HomeViewModel(
     override fun handleIntent(intent: HomeIntent): Flow<HomeState.PartialState> {
         return when (intent) {
             HomeIntent.LoadData -> loadData()
-            HomeIntent.NavigateToCreateBusiness -> sendEvent(HomeEvent.NavigateToCreateBusiness)
-            HomeIntent.NavigateToCreateVisitor -> sendEvent(HomeEvent.NavigateToCreateVisitor)
             is HomeIntent.RemoveAppointment -> removeAppointment(intent.appointmentId)
             is HomeIntent.MarkAppointmentCompleted -> markCompleted(intent.appointmentId)
             is HomeIntent.MarkAppointmentNoShow -> markNoShow(intent.appointmentId)
