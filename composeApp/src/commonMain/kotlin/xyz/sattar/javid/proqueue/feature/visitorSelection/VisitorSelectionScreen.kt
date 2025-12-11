@@ -57,6 +57,12 @@ import org.koin.compose.viewmodel.koinViewModel
 import xyz.sattar.javid.proqueue.core.ui.collectWithLifecycleAware
 import xyz.sattar.javid.proqueue.domain.model.Visitor
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.height
+import androidx.compose.material.icons.filled.Factory
+import org.jetbrains.compose.resources.stringResource
+import proqueue.composeapp.generated.resources.Res
+import proqueue.composeapp.generated.resources.create_first_business
+import proqueue.composeapp.generated.resources.no_business_found
 
 @Composable
 fun VisitorSelectionScreen(
@@ -164,60 +170,105 @@ fun VisitorSelectionScreenContent(
                 .background(MaterialTheme.colorScheme.background)
                 .padding(paddingValues)
         ) {
-            // Search Bar
-            OutlinedTextField(
-                value = uiState.searchQuery,
-                onValueChange = { onIntent(VisitorSelectionIntent.SearchVisitors(it)) },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                placeholder = { Text("جستجو نام یا شماره تماس...") },
-                leadingIcon = {
-                    Icon(
-                        imageVector = Icons.Default.Search,
-                        contentDescription = null
-                    )
-                },
-
-                maxLines = 1,
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = MaterialTheme.colorScheme.primary,
-                    unfocusedBorderColor = MaterialTheme.colorScheme.outline,
-                    errorBorderColor = MaterialTheme.colorScheme.error,
-                    focusedContainerColor = MaterialTheme.colorScheme.surface,
-                    unfocusedContainerColor = MaterialTheme.colorScheme.surface
-                ),
-                shape = RoundedCornerShape(12.dp),
-                singleLine = true
-            )
-
-            if (uiState.isLoading) {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator()
+            when {
+                uiState.filteredVisitors.isEmpty() -> {
+                    Box(
+                        modifier = modifier
+                            .fillMaxSize()
+                            .padding(paddingValues)
+                    ) {
+                        EmptyVisitorState(modifier = Modifier.align(Alignment.Center))
+                    }
                 }
-            } else {
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                    contentPadding = androidx.compose.foundation.layout.PaddingValues(
-                        horizontal = 16.dp,
-                        vertical = 8.dp
-                    )
-                ) {
-                    items(uiState.filteredVisitors) { visitor ->
-                        VisitorItem(
-                            visitor = visitor,
-                            onClick = { onIntent(VisitorSelectionIntent.SelectVisitor(visitor.id)) },
-                            onEdit = { onIntent(VisitorSelectionIntent.EditVisitor(visitor.id)) },
-                            onDelete = {
-                                visitorToDelete = visitor.id
-                                showDeleteDialog = true
-                            }
+
+                uiState.isLoading -> {
+                    Box(
+                        modifier = modifier
+                            .fillMaxSize()
+                            .padding(paddingValues)
+                    ) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.align(Alignment.Center)
                         )
+                    }
+                }
+
+                else -> {
+                    OutlinedTextField(
+                        value = uiState.searchQuery,
+                        onValueChange = { onIntent(VisitorSelectionIntent.SearchVisitors(it)) },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        placeholder = { Text("جستجو نام یا شماره تماس...") },
+                        leadingIcon = {
+                            Icon(
+                                imageVector = Icons.Default.Search,
+                                contentDescription = null
+                            )
+                        },
+
+                        maxLines = 1,
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = MaterialTheme.colorScheme.primary,
+                            unfocusedBorderColor = MaterialTheme.colorScheme.outline,
+                            errorBorderColor = MaterialTheme.colorScheme.error,
+                            focusedContainerColor = MaterialTheme.colorScheme.surface,
+                            unfocusedContainerColor = MaterialTheme.colorScheme.surface
+                        ),
+                        shape = RoundedCornerShape(12.dp),
+                        singleLine = true
+                    )
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                        contentPadding = androidx.compose.foundation.layout.PaddingValues(
+                            horizontal = 16.dp,
+                            vertical = 8.dp
+                        )
+                    ) {
+                        items(uiState.filteredVisitors) { visitor ->
+                            VisitorItem(
+                                visitor = visitor,
+                                onClick = { onIntent(VisitorSelectionIntent.SelectVisitor(visitor.id)) },
+                                onEdit = { onIntent(VisitorSelectionIntent.EditVisitor(visitor.id)) },
+                                onDelete = {
+                                    visitorToDelete = visitor.id
+                                    showDeleteDialog = true
+                                }
+                            )
+                        }
                     }
                 }
             }
         }
+    }
+}
+
+@Composable
+fun EmptyVisitorState(modifier: Modifier = Modifier) {
+    Column(
+        modifier = modifier.padding(32.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Icon(
+            imageVector = Icons.Default.Person,
+            contentDescription = null,
+            modifier = Modifier.size(50.dp),
+            tint = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        Text(
+            text = "مرجعی ثبت نشده است",
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            text = "اولین مرجع را ایجاد کنید",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
     }
 }
 
@@ -265,7 +316,7 @@ fun VisitorItem(
                     )
                 }
             }
-            
+
             Row {
                 IconButton(onClick = onEdit) {
                     Icon(
