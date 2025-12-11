@@ -66,6 +66,9 @@ import xyz.sattar.javid.proqueue.ui.theme.AppTheme
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.material.icons.filled.ChevronLeft
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material3.PrimaryTabRow
+import androidx.compose.material3.Tab
+import androidx.compose.material3.TabRow
 import org.jetbrains.compose.resources.stringResource
 import proqueue.composeapp.generated.resources.Res
 import proqueue.composeapp.generated.resources.create_appointment
@@ -80,6 +83,10 @@ import proqueue.composeapp.generated.resources.status_cancelled
 import proqueue.composeapp.generated.resources.status_completed
 import proqueue.composeapp.generated.resources.status_no_show
 import proqueue.composeapp.generated.resources.status_waiting
+import proqueue.composeapp.generated.resources.queue_tab
+import proqueue.composeapp.generated.resources.visitors_tab
+import xyz.sattar.javid.proqueue.feature.home.QueueItem
+import xyz.sattar.javid.proqueue.core.ui.components.QueueItemCard
 
 @Composable
 fun LastVisitorsScreen(
@@ -160,19 +167,70 @@ fun LastVisitorsScreenContent(
 
                 else -> {
                     Column(modifier = Modifier.fillMaxSize()) {
-                        // Header with count
-                        TotalCountHeader(count = uiState.totalCount)
-
-                        // Appointments list
-                        AppointmentsList(
-                            appointments = uiState.appointments,
-                            onEditClick = { appointmentId ->
-                                onIntent(LastVisitorsIntent.OnEditAppointment(appointmentId))
-                            },
-                            onDeleteClick = { appointmentId ->
-                                onIntent(LastVisitorsIntent.OnDeleteAppointment(appointmentId))
+                        var selectedTab by remember { mutableStateOf(0) }
+                        PrimaryTabRow(
+                            selectedTabIndex = selectedTab,
+                            modifier = modifier.background(MaterialTheme.colorScheme.background)
+                        ) {
+                            Tab(
+                                selected = selectedTab == 0,
+                                onClick = { selectedTab = 0 },
+                                text = { Text(stringResource(Res.string.queue_tab)) }
+                            )
+                            Tab(
+                                selected = selectedTab == 1,
+                                onClick = { selectedTab = 1 },
+                                text = { Text(stringResource(Res.string.visitors_tab)) }
+                            )
+                        }
+                        Spacer(modifier = Modifier.height(12.dp))
+                        if (selectedTab == 0) {
+                            val waiting = uiState.appointments.filter { it.appointment.status == "WAITING" }
+                            if (waiting.isEmpty()) {
+                                EmptyState(modifier = Modifier.align(Alignment.CenterHorizontally))
+                            } else {
+                                val queueItems = waiting.map { item ->
+                                    val duration = (item.appointment.serviceDuration
+                                        ?: item.business.defaultServiceDuration) * 60 * 1000L
+                                    QueueItem(
+                                        appointment = item.appointment,
+                                        visitorName = item.visitor.fullName,
+                                        visitorPhone = item.visitor.phoneNumber,
+                                        estimatedStartTime = item.appointment.appointmentDate,
+                                        estimatedEndTime = item.appointment.appointmentDate + duration
+                                    )
+                                }
+                                LazyColumn(
+                                    modifier = Modifier.fillMaxSize(),
+                                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                                ) {
+                                    items(queueItems) { queueItem ->
+                                        QueueItemCard(
+                                            item = queueItem,
+                                            onRemove = {
+                                                onIntent(LastVisitorsIntent.OnDeleteAppointment(queueItem.appointment.id))
+                                            },
+                                            onComplete = { /* TODO: hook complete in ViewModel */ },
+                                            onNoShow = { /* TODO: hook no-show in ViewModel */ },
+                                            onSendMessage = { /* TODO: hook messaging */ _ -> }
+                                        )
+                                    }
+                                    item { Spacer(modifier = Modifier.height(80.dp)) }
+                                }
                             }
-                        )
+                        } else {
+                            TotalCountHeader(count = uiState.totalCount)
+                            Spacer(modifier = Modifier.height(12.dp))
+                            AppointmentsList(
+                                appointments = uiState.appointments,
+                                onEditClick = { appointmentId ->
+                                    onIntent(LastVisitorsIntent.OnEditAppointment(appointmentId))
+                                },
+                                onDeleteClick = { appointmentId ->
+                                    onIntent(LastVisitorsIntent.OnDeleteAppointment(appointmentId))
+                                }
+                            )
+                        }
                     }
                 }
             }
@@ -336,9 +394,9 @@ fun AppointmentCard(
                     appointment.serviceDuration?.let { duration ->
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                        text = "• $duration دقیقه",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                            text = "• $duration دقیقه",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 }
