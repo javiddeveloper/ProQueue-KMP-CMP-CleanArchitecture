@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -33,9 +32,12 @@ import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.viewmodel.koinViewModel
 import proqueue.composeapp.generated.resources.Res
+import proqueue.composeapp.generated.resources.address
+import proqueue.composeapp.generated.resources.completed_visitors
 import proqueue.composeapp.generated.resources.home_menu_item
-import proqueue.composeapp.generated.resources.queue_title
+import proqueue.composeapp.generated.resources.phone
 import proqueue.composeapp.generated.resources.to_label
+import proqueue.composeapp.generated.resources.today_total_appointments
 import proqueue.composeapp.generated.resources.welcome_to_proqueue
 import xyz.sattar.javid.proqueue.core.ui.collectWithLifecycleAware
 import xyz.sattar.javid.proqueue.core.utils.DateTimeUtils
@@ -91,66 +93,14 @@ fun HomeScreenContent(
                 .padding(paddingValues),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            item {
-                // Welcome Card
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.primaryContainer
-                    )
-                ) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth().wrapContentHeight(),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        uiState.business?.title?.ifEmpty { stringResource(Res.string.welcome_to_proqueue) }
-                            ?.let {
-                                Text(
-                                    text = it,
-                                    style = MaterialTheme.typography.headlineSmall,
-                                    color = MaterialTheme.colorScheme.onPrimaryContainer
-                                )
-                            }
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            text = uiState.business?.address ?: "--",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer
-                        )
-                    }
-                }
-            }
+            item { BusinessInfoHeader(uiState) }
 
             item {
                 // Dashboard Stats
                 DashboardStatsSection(stats = uiState.stats)
             }
 
-            item {
-                Text(
-                    text = stringResource(Res.string.queue_title),
-                    style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
-
-            items(uiState.queue) { queueItem ->
-                QueueItemCard(
-                    item = queueItem,
-                    onRemove = { onIntent(HomeIntent.RemoveAppointment(queueItem.appointment.id)) },
-                    onComplete = { onIntent(HomeIntent.MarkAppointmentCompleted(queueItem.appointment.id)) },
-                    onNoShow = { onIntent(HomeIntent.MarkAppointmentNoShow(queueItem.appointment.id)) },
-                    onSendMessage = { type ->
-                        onIntent(
-                            HomeIntent.SendMessage(
-                                queueItem.appointment.id,
-                                type
-                            )
-                        )
-                    }
-                )
-            }
+            // Queue moved to LastVisitors pager
 
             item {
                 Spacer(modifier = Modifier.height(30.dp))
@@ -167,33 +117,15 @@ fun DashboardStatsSection(stats: DashboardStats) {
     ) {
         StatCard(
             modifier = Modifier.weight(1f),
-            title = "Total", // TODO: Res
+            title = stringResource(Res.string.today_total_appointments),
             value = stats.totalVisitors.toString(),
             color = MaterialTheme.colorScheme.secondaryContainer
         )
         StatCard(
             modifier = Modifier.weight(1f),
-            title = "Cancelled", // TODO: Res
-            value = stats.cancelledVisitors.toString(),
-            color = MaterialTheme.colorScheme.errorContainer
-        )
-    }
-    Spacer(modifier = Modifier.height(8.dp))
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        StatCard(
-            modifier = Modifier.weight(1f),
-            title = "Avg/Day", // TODO: Res
-            value = stats.avgVisitorsPerDay.toString(),
-            color = MaterialTheme.colorScheme.surfaceVariant
-        )
-        StatCard(
-            modifier = Modifier.weight(1f),
-            title = "Peak", // TODO: Res
-            value = stats.peakHours,
-            color = MaterialTheme.colorScheme.surfaceVariant
+            title = stringResource(Res.string.completed_visitors),
+            value = (stats.totalVisitors - stats.cancelledVisitors).toString(),
+            color = MaterialTheme.colorScheme.primaryContainer
         )
     }
 }
@@ -215,6 +147,59 @@ fun StatCard(
         ) {
             Text(text = value, style = MaterialTheme.typography.titleLarge)
             Text(text = title, style = MaterialTheme.typography.bodySmall)
+        }
+    }
+}
+
+@Composable
+fun BusinessInfoHeader(uiState: HomeState) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainer
+        )
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(12.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(
+                modifier = Modifier.weight(1f)
+            ) {
+                Text(
+                    text = uiState.business?.title?.ifEmpty { stringResource(Res.string.welcome_to_proqueue) }
+                        ?: stringResource(Res.string.welcome_to_proqueue),
+                    style = MaterialTheme.typography.titleMedium
+                )
+                Spacer(modifier = Modifier.height(6.dp))
+                Text(
+                    text = "${stringResource(Res.string.address)}: ${uiState.business?.address ?: "--"}",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = "${stringResource(Res.string.phone)}: ${uiState.business?.phone ?: "--"}",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            Card(
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+            ) {
+                Row(
+                    modifier = Modifier
+                        .padding(12.dp)
+                        .wrapContentHeight(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    // Placeholder square avatar (replace with logo if available)
+                    Text(text = "■", style = MaterialTheme.typography.titleLarge)
+                }
+            }
         }
     }
 }
