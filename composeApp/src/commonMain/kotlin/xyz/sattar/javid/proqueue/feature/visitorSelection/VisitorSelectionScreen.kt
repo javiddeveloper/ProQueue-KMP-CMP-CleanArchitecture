@@ -56,11 +56,23 @@ import kotlinx.coroutines.launch
 import org.koin.compose.viewmodel.koinViewModel
 import xyz.sattar.javid.proqueue.core.ui.collectWithLifecycleAware
 import xyz.sattar.javid.proqueue.domain.model.Visitor
+import org.jetbrains.compose.resources.stringResource
+import proqueue.composeapp.generated.resources.Res
+import proqueue.composeapp.generated.resources.back
+import proqueue.composeapp.generated.resources.create_new_visitor
+import proqueue.composeapp.generated.resources.search_placeholder
+import proqueue.composeapp.generated.resources.visitor_selection_title
+import proqueue.composeapp.generated.resources.visitor_delete_title
+import proqueue.composeapp.generated.resources.visitor_delete_message
+import proqueue.composeapp.generated.resources.delete
+import proqueue.composeapp.generated.resources.cancel
+import proqueue.composeapp.generated.resources.no_visitors_found
+import proqueue.composeapp.generated.resources.create_first_visitor
+import proqueue.composeapp.generated.resources.edit
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.height
 import androidx.compose.material.icons.filled.Factory
-import org.jetbrains.compose.resources.stringResource
-import proqueue.composeapp.generated.resources.Res
+// removed duplicate imports
 import proqueue.composeapp.generated.resources.create_first_business
 import proqueue.composeapp.generated.resources.no_business_found
 
@@ -103,8 +115,8 @@ fun VisitorSelectionScreenContent(
     if (showDeleteDialog && visitorToDelete != null) {
         AlertDialog(
             onDismissRequest = { showDeleteDialog = false },
-            title = { Text("حذف مرجع") },
-            text = { Text("آیا از حذف این مرجع اطمینان دارید؟ \nتمام نوبت‌های این مرجع در همه کسب‌وکارها حذف خواهند شد.") },
+            title = { Text(stringResource(Res.string.visitor_delete_title)) },
+            text = { Text(stringResource(Res.string.visitor_delete_message)) },
             confirmButton = {
                 TextButton(
                     onClick = {
@@ -116,19 +128,18 @@ fun VisitorSelectionScreenContent(
                     },
                     colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
                 ) {
-                    Text("حذف")
+                    Text(stringResource(Res.string.delete))
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showDeleteDialog = false }) {
-                    Text("لغو")
+                    Text(stringResource(Res.string.cancel))
                 }
             }
         )
     }
 
     Scaffold(
-        contentWindowInsets = WindowInsets(0),
         floatingActionButton = {
             FloatingActionButton(
                 onClick = {
@@ -138,7 +149,7 @@ fun VisitorSelectionScreenContent(
             ) {
                 Icon(
                     imageVector = Icons.Default.PersonAdd,
-                    contentDescription = "ایجاد نوبت جدید"
+                    contentDescription = stringResource(Res.string.create_new_visitor)
                 )
             }
         },
@@ -146,7 +157,7 @@ fun VisitorSelectionScreenContent(
             TopAppBar(
                 title = {
                     Text(
-                        "انتخاب مراجع",
+                        stringResource(Res.string.visitor_selection_title),
                         style = MaterialTheme.typography.titleLarge
                     )
                 },
@@ -154,7 +165,7 @@ fun VisitorSelectionScreenContent(
                     IconButton(onClick = { onIntent(VisitorSelectionIntent.BackPress) }) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "بازگشت"
+                            contentDescription = stringResource(Res.string.back)
                         )
                     }
                 },
@@ -200,7 +211,7 @@ fun VisitorSelectionScreenContent(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(16.dp),
-                        placeholder = { Text("جستجو نام یا شماره تماس...") },
+                placeholder = { Text(stringResource(Res.string.search_placeholder)) },
                         leadingIcon = {
                             Icon(
                                 imageVector = Icons.Default.Search,
@@ -259,13 +270,13 @@ fun EmptyVisitorState(modifier: Modifier = Modifier) {
         )
         Spacer(modifier = Modifier.height(16.dp))
         Text(
-            text = "مرجعی ثبت نشده است",
+            text = stringResource(Res.string.no_visitors_found),
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(
-            text = "اولین مرجع را ایجاد کنید",
+            text = stringResource(Res.string.create_first_visitor),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
@@ -321,14 +332,14 @@ fun VisitorItem(
                 IconButton(onClick = onEdit) {
                     Icon(
                         imageVector = Icons.Default.Edit,
-                        contentDescription = "Edit",
+                        contentDescription = stringResource(Res.string.edit),
                         tint = MaterialTheme.colorScheme.primary
                     )
                 }
                 IconButton(onClick = onDelete) {
                     Icon(
                         imageVector = Icons.Default.Delete,
-                        contentDescription = "Delete",
+                        contentDescription = stringResource(Res.string.delete),
                         tint = MaterialTheme.colorScheme.error
                     )
                 }

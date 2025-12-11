@@ -66,6 +66,20 @@ import xyz.sattar.javid.proqueue.ui.theme.AppTheme
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.material.icons.filled.ChevronLeft
 import androidx.compose.material.icons.filled.Person
+import org.jetbrains.compose.resources.stringResource
+import proqueue.composeapp.generated.resources.Res
+import proqueue.composeapp.generated.resources.create_appointment
+import proqueue.composeapp.generated.resources.empty_appointments_subtitle
+import proqueue.composeapp.generated.resources.empty_appointments_title
+import proqueue.composeapp.generated.resources.last_visitors_title
+import proqueue.composeapp.generated.resources.total_appointments_today
+import proqueue.composeapp.generated.resources.overdue_time
+import proqueue.composeapp.generated.resources.change_appointment
+import proqueue.composeapp.generated.resources.delete_appointment
+import proqueue.composeapp.generated.resources.status_cancelled
+import proqueue.composeapp.generated.resources.status_completed
+import proqueue.composeapp.generated.resources.status_no_show
+import proqueue.composeapp.generated.resources.status_waiting
 
 @Composable
 fun LastVisitorsScreen(
@@ -104,7 +118,7 @@ fun LastVisitorsScreenContent(
             TopAppBar(
                 title = {
                     Text(
-                        "نوبت های اخیر",
+                        stringResource(Res.string.last_visitors_title),
                         style = MaterialTheme.typography.titleLarge
                     )
                 },
@@ -122,7 +136,7 @@ fun LastVisitorsScreenContent(
             ) {
                 Icon(
                     imageVector = Icons.Default.Add,
-                    contentDescription = "ایجاد نوبت جدید"
+                    contentDescription = stringResource(Res.string.create_appointment)
                 )
             }
         }
@@ -185,7 +199,7 @@ fun TotalCountHeader(count: Int) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "تعداد کل نوبت‌های امروز",
+                text = stringResource(Res.string.total_appointments_today),
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onPrimaryContainer
             )
@@ -287,7 +301,7 @@ fun AppointmentCard(
                 val isOverdueForWait =
                     DateTimeUtils.systemCurrentMilliseconds() > endTimeForWait && appointment.status == "WAITING"
                 val waitingOrOverdueText =
-                    if (isOverdueForWait) "زمان رد شده" else DateTimeUtils.calculateWaitingTime(
+                    if (isOverdueForWait) stringResource(Res.string.overdue_time) else DateTimeUtils.calculateWaitingTime(
                         appointment.appointmentDate
                     )
                 Text(
@@ -319,9 +333,9 @@ fun AppointmentCard(
                     appointment.serviceDuration?.let { duration ->
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            text = "• $duration دقیقه",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        text = "• $duration دقیقه",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 }
@@ -339,7 +353,7 @@ fun AppointmentCard(
                 IconButton(onClick = { showMenu = true }) {
                     Icon(
                         imageVector = Icons.Default.MoreVert,
-                        contentDescription = "گزینه‌ها",
+                        contentDescription = null,
                         tint = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
@@ -349,7 +363,7 @@ fun AppointmentCard(
                     onDismissRequest = { showMenu = false }
                 ) {
                     DropdownMenuItem(
-                        text = { Text("تغییر نوبت") },
+                        text = { Text(stringResource(Res.string.change_appointment)) },
                         onClick = {
                             showMenu = false
                             onEditClick()
@@ -365,7 +379,7 @@ fun AppointmentCard(
                     DropdownMenuItem(
                         text = {
                             Text(
-                                "حذف نوبت",
+                                stringResource(Res.string.delete_appointment),
                                 color = MaterialTheme.colorScheme.error
                             )
                         },
@@ -391,11 +405,11 @@ fun AppointmentCard(
 @Composable
 fun StatusBadge(status: String, overdue: Boolean) {
     val (text, color) = when {
-        status == "WAITING" && overdue -> "زمان رد شده" to MaterialTheme.colorScheme.error
-        status == "WAITING" -> "در انتظار" to MaterialTheme.colorScheme.primary
-        status == "COMPLETED" -> "تکمیل شده" to MaterialTheme.colorScheme.tertiary
-        status == "NO_SHOW" -> "عدم حضور" to MaterialTheme.colorScheme.error
-        status == "CANCELLED" -> "لغو شده" to MaterialTheme.colorScheme.error
+        status == "WAITING" && overdue -> stringResource(Res.string.overdue_time) to MaterialTheme.colorScheme.error
+        status == "WAITING" -> stringResource(Res.string.status_waiting) to MaterialTheme.colorScheme.primary
+        status == "COMPLETED" -> stringResource(Res.string.status_completed) to MaterialTheme.colorScheme.tertiary
+        status == "NO_SHOW" -> stringResource(Res.string.status_no_show) to MaterialTheme.colorScheme.error
+        status == "CANCELLED" -> stringResource(Res.string.status_cancelled) to MaterialTheme.colorScheme.error
         else -> status to MaterialTheme.colorScheme.onSurfaceVariant
     }
 
@@ -427,13 +441,13 @@ fun EmptyState(modifier: Modifier = Modifier) {
         )
         Spacer(modifier = Modifier.height(16.dp))
         Text(
-            text = "هنوز نوبتی ثبت نشده",
+            text = stringResource(Res.string.empty_appointments_title),
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(
-            text = "با زدن دکمه + می‌توانید نوبت جدید ایجاد کنید",
+            text = stringResource(Res.string.empty_appointments_subtitle),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )

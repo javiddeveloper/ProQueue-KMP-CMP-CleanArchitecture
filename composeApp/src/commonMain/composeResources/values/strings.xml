@@ -11,7 +11,7 @@
     <string name="accept">ثبت</string>
     <string name="create_business">ایجاد کسب‌وکار</string>
     <string name="visitor_name">نام و نام خانوادگی</string>
-    <string name="create_visitor">افزودن مشتری/سرویس گیرنده</string>
+    <string name="create_visitor">افزودن مراجع</string>
     <string name="register_visitor">ثبت</string>
 
     <!-- Home Screen -->
@@ -19,10 +19,24 @@
     <string name="smart_queue_management">سیستم مدیریت نوبت‌دهی هوشمند</string>
     <string name="quick_access">دسترسی سریع</string>
     <string name="add_customer">افزودن مشتری</string>
+    <string name="queue_title">صف</string>
     
     <!-- Last Visitors Screen -->
     <string name="no_visitors_yet">هنوز مشتری ثبت نشده است</string>
     <string name="visitors_will_show_here">مشتریان شما در اینجا نمایش داده می‌شوند</string>
+    <string name="last_visitors_title">نوبت های اخیر</string>
+    <string name="create_appointment">ایجاد نوبت جدید</string>
+    <string name="total_appointments_today">تعداد کل نوبت‌های امروز</string>
+    <string name="empty_appointments_title">هنوز نوبتی ثبت نشده</string>
+    <string name="empty_appointments_subtitle">با زدن دکمه + می‌توانید نوبت جدید ایجاد کنید</string>
+    <string name="overdue_time">زمان رد شده</string>
+    <string name="change_appointment">تغییر نوبت</string>
+    <string name="delete_appointment">حذف نوبت</string>
+    <string name="status_waiting">در انتظار</string>
+    <string name="status_completed">تکمیل شده</string>
+    <string name="status_no_show">عدم حضور</string>
+    <string name="status_cancelled">لغو شده</string>
+    <string name="to_label">تا</string>
     
     <!-- Settings Screen -->
     <string name="app_version">نسخه %s</string>
@@ -44,4 +58,29 @@
     <string name="delete_business_confirmation">آیا از حذف این کسب‌وکار و تمام نوبت‌های آن اطمینان دارید؟</string>
     <string name="cancel">انصراف</string>
     <string name="delete">حذف</string>
+
+    <!-- Visitor Selection -->
+    <string name="visitor_selection_title">انتخاب مراجع</string>
+    <string name="search_placeholder">جستجو نام یا شماره تماس...</string>
+    <string name="back">بازگشت</string>
+    <string name="create_new_visitor">ایجاد مراجع جدید</string>
+    <string name="visitor_delete_title">حذف مراجع</string>
+    <string name="visitor_delete_message">آیا از حذف این مرجع اطمینان دارید؟ \nتمام نوبت‌های این مرجع در همه کسب‌وکارها حذف خواهند شد.</string>
+    <string name="no_visitors_found">مرجعی ثبت نشده است</string>
+    <string name="create_first_visitor">اولین مرجع را ایجاد کنید</string>
+
+    <!-- Create Visitor / Appointment -->
+    <string name="edit_visitor">ویرایش مراجع</string>
+    <string name="edit">ویرایش</string>
+    <string name="create_appointment_title">ایجاد نوبت جدید</string>
+    <string name="select_visitor">انتخاب مراجع</string>
+    <string name="appointment_time">زمان نوبت</string>
+    <string name="service_duration_minutes">مدت زمان سرویس (دقیقه)</string>
+    <string name="example_30">مثال: 30</string>
+    <string name="edit_appointment">ویرایش نوبت</string>
+    <string name="appointment_create_action">ایجاد نوبت</string>
+    <string name="choose_time">انتخاب زمان</string>
+    <string name="hour_label">ساعت:</string>
+    <string name="minute_label">دقیقه:</string>
+    <string name="confirm">تایید</string>
 </resources>

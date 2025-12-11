@@ -38,6 +38,8 @@ import proqueue.composeapp.generated.resources.add_customer
 import proqueue.composeapp.generated.resources.home_menu_item
 import proqueue.composeapp.generated.resources.quick_access
 import proqueue.composeapp.generated.resources.welcome_to_proqueue
+import proqueue.composeapp.generated.resources.queue_title
+import proqueue.composeapp.generated.resources.to_label
 import xyz.sattar.javid.proqueue.core.ui.collectWithLifecycleAware
 import xyz.sattar.javid.proqueue.core.ui.components.AppButton
 import xyz.sattar.javid.proqueue.core.utils.DateTimeUtils
@@ -158,8 +160,8 @@ fun HomeScreenContent(
             }
             
             item {
-                 Text(
-                    text = "Queue", // TODO: Add string resource
+                Text(
+                    text = stringResource(Res.string.queue_title),
                     style = MaterialTheme.typography.titleMedium,
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -271,7 +273,7 @@ fun QueueItemCard(
                         color = MaterialTheme.colorScheme.primary
                     )
                     Text(
-                        text = "to ${DateTimeUtils.formatTime(item.estimatedEndTime)}",
+                        text = "${stringResource(Res.string.to_label)} ${DateTimeUtils.formatTime(item.estimatedEndTime)}",
                         style = MaterialTheme.typography.bodySmall
                     )
                 }

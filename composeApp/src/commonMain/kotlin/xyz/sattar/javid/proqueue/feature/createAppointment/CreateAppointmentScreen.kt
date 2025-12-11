@@ -58,6 +58,21 @@ import xyz.sattar.javid.proqueue.core.utils.DateTimeUtils
 import xyz.sattar.javid.proqueue.ui.theme.AppTheme
 import kotlin.time.ExperimentalTime
 import androidx.compose.foundation.layout.WindowInsets
+import org.jetbrains.compose.resources.stringResource
+import proqueue.composeapp.generated.resources.Res
+import proqueue.composeapp.generated.resources.appointment_create_action
+import proqueue.composeapp.generated.resources.appointment_time
+import proqueue.composeapp.generated.resources.choose_time
+import proqueue.composeapp.generated.resources.confirm
+import proqueue.composeapp.generated.resources.create_appointment_title
+import proqueue.composeapp.generated.resources.example_30
+import proqueue.composeapp.generated.resources.edit_appointment
+import proqueue.composeapp.generated.resources.hour_label
+import proqueue.composeapp.generated.resources.minute_label
+import proqueue.composeapp.generated.resources.select_visitor
+import proqueue.composeapp.generated.resources.service_duration_minutes
+import proqueue.composeapp.generated.resources.back
+import proqueue.composeapp.generated.resources.cancel
 import androidx.compose.ui.graphics.Color
 
 @Composable
@@ -135,7 +150,7 @@ fun CreateAppointmentScreenContent(
             TopAppBar(
                 title = {
                     Text(
-                        "ایجاد نوبت جدید",
+                        stringResource(Res.string.create_appointment_title),
                         style = MaterialTheme.typography.titleLarge
                     )
                 },
@@ -143,7 +158,7 @@ fun CreateAppointmentScreenContent(
                     IconButton(onClick = { onIntent(CreateAppointmentIntent.BackPress) }) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "بازگشت"
+                            contentDescription = stringResource(Res.string.back)
                         )
                     }
                 },
@@ -176,7 +191,7 @@ fun CreateAppointmentScreenContent(
                 ) {
                     // Visitor Selection
                     Text(
-                        text = "انتخاب مراجع",
+                        text = stringResource(Res.string.select_visitor),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold
                     )
@@ -220,7 +235,7 @@ fun CreateAppointmentScreenContent(
 
                     // Time Selection
                     Text(
-                        text = "زمان نوبت",
+                        text = stringResource(Res.string.appointment_time),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold
                     )
@@ -263,7 +278,7 @@ fun CreateAppointmentScreenContent(
 
                     // Service Duration
                     Text(
-                        text = "مدت زمان سرویس (دقیقه)",
+                        text = stringResource(Res.string.service_duration_minutes),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold
                     )
@@ -272,7 +287,7 @@ fun CreateAppointmentScreenContent(
                         value = serviceDuration,
                         onValueChange = { serviceDuration = it },
                         modifier = Modifier.fillMaxWidth(),
-                        placeholder = { Text("مثال: 30") },
+                        placeholder = { Text(stringResource(Res.string.example_30)) },
                         leadingIcon = {
                             Icon(
                                 imageVector = Icons.Default.Timer,
@@ -294,7 +309,7 @@ fun CreateAppointmentScreenContent(
 
                     // Create/Update Button
                     AppButton(
-                        text = if (uiState.editingAppointmentId != null) "ویرایش نوبت" else "ایجاد نوبت",
+                        text = if (uiState.editingAppointmentId != null) stringResource(Res.string.edit_appointment) else stringResource(Res.string.appointment_create_action),
                         onClick = {
                             selectedVisitorId?.let { visitorId ->
                                 // Parse time and create timestamp
@@ -345,7 +360,7 @@ fun TimeSelectionDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("انتخاب زمان") },
+        title = { Text(stringResource(Res.string.choose_time)) },
         text = {
             Column(
                 modifier = Modifier.fillMaxWidth(),
@@ -357,7 +372,7 @@ fun TimeSelectionDialog(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Text("ساعت:", style = MaterialTheme.typography.titleSmall)
+                    Text(stringResource(Res.string.hour_label), style = MaterialTheme.typography.titleSmall)
                     IconButton(onClick = { if (hour > 0) hour-- }) {
                         Icon(Icons.Default.Remove, contentDescription = null)
                     }
@@ -376,7 +391,7 @@ fun TimeSelectionDialog(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Text("دقیقه:", style = MaterialTheme.typography.titleSmall)
+                    Text(stringResource(Res.string.minute_label), style = MaterialTheme.typography.titleSmall)
                     IconButton(onClick = { if (minute >= 15) minute -= 15 }) {
                         Icon(Icons.Default.Remove, contentDescription = null)
                     }
@@ -399,12 +414,12 @@ fun TimeSelectionDialog(
                     onTimeSelected(timeString)
                 }
             ) {
-                Text("تایید")
+                Text(stringResource(Res.string.confirm))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("لغو")
+                Text(stringResource(Res.string.cancel))
             }
         }
     )

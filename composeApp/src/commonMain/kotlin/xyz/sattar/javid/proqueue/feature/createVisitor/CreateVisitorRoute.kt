@@ -40,6 +40,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import proqueue.composeapp.generated.resources.Res
 import proqueue.composeapp.generated.resources.create_visitor
@@ -50,6 +51,9 @@ import xyz.sattar.javid.proqueue.core.ui.collectWithLifecycleAware
 import xyz.sattar.javid.proqueue.core.ui.components.AppButton
 import xyz.sattar.javid.proqueue.core.ui.components.AppTextField
 import xyz.sattar.javid.proqueue.ui.theme.AppTheme
+// removed duplicate imports
+import proqueue.composeapp.generated.resources.edit
+import proqueue.composeapp.generated.resources.edit_visitor
 import androidx.compose.foundation.layout.WindowInsets
 
 @Composable
@@ -118,8 +122,8 @@ fun CreateVisitorScreen(
             TopAppBar(
                 title = {
                     Text(
-                        if (isEditing) "ویرایش مراجع" else stringResource(Res.string.create_visitor),
-                        style = MaterialTheme.typography.titleMedium
+                        if (isEditing) stringResource(Res.string.edit_visitor) else stringResource(Res.string.create_visitor),
+                        style = MaterialTheme.typography.titleLarge
                     )
                 },
                 navigationIcon = {
@@ -197,7 +201,7 @@ fun CreateVisitorScreen(
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 AppButton(
-                    text = if (isEditing) "ویرایش" else stringResource(Res.string.register_visitor),
+                    text = if (isEditing) stringResource(Res.string.edit) else stringResource(Res.string.register_visitor),
                     onClick = {
                         onIntent(CreateVisitorIntent.CreateVisitor(fullName, phoneNumber))
                     },

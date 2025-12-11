@@ -123,7 +123,7 @@ fun CreateBusinessScreen(
                 title = {
                     Text(
                         stringResource(Res.string.create_business),
-                        style = MaterialTheme.typography.titleMedium
+                        style = MaterialTheme.typography.titleLarge
                     )
                 },
                 navigationIcon = {
