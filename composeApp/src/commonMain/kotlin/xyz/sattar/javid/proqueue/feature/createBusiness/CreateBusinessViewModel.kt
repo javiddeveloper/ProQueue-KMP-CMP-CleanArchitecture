@@ -14,11 +14,14 @@ class CreateBusinessViewModel(
 ) {
     override fun handleIntent(intent: CreateBusinessIntent): Flow<CreateBusinessState.PartialState> {
         return when (intent) {
-            is CreateBusinessIntent.CreateBusiness -> createBusiness(
-                intent.title,
-                intent.phone,
-                intent.address
-            )
+            is CreateBusinessIntent.CreateBusiness -> {
+                createBusiness(
+                    intent.title,
+                    intent.phone,
+                    intent.address,
+                    intent.defaultProgress
+                )
+            }
 
             CreateBusinessIntent.BackPress -> {
                 sendEvent(CreateBusinessEvent.BackPressed)
@@ -53,7 +56,8 @@ class CreateBusinessViewModel(
     private fun createBusiness(
         businessName: String,
         phone: String,
-        address: String
+        address: String,
+        defaultProgress: String
     ): Flow<CreateBusinessState.PartialState> = flow {
         emit(CreateBusinessState.PartialState.IsLoading(true))
         businessUpsertUseCase.invoke(
@@ -63,13 +67,11 @@ class CreateBusinessViewModel(
                 address = address,
                 logoPath = "Sample_path.jpg",
                 id = 0,
-                defaultServiceDuration = 15,
+                defaultServiceDuration = defaultProgress.toInt(),
                 workStartHour = 9,
                 workEndHour = 17,
                 notificationEnabled = false,
                 notificationTypes = "",
-                notificationMinutesBefore = 30,
-                createdAt = 0L
             )
         )
         emit(CreateBusinessState.PartialState.BusinessCreated)

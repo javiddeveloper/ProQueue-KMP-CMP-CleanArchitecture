@@ -16,7 +16,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AddLocation
 import androidx.compose.material.icons.filled.Factory
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -75,7 +74,11 @@ fun CreateBusinessRoute(
         onContinue = onContinue,
         onNavigateBack = onNavigateBack
     )
-
+    LaunchedEffect(uiState.businessCreated){
+        if(uiState.businessCreated){
+            onContinue()
+        }
+    }
     CreateBusinessScreen(
         uiState = uiState,
         onIntent = viewModel::sendIntent,
@@ -241,7 +244,7 @@ fun CreateBusinessScreen(
                 AppButton(
                     text = stringResource(Res.string.accept),
                     onClick = {
-                        onIntent(CreateBusinessIntent.CreateBusiness(title, phone, address))
+                        onIntent(CreateBusinessIntent.CreateBusiness(title, phone, address,defaultProgress))
                     },
                     modifier = Modifier.weight(1f),
                     enabled = !uiState.isLoading && title.isNotBlank()
@@ -274,7 +277,7 @@ fun HandleEvents(
     val scope = rememberCoroutineScope()
     events.collectWithLifecycleAware {
         when (it) {
-            CreateBusinessEvent.NavigateToVisitors -> {
+            CreateBusinessEvent. NavigateToBusiness -> {
                 scope.launch {
                     onContinue()
                 }
