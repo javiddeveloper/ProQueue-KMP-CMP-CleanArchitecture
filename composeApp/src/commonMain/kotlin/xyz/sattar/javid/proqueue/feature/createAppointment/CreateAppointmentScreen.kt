@@ -59,6 +59,7 @@ import xyz.sattar.javid.proqueue.core.utils.DateTimeUtils
 import xyz.sattar.javid.proqueue.ui.theme.AppTheme
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
+import androidx.compose.foundation.layout.WindowInsets
 
 @Composable
 fun CreateAppointmentScreen(
@@ -126,6 +127,7 @@ fun CreateAppointmentScreenContent(
     }
 
     Scaffold(
+        contentWindowInsets = WindowInsets(0),
         topBar = {
             TopAppBar(
                 title = {
@@ -425,4 +427,3 @@ fun CreateAppointmentScreenPreview() {
         )
     }
 }
-
