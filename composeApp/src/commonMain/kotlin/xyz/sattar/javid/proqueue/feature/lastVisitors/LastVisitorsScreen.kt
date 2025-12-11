@@ -64,6 +64,8 @@ import xyz.sattar.javid.proqueue.domain.model.Business
 import xyz.sattar.javid.proqueue.domain.model.Visitor
 import xyz.sattar.javid.proqueue.ui.theme.AppTheme
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.material.icons.filled.ChevronLeft
+import androidx.compose.material.icons.filled.Person
 
 @Composable
 fun LastVisitorsScreen(
@@ -257,11 +259,10 @@ fun AppointmentCard(
                     .background(MaterialTheme.colorScheme.primaryContainer),
                 contentAlignment = Alignment.Center
             ) {
-                Text(
-                    text = appointment.queuePosition.toString(),
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                Icon(
+                    imageVector = Icons.Default.Person,
+                    contentDescription = null,
+                    modifier = Modifier.size(20.dp),
                 )
             }
 
@@ -479,7 +480,6 @@ fun PreviewLastVisitorsScreen() {
                             appointmentDate = DateTimeUtils.systemCurrentMilliseconds(),
                             serviceDuration = 30,
                             status = "WAITING",
-                            queuePosition = 1,
                             createdAt = 0,
                             updatedAt = 0
                         ),
