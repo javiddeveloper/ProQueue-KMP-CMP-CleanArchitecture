@@ -10,11 +10,18 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Card
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Cancel
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Event
+import androidx.compose.material.icons.filled.People
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -42,6 +49,10 @@ import proqueue.composeapp.generated.resources.welcome_to_proqueue
 import xyz.sattar.javid.proqueue.core.ui.collectWithLifecycleAware
 import xyz.sattar.javid.proqueue.core.utils.DateTimeUtils
 import xyz.sattar.javid.proqueue.ui.theme.AppTheme
+
+import kotlinx.datetime.Clock
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 
 @Composable
 fun HomeScreen(
@@ -96,6 +107,10 @@ fun HomeScreenContent(
             item { BusinessInfoHeader(uiState) }
 
             item {
+                DateHeader()
+            }
+
+            item {
                 // Dashboard Stats
                 DashboardStatsSection(stats = uiState.stats)
             }
@@ -110,23 +125,74 @@ fun HomeScreenContent(
 }
 
 @Composable
-fun DashboardStatsSection(stats: DashboardStats) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
+fun DateHeader(modifier: Modifier = Modifier) {
+    val currentTime = DateTimeUtils.systemCurrentMilliseconds()
+    val formattedDate = DateTimeUtils.formatDate(currentTime)
+    val formattedTime = DateTimeUtils.formatTime(currentTime)
+
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(vertical = 16.dp),
+        horizontalAlignment = Alignment.Start
     ) {
-        StatCard(
-            modifier = Modifier.weight(1f),
-            title = stringResource(Res.string.today_total_appointments),
-            value = stats.totalVisitors.toString(),
-            color = MaterialTheme.colorScheme.secondaryContainer
+        Text(
+            text = "امروز، $formattedDate",
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onBackground
         )
-        StatCard(
-            modifier = Modifier.weight(1f),
-            title = stringResource(Res.string.completed_visitors),
-            value = (stats.totalVisitors - stats.cancelledVisitors).toString(),
-            color = MaterialTheme.colorScheme.primaryContainer
+        Text(
+            text = "ساعت: $formattedTime",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
+    }
+}
+
+@Composable
+fun DashboardStatsSection(stats: DashboardStats) {
+    Column(
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            StatCard(
+                modifier = Modifier.weight(1f),
+                title = "نوبت‌های امروز",
+                value = stats.totalAppointments.toString(),
+                color = MaterialTheme.colorScheme.primaryContainer,
+                icon = Icons.Default.Event
+            )
+            StatCard(
+                modifier = Modifier.weight(1f),
+                title = "تکمیل شده",
+                value = stats.completedAppointments.toString(),
+                color = MaterialTheme.colorScheme.tertiaryContainer, // Greenish tone usually
+                icon = Icons.Default.CheckCircle
+            )
+        }
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            StatCard(
+                modifier = Modifier.weight(1f),
+                title = "عدم حضور",
+                value = stats.noShowAppointments.toString(),
+                color = MaterialTheme.colorScheme.errorContainer,
+                icon = Icons.Default.Cancel
+            )
+            StatCard(
+                modifier = Modifier.weight(1f),
+                title = "کل بازدیدکنندگان",
+                value = stats.totalVisitors.toString(),
+                color = MaterialTheme.colorScheme.secondaryContainer,
+                icon = Icons.Default.People
+            )
+        }
     }
 }
 
@@ -135,18 +201,44 @@ fun StatCard(
     modifier: Modifier = Modifier,
     title: String,
     value: String,
-    color: androidx.compose.ui.graphics.Color
+    color: androidx.compose.ui.graphics.Color,
+    icon: androidx.compose.ui.graphics.vector.ImageVector
 ) {
     Card(
         modifier = modifier,
-        colors = CardDefaults.cardColors(containerColor = color)
+        colors = CardDefaults.cardColors(containerColor = color),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Column(
-            modifier = Modifier.padding(12.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+            modifier = Modifier
+                .padding(16.dp)
+                .fillMaxWidth(),
+            horizontalAlignment = Alignment.Start,
+            verticalArrangement = Arrangement.Center
         ) {
-            Text(text = value, style = MaterialTheme.typography.titleLarge)
-            Text(text = title, style = MaterialTheme.typography.bodySmall)
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    modifier = Modifier.size(24.dp),
+                    tint = MaterialTheme.colorScheme.onSurface
+                )
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            Spacer(modifier = Modifier.height(12.dp))
+            Text(
+                text = value,
+                style = MaterialTheme.typography.headlineMedium,
+                fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
+                modifier = Modifier.align(Alignment.CenterHorizontally)
+            )
         }
     }
 }
@@ -204,89 +296,6 @@ fun BusinessInfoHeader(uiState: HomeState) {
     }
 }
 
-@Composable
-fun QueueItemCard(
-    item: QueueItem,
-    onRemove: () -> Unit,
-    onComplete: () -> Unit,
-    onNoShow: () -> Unit,
-    onSendMessage: (String) -> Unit
-) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-    ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Column {
-                    Text(text = item.visitorName, style = MaterialTheme.typography.titleMedium)
-                    Text(text = item.visitorPhone, style = MaterialTheme.typography.bodyMedium)
-                }
-                Column(horizontalAlignment = Alignment.End) {
-                    Text(
-                        text = DateTimeUtils.formatDateTime(item.estimatedStartTime),
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                    Text(
-                        text = "${stringResource(Res.string.to_label)} ${
-                            DateTimeUtils.formatTime(
-                                item.estimatedEndTime
-                            )
-                        }",
-                        style = MaterialTheme.typography.bodySmall
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            val overdue =
-                DateTimeUtils.systemCurrentMilliseconds() > item.estimatedEndTime && item.appointment.status == "WAITING"
-            if (overdue) {
-                Text(
-                    text = "زمان رد شده",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.error
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-            }
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                // Message Actions
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    // TODO: Add Icons for SMS, WhatsApp, Telegram
-                    // For now using Text placeholders
-                    Text("SMS", modifier = Modifier.clickable { onSendMessage("SMS") })
-                    Text("WA", modifier = Modifier.clickable { onSendMessage("WHATSAPP") })
-                    Text("TG", modifier = Modifier.clickable { onSendMessage("TELEGRAM") })
-                }
-
-                // Queue Actions
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text(
-                        "Done",
-                        modifier = Modifier.clickable { onComplete() },
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                    Text(
-                        "NoShow",
-                        modifier = Modifier.clickable { onNoShow() },
-                        color = MaterialTheme.colorScheme.error
-                    )
-                    Text("Del", modifier = Modifier.clickable { onRemove() })
-                }
-            }
-        }
-    }
-}
 
 @Composable
 fun HandleEvents(
