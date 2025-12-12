@@ -89,6 +89,8 @@ import proqueue.composeapp.generated.resources.app_version
 import proqueue.composeapp.generated.resources.google_play
 import androidx.compose.ui.graphics.painter.Painter
 
+import xyz.sattar.javid.proqueue.core.state.ThemeStateHolder
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
@@ -102,7 +104,7 @@ fun SettingsScreen(
     val sheetState = rememberModalBottomSheetState()
 
     // Theme Toggle Logic
-    var isDarkTheme by remember { mutableStateOf(false) } // This should ideally be from a ThemeManager or Datastore
+    val isDarkTheme by ThemeStateHolder.isDarkTheme.collectAsState()
 
     LaunchedEffect(Unit) {
         viewModel.sendIntent(SettingsIntent.LoadSettings)
@@ -135,7 +137,7 @@ fun SettingsScreen(
         uiState = uiState,
         onIntent = viewModel::sendIntent,
         onThemeToggle = {
-            isDarkTheme = !isDarkTheme
+            ThemeStateHolder.toggleTheme()
         },
         onContactUsClick = { showContactSheet = true }
     )

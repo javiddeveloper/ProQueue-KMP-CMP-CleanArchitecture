@@ -9,10 +9,14 @@ import xyz.sattar.javid.proqueue.core.navigation.navHost.BusinessNavHost
 import xyz.sattar.javid.proqueue.core.navigation.navHost.MainNavHost
 import xyz.sattar.javid.proqueue.ui.theme.AppTheme
 
+import xyz.sattar.javid.proqueue.core.state.ThemeStateHolder
+
 @Composable
 @Preview
 fun App() {
-    AppTheme {
+    val isDarkTheme by ThemeStateHolder.isDarkTheme.collectAsState()
+
+    AppTheme(darkTheme = isDarkTheme) {
         val selectedBusiness by BusinessStateHolder.selectedBusiness.collectAsState()
 
         if (selectedBusiness == null) {
