@@ -24,6 +24,13 @@
     <string name="completed_visitors">تکمیل‌شده‌ها</string>
     <string name="queue_tab">صف</string>
     <string name="visitors_tab">مراجعین</string>
+    <string name="contact_options">گزینه‌های تماس</string>
+    <string name="sms">پیامک</string>
+    <string name="whatsapp">واتساپ</string>
+    <string name="telegram">تلگرام</string>
+    <string name="phone_call">تماس تلفنی</string>
+    <string name="complete_action">تکمیل شده</string>
+    <string name="no_show_action">عدم مراجعه</string>
     
     <!-- Last Visitors Screen -->
     <string name="no_visitors_yet">هنوز مشتری ثبت نشده است</string>
