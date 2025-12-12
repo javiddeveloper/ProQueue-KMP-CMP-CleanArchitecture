@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -24,6 +25,7 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.EventNote
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -34,8 +36,11 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.PrimaryTabRow
+import androidx.compose.material3.TabRowDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -46,47 +51,45 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.viewmodel.koinViewModel
+import proqueue.composeapp.generated.resources.Res
+import proqueue.composeapp.generated.resources.change_appointment
+import proqueue.composeapp.generated.resources.create_appointment
+import proqueue.composeapp.generated.resources.delete_appointment
+import proqueue.composeapp.generated.resources.empty_appointments_subtitle
+import proqueue.composeapp.generated.resources.empty_appointments_title
+import proqueue.composeapp.generated.resources.last_visitors_title
+import proqueue.composeapp.generated.resources.overdue_time
+import proqueue.composeapp.generated.resources.queue_tab
+import proqueue.composeapp.generated.resources.status_cancelled
+import proqueue.composeapp.generated.resources.status_completed
+import proqueue.composeapp.generated.resources.status_no_show
+import proqueue.composeapp.generated.resources.status_waiting
+import proqueue.composeapp.generated.resources.total_appointments_today
+import proqueue.composeapp.generated.resources.visitors_tab
+import proqueue.composeapp.generated.resources.to_label
+import kotlin.math.abs
 import xyz.sattar.javid.proqueue.core.ui.collectWithLifecycleAware
+import xyz.sattar.javid.proqueue.core.ui.components.QueueItemCard
 import xyz.sattar.javid.proqueue.core.utils.DateTimeUtils
 import xyz.sattar.javid.proqueue.domain.model.Appointment
 import xyz.sattar.javid.proqueue.domain.model.AppointmentWithDetails
 import xyz.sattar.javid.proqueue.domain.model.Business
 import xyz.sattar.javid.proqueue.domain.model.Visitor
-import xyz.sattar.javid.proqueue.ui.theme.AppTheme
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.material.icons.filled.ChevronLeft
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material3.PrimaryTabRow
-import androidx.compose.material3.Tab
-import androidx.compose.material3.TabRow
-import org.jetbrains.compose.resources.stringResource
-import proqueue.composeapp.generated.resources.Res
-import proqueue.composeapp.generated.resources.create_appointment
-import proqueue.composeapp.generated.resources.empty_appointments_subtitle
-import proqueue.composeapp.generated.resources.empty_appointments_title
-import proqueue.composeapp.generated.resources.last_visitors_title
-import proqueue.composeapp.generated.resources.total_appointments_today
-import proqueue.composeapp.generated.resources.overdue_time
-import proqueue.composeapp.generated.resources.change_appointment
-import proqueue.composeapp.generated.resources.delete_appointment
-import proqueue.composeapp.generated.resources.status_cancelled
-import proqueue.composeapp.generated.resources.status_completed
-import proqueue.composeapp.generated.resources.status_no_show
-import proqueue.composeapp.generated.resources.status_waiting
-import proqueue.composeapp.generated.resources.queue_tab
-import proqueue.composeapp.generated.resources.visitors_tab
 import xyz.sattar.javid.proqueue.feature.home.QueueItem
-import xyz.sattar.javid.proqueue.core.ui.components.QueueItemCard
+import xyz.sattar.javid.proqueue.ui.theme.AppTheme
 
 @Composable
 fun LastVisitorsScreen(
@@ -167,25 +170,49 @@ fun LastVisitorsScreenContent(
 
                 else -> {
                     Column(modifier = Modifier.fillMaxSize()) {
-                        var selectedTab by remember { mutableStateOf(0) }
+                        var selectedTab by rememberSaveable { mutableStateOf(0) }
                         PrimaryTabRow(
                             selectedTabIndex = selectedTab,
-                            modifier = modifier.background(MaterialTheme.colorScheme.background)
+                            containerColor = MaterialTheme.colorScheme.background,
+                            contentColor = MaterialTheme.colorScheme.onSurface,
+                            modifier = Modifier.fillMaxWidth(),
+                            divider = { androidx.compose.material3.Divider(color = MaterialTheme.colorScheme.outlineVariant) }
                         ) {
                             Tab(
                                 selected = selectedTab == 0,
                                 onClick = { selectedTab = 0 },
-                                text = { Text(stringResource(Res.string.queue_tab)) }
+                                modifier = Modifier.weight(1f).height(58.dp),
+                                text = {
+                                    Text(
+                                        text = stringResource(Res.string.queue_tab),
+                                        style = MaterialTheme.typography.bodyLarge,
+                                        fontSize = if (selectedTab == 0) 18.sp else 16.sp ,
+                                        color = if (selectedTab == 0) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                                        fontWeight = if (selectedTab == 0) FontWeight.Bold else FontWeight.SemiBold
+                                    )
+                                }
                             )
                             Tab(
                                 selected = selectedTab == 1,
                                 onClick = { selectedTab = 1 },
-                                text = { Text(stringResource(Res.string.visitors_tab)) }
+                                modifier = Modifier.weight(1f).height(58.dp),
+                                text = {
+                                    Text(
+                                        text = stringResource(Res.string.visitors_tab),
+                                        style = MaterialTheme.typography.bodyLarge,
+                                        fontSize = if (selectedTab == 1) 18.sp else 16.sp ,
+                                        color = if (selectedTab == 1) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                                        fontWeight = if (selectedTab == 1) FontWeight.Bold else FontWeight.SemiBold
+                                    )
+                                }
                             )
                         }
-                        Spacer(modifier = Modifier.height(12.dp))
+                        Spacer(modifier = Modifier.height(8.dp))
                         if (selectedTab == 0) {
-                            val waiting = uiState.appointments.filter { it.appointment.status == "WAITING" }
+                            val now = DateTimeUtils.systemCurrentMilliseconds()
+                            val waiting = uiState.appointments
+                                .filter { it.appointment.status == "WAITING" }
+                                .sortedBy { abs(it.appointment.appointmentDate - now) }
                             if (waiting.isEmpty()) {
                                 EmptyState(modifier = Modifier.align(Alignment.CenterHorizontally))
                             } else {
@@ -201,7 +228,7 @@ fun LastVisitorsScreenContent(
                                     )
                                 }
                                 LazyColumn(
-                                    modifier = Modifier.fillMaxSize(),
+                                    modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp),
                                     verticalArrangement = Arrangement.spacedBy(12.dp)
                                 ) {
                                     items(queueItems) { queueItem ->
@@ -210,9 +237,13 @@ fun LastVisitorsScreenContent(
                                             onRemove = {
                                                 onIntent(LastVisitorsIntent.OnDeleteAppointment(queueItem.appointment.id))
                                             },
-                                            onComplete = { /* TODO: hook complete in ViewModel */ },
-                                            onNoShow = { /* TODO: hook no-show in ViewModel */ },
-                                            onSendMessage = { /* TODO: hook messaging */ _ -> }
+                                            onComplete = {
+                                                onIntent(LastVisitorsIntent.OnMarkCompleted(queueItem.appointment.id))
+                                            },
+                                            onNoShow = {
+                                                onIntent(LastVisitorsIntent.OnMarkNoShow(queueItem.appointment.id))
+                                            },
+                                            onSendMessage = { _ -> }
                                         )
                                     }
                                     item { Spacer(modifier = Modifier.height(80.dp)) }
@@ -220,7 +251,6 @@ fun LastVisitorsScreenContent(
                             }
                         } else {
                             TotalCountHeader(count = uiState.totalCount)
-                            Spacer(modifier = Modifier.height(12.dp))
                             AppointmentsList(
                                 appointments = uiState.appointments,
                                 onEditClick = { appointmentId ->
@@ -243,7 +273,7 @@ fun TotalCountHeader(count: Int) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(16.dp),
+            .padding(horizontal = 16.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.primaryContainer
         ),
@@ -299,7 +329,7 @@ fun AppointmentsList(
             )
         }
 
-        item { Spacer(modifier = Modifier.height(80.dp)) } // Space for FAB
+        item { Spacer(modifier = Modifier.height(56.dp)) }
     }
 }
 
@@ -326,139 +356,80 @@ fun AppointmentCard(
                 .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Queue Position Badge
-            Box(
-                modifier = Modifier
-                    .size(48.dp)
-                    .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.primaryContainer),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Person,
-                    contentDescription = null,
-                    modifier = Modifier.size(20.dp),
-                )
-            }
-
-            Spacer(modifier = Modifier.width(16.dp))
-
-            // Visitor Info
+            // Visitor Info (compact)
             Column(
                 modifier = Modifier.weight(1f)
             ) {
-                Text(
-                    text = visitor.fullName,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-                Spacer(modifier = Modifier.height(4.dp))
+                val dateText = DateTimeUtils.formatDateTime(appointment.appointmentDate)
+                val endTimeMs = appointment.appointmentDate + (appointment.serviceDuration
+                    ?: appointmentWithDetails.business.defaultServiceDuration) * 60 * 1000L
+                val timeRange = "${DateTimeUtils.formatTime(appointment.appointmentDate)} ${stringResource(Res.string.to_label)} ${DateTimeUtils.formatTime(endTimeMs)}"
 
-                val durationMinutesForWait = appointment.serviceDuration
-                    ?: appointmentWithDetails.business.defaultServiceDuration
-                val endTimeForWait =
-                    appointment.appointmentDate + durationMinutesForWait * 60 * 1000L
-                val isOverdueForWait =
-                    DateTimeUtils.systemCurrentMilliseconds() > endTimeForWait && appointment.status == "WAITING"
-                val waitingOrOverdueText =
-                    if (isOverdueForWait) stringResource(Res.string.overdue_time) else DateTimeUtils.calculateWaitingTime(
-                        appointment.appointmentDate
-                    )
-                Text(
-                    text = waitingOrOverdueText,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = if (isOverdueForWait) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
-                )
-
-                Spacer(modifier = Modifier.height(4.dp))
                 Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.AccessTime,
-                        contentDescription = null,
-                        modifier = Modifier.size(16.dp),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    Spacer(modifier = Modifier.width(4.dp))
-
-                    // Date and Time
-                    val dateTime = DateTimeUtils.formatDateTime(appointment.appointmentDate)
                     Text(
-                        text = dateTime,
+                        text = visitor.fullName,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Text(
+                        text = dateText,
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
-
-                    appointment.serviceDuration?.let { duration ->
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            text = "• $duration دقیقه",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
                 }
 
                 Spacer(modifier = Modifier.height(4.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = visitor.phoneNumber ?: "--",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Text(
+                        text = timeRange,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(6.dp))
+
                 val durationMinutes = appointment.serviceDuration
                     ?: appointmentWithDetails.business.defaultServiceDuration
                 val endTime = appointment.appointmentDate + durationMinutes * 60 * 1000L
-                val overdue = DateTimeUtils.systemCurrentMilliseconds() > endTime
-                StatusBadge(status = appointment.status, overdue = overdue)
-            }
+                val overdue = DateTimeUtils.systemCurrentMilliseconds() > endTime && appointment.status == "WAITING"
+                val waitingOrOverdueText =
+                    if (overdue) stringResource(Res.string.overdue_time) else DateTimeUtils.calculateWaitingTime(
+                        appointment.appointmentDate
+                    )
 
-            // Options Button with Popup Menu
-            Box {
-                IconButton(onClick = { showMenu = true }) {
-                    Icon(
-                        imageVector = Icons.Default.MoreVert,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-
-                DropdownMenu(
-                    expanded = showMenu,
-                    onDismissRequest = { showMenu = false }
-                ) {
-                    DropdownMenuItem(
-                        text = { Text(stringResource(Res.string.change_appointment)) },
-                        onClick = {
-                            showMenu = false
-                            onEditClick()
-                        },
-                        leadingIcon = {
-                            Icon(
-                                imageVector = Icons.Default.Edit,
-                                contentDescription = null,
-                                modifier = Modifier.size(20.dp)
-                            )
-                        }
-                    )
-                    DropdownMenuItem(
-                        text = {
-                            Text(
-                                stringResource(Res.string.delete_appointment),
-                                color = MaterialTheme.colorScheme.error
-                            )
-                        },
-                        onClick = {
-                            showMenu = false
-                            onDeleteClick()
-                        },
-                        leadingIcon = {
-                            Icon(
-                                imageVector = Icons.Default.Delete,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.error,
-                                modifier = Modifier.size(20.dp)
-                            )
-                        }
-                    )
+                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    androidx.compose.material3.Surface(
+                        shape = RoundedCornerShape(6.dp),
+                        color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.12f)
+                    ) {
+                        Text(
+                            text = waitingOrOverdueText,
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = if (overdue) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.secondary
+                        )
+                    }
+                    StatusBadge(status = appointment.status, overdue = overdue)
                 }
             }
+
+            // Options menu removed per request
         }
     }
 }
