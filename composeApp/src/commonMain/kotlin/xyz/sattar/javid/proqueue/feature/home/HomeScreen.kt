@@ -279,19 +279,6 @@ fun BusinessInfoHeader(uiState: HomeState) {
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
-            Card(
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
-            ) {
-                Row(
-                    modifier = Modifier
-                        .padding(12.dp)
-                        .wrapContentHeight(),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    // Placeholder square avatar (replace with logo if available)
-                    Text(text = "■", style = MaterialTheme.typography.titleLarge)
-                }
-            }
         }
     }
 }
