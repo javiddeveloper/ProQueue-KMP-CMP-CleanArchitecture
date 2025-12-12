@@ -28,3 +28,15 @@ actual fun openPhoneDial(phone: String) {
     context.startActivity(intent)
 }
 
+actual fun openUrl(url: String) {
+    launchUri(url)
+}
+
+actual fun openInstagram(username: String) {
+    launchUri("https://www.instagram.com/$username/?hl=en")
+}
+
+actual fun openTwitter(username: String) {
+    launchUri("https://twitter.com/$username")
+}
+

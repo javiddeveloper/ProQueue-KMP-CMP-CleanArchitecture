@@ -54,9 +54,7 @@ import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.viewmodel.koinViewModel
 import proqueue.composeapp.generated.resources.Res
-import proqueue.composeapp.generated.resources.about_app
 import proqueue.composeapp.generated.resources.appName
-import proqueue.composeapp.generated.resources.app_version
 import proqueue.composeapp.generated.resources.cancel
 import proqueue.composeapp.generated.resources.change_business
 import proqueue.composeapp.generated.resources.compose_multiplatform
@@ -72,7 +70,26 @@ import proqueue.composeapp.generated.resources.theme_appearance
 import proqueue.composeapp.generated.resources.theme_settings
 import xyz.sattar.javid.proqueue.core.ui.collectWithLifecycleAware
 import xyz.sattar.javid.proqueue.ui.theme.AppTheme
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.rememberModalBottomSheetState
+import xyz.sattar.javid.proqueue.core.utils.openInstagram
+import xyz.sattar.javid.proqueue.core.utils.openTwitter
+import xyz.sattar.javid.proqueue.core.utils.openUrl
+import androidx.compose.material.icons.filled.Phone
+import androidx.compose.material.icons.filled.Close
+import proqueue.composeapp.generated.resources.contact_me
+import xyz.sattar.javid.proqueue.core.utils.openWhatsApp
+import proqueue.composeapp.generated.resources.instagram
+import proqueue.composeapp.generated.resources.whatsapp
+import proqueue.composeapp.generated.resources.market
+import proqueue.composeapp.generated.resources.notification_title
+import proqueue.composeapp.generated.resources.coming_soon_message
+import proqueue.composeapp.generated.resources.confirm
+import proqueue.composeapp.generated.resources.app_version
+import proqueue.composeapp.generated.resources.google_play
+import androidx.compose.ui.graphics.painter.Painter
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
     viewModel: SettingsViewModel = koinViewModel<SettingsViewModel>(),
@@ -80,6 +97,12 @@ fun SettingsScreen(
     onChangeBusiness: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val scope = rememberCoroutineScope()
+    var showContactSheet by remember { mutableStateOf(false) }
+    val sheetState = rememberModalBottomSheetState()
+
+    // Theme Toggle Logic
+    var isDarkTheme by remember { mutableStateOf(false) } // This should ideally be from a ThemeManager or Datastore
 
     LaunchedEffect(Unit) {
         viewModel.sendIntent(SettingsIntent.LoadSettings)
@@ -91,10 +114,101 @@ fun SettingsScreen(
         onChangeBusiness = onChangeBusiness
     )
 
+    if (showContactSheet) {
+        ModalBottomSheet(
+            onDismissRequest = { showContactSheet = false },
+            sheetState = sheetState
+        ) {
+            ContactUsContent(
+                onDismiss = {
+                    scope.launch { sheetState.hide() }.invokeOnCompletion {
+                        if (!sheetState.isVisible) {
+                            showContactSheet = false
+                        }
+                    }
+                }
+            )
+        }
+    }
+
     SettingsScreenContent(
         uiState = uiState,
-        onIntent = viewModel::sendIntent
+        onIntent = viewModel::sendIntent,
+        onThemeToggle = {
+            isDarkTheme = !isDarkTheme
+        },
+        onContactUsClick = { showContactSheet = true }
     )
+}
+
+@Composable
+fun ContactUsContent(onDismiss: () -> Unit) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        Text(
+            text = stringResource(Res.string.contact_me),
+            style = MaterialTheme.typography.titleLarge,
+            modifier = Modifier.padding(bottom = 8.dp)
+        )
+
+        ContactItem(
+            painter = painterResource(Res.drawable.instagram),
+            title = stringResource(Res.string.instagram),
+            onClick = {
+                openInstagram("javiddev") // Replace with actual ID
+                onDismiss()
+            }
+        )
+        ContactItem(
+            painter = painterResource(Res.drawable.whatsapp),
+            title = stringResource(Res.string.whatsapp),
+            onClick = {
+                openWhatsApp("+989399018941") // Replace with actual number
+                onDismiss()
+            }
+        )
+        ContactItem(
+            painter = painterResource(Res.drawable.google_play),
+            title = stringResource(Res.string.market),
+            onClick = {
+                openUrl("https://cafebazaar.ir/developer/nice_javid")
+                onDismiss()
+            }
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+    }
+}
+
+@Composable
+fun ContactItem(
+    painter: Painter,
+    title: String,
+    onClick: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
+            .padding(12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        Icon(
+            painter = painter,
+            contentDescription = null,
+            modifier = Modifier.size(24.dp),
+            tint = MaterialTheme.colorScheme.onSurface
+        )
+        Text(
+            text = title,
+            style = MaterialTheme.typography.bodyLarge
+        )
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -102,9 +216,25 @@ fun SettingsScreen(
 fun SettingsScreenContent(
     modifier: Modifier = Modifier,
     uiState: SettingsState,
-    onIntent: (SettingsIntent) -> Unit
+    onIntent: (SettingsIntent) -> Unit,
+    onThemeToggle: () -> Unit,
+    onContactUsClick: () -> Unit
 ) {
     var showDeleteDialog by remember { mutableStateOf(false) }
+    var showNotificationToast by remember { mutableStateOf(false) } // Placeholder toast state
+
+    if (showNotificationToast) {
+        AlertDialog(
+            onDismissRequest = { showNotificationToast = false },
+            confirmButton = {
+                TextButton(onClick = { showNotificationToast = false }) {
+                    Text(stringResource(Res.string.confirm))
+                }
+            },
+            title = { Text(stringResource(Res.string.notification_title)) },
+            text = { Text(stringResource(Res.string.coming_soon_message)) }
+        )
+    }
 
     if (showDeleteDialog) {
         AlertDialog(
@@ -180,7 +310,7 @@ fun SettingsScreenContent(
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = stringResource(Res.string.app_version, uiState.appVersion),
+                    text = "${stringResource(Res.string.app_version)} ${uiState.appVersion}",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -234,7 +364,7 @@ fun SettingsScreenContent(
                         icon = Icons.Default.Palette,
                         title = stringResource(Res.string.theme_appearance),
                         subtitle = stringResource(Res.string.theme_settings),
-                        onClick = { /* TODO */ }
+                        onClick = onThemeToggle
                     )
 
                     HorizontalDivider()
@@ -243,16 +373,16 @@ fun SettingsScreenContent(
                         icon = Icons.Default.Notifications,
                         title = stringResource(Res.string.notifications),
                         subtitle = stringResource(Res.string.manage_notifications),
-                        onClick = { /* TODO */ }
+                        onClick = { showNotificationToast = true }
                     )
 
                     HorizontalDivider()
 
                     SettingsItem(
                         icon = Icons.Default.Info,
-                        title = stringResource(Res.string.about_app),
+                        title = stringResource(Res.string.contact_me),
                         subtitle = stringResource(Res.string.more_info),
-                        onClick = { onIntent(SettingsIntent.OnAboutClick) }
+                        onClick = onContactUsClick
                     )
                 }
             }
@@ -350,7 +480,9 @@ fun PreviewSettingsScreen() {
     AppTheme {
         SettingsScreenContent(
             uiState = SettingsState(),
-            onIntent = {}
+            onIntent = {},
+            onThemeToggle = {},
+            onContactUsClick = { }
         )
     }
 }

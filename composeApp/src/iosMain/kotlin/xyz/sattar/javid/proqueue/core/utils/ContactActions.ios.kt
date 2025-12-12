@@ -3,7 +3,7 @@ package xyz.sattar.javid.proqueue.core.utils
 import platform.Foundation.NSURL
 import platform.UIKit.UIApplication
 
-private fun openUrl(url: String) {
+actual fun openUrl(url: String) {
     val encodedUrl = url.replace(" ", "%20")
     val nsUrl = NSURL.URLWithString(encodedUrl)
     if (nsUrl != null) {
@@ -31,5 +31,13 @@ actual fun openTelegram(phone: String) {
 
 actual fun openPhoneDial(phone: String) {
     openUrl("tel:${sanitizePhone(phone)}")
+}
+
+actual fun openInstagram(username: String) {
+    openUrl("https://instagram.com/$username")
+}
+
+actual fun openTwitter(username: String) {
+    openUrl("https://twitter.com/$username")
 }
 
