@@ -100,8 +100,7 @@ fun CreateVisitorRoute(
         phoneNumber = phoneNumber,
         onFullName = { fullName = it },
         onPhoneNumber = { phoneNumber = it },
-        isEditing = visitorId != null,
-        visitorId = visitorId
+        isEditing = visitorId != null
     )
 }
 
@@ -113,7 +112,6 @@ fun CreateVisitorScreen(
     onIntent: (CreateVisitorIntent) -> Unit,
     fullName: String,
     phoneNumber: String,
-    visitorId: Long? = null,
     onFullName: (String) -> Unit,
     onPhoneNumber: (String) -> Unit,
     isEditing: Boolean = false
@@ -124,10 +122,8 @@ fun CreateVisitorScreen(
             TopAppBar(
                 title = {
                     Text(
-                        if (isEditing) stringResource(Res.string.edit_visitor) else stringResource(
-                            Res.string.create_visitor
-                        ),
-                        style = MaterialTheme.typography.titleLarge
+                        if (isEditing) stringResource(Res.string.edit_visitor) else stringResource(Res.string.create_visitor),
+                        style = MaterialTheme.typography.titleMedium
                     )
                 },
                 navigationIcon = {
@@ -204,28 +200,10 @@ fun CreateVisitorScreen(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-
-                uiState.message?.let {
-                    Text(
-                        text = it,
-                        color = MaterialTheme.colorScheme.error,
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                }
-
                 AppButton(
                     text = if (isEditing) stringResource(Res.string.edit) else stringResource(Res.string.register_visitor),
                     onClick = {
-                        if (isEditing)
-                            onIntent(
-                                CreateVisitorIntent.EditVisitor(
-                                    visitorId = visitorId,
-                                    fullName = fullName,
-                                    phoneNumber = phoneNumber
-                                )
-                            )
-                        else
-                            onIntent(CreateVisitorIntent.CreateVisitor(fullName, phoneNumber))
+                        onIntent(CreateVisitorIntent.CreateVisitor(fullName, phoneNumber))
                     },
                     modifier = Modifier.weight(1f),
                     enabled = !uiState.isLoading && fullName.isNotBlank()
@@ -234,6 +212,13 @@ fun CreateVisitorScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
+            uiState.message?.let {
+                Text(
+                    text = it,
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
         }
     }
 }
@@ -247,9 +232,23 @@ fun HandleEvents(
     val scope = rememberCoroutineScope()
     events.collectWithLifecycleAware {
         when (it) {
-            is CreateVisitorEvent.VisitorCreated -> onContinue(it.visitorId)
-            CreateVisitorEvent.BackPressed -> onNavigateBack()
-            is CreateVisitorEvent.VisitorUpdated -> onNavigateBack()
+            is CreateVisitorEvent.VisitorCreated -> {
+                scope.launch {
+                    onContinue(it.visitorId)
+                }
+            }
+
+            CreateVisitorEvent.BackPressed -> {
+                scope.launch {
+                    onNavigateBack()
+                }
+            }
+
+            is CreateVisitorEvent.VisitorUpdated ->  {
+                scope.launch {
+                    onNavigateBack()
+                }
+            }
         }
     }
 }
