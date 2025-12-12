@@ -4,25 +4,32 @@ import platform.Foundation.NSURL
 import platform.UIKit.UIApplication
 
 private fun openUrl(url: String) {
-    val nsUrl = NSURL.URLWithString(url)
+    val encodedUrl = url.replace(" ", "%20")
+    val nsUrl = NSURL.URLWithString(encodedUrl)
     if (nsUrl != null) {
-        UIApplication.sharedApplication.openURL(nsUrl)
+        if (UIApplication.sharedApplication.canOpenURL(nsUrl)) {
+            UIApplication.sharedApplication.openURL(nsUrl, emptyMap<Any?, Any>(), null)
+        }
     }
 }
 
+private fun sanitizePhone(phone: String): String {
+    return phone.filter { it.isDigit() || it == '+' }
+}
+
 actual fun openSms(phone: String) {
-    openUrl("sms:$phone")
+    openUrl("sms:${sanitizePhone(phone)}")
 }
 
 actual fun openWhatsApp(phone: String) {
-    openUrl("https://wa.me/$phone")
+    openUrl("https://wa.me/${sanitizePhone(phone)}")
 }
 
 actual fun openTelegram(phone: String) {
-    openUrl("https://t.me/$phone")
+    openUrl("https://t.me/${sanitizePhone(phone)}")
 }
 
 actual fun openPhoneDial(phone: String) {
-    openUrl("tel:$phone")
+    openUrl("tel:${sanitizePhone(phone)}")
 }
 
