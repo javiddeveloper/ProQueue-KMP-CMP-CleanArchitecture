@@ -87,6 +87,9 @@ import xyz.sattar.javid.proqueue.core.utils.openInstagram
 import xyz.sattar.javid.proqueue.core.utils.openUrl
 import xyz.sattar.javid.proqueue.core.utils.openWhatsApp
 import xyz.sattar.javid.proqueue.ui.theme.AppTheme
+import xyz.sattar.javid.proqueue.core.prefs.PreferencesManager
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -134,7 +137,8 @@ fun SettingsScreen(
         uiState = uiState,
         onIntent = viewModel::sendIntent,
         onThemeToggle = {
-            ThemeStateHolder.toggleTheme()
+            val newTheme = !isDarkTheme
+            scope.launch { PreferencesManager.setDarkTheme(newTheme) }
         },
         onContactUsClick = { showContactSheet = true }
     )
