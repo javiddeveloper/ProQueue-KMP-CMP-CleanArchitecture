@@ -55,6 +55,7 @@ import xyz.sattar.javid.proqueue.ui.theme.AppTheme
 import proqueue.composeapp.generated.resources.edit
 import proqueue.composeapp.generated.resources.edit_visitor
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.imePadding
 
 @Composable
 fun CreateVisitorRoute(
@@ -148,6 +149,7 @@ fun CreateVisitorScreen(
                 .background(MaterialTheme.colorScheme.background)
                 .padding(paddingValues)
                 .verticalScroll(rememberScrollState())
+                .imePadding()
                 .padding(horizontal = 24.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center

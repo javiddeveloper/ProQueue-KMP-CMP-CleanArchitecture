@@ -7,9 +7,11 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
@@ -45,35 +47,33 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.launch
 import kotlinx.datetime.toLocalDateTime
+import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.viewmodel.koinViewModel
+import proqueue.composeapp.generated.resources.Res
+import proqueue.composeapp.generated.resources.appointment_create_action
+import proqueue.composeapp.generated.resources.appointment_time
+import proqueue.composeapp.generated.resources.back
+import proqueue.composeapp.generated.resources.cancel
+import proqueue.composeapp.generated.resources.choose_time
+import proqueue.composeapp.generated.resources.confirm
+import proqueue.composeapp.generated.resources.create_appointment_title
+import proqueue.composeapp.generated.resources.edit_appointment
+import proqueue.composeapp.generated.resources.example_30
+import proqueue.composeapp.generated.resources.hour_label
+import proqueue.composeapp.generated.resources.minute_label
+import proqueue.composeapp.generated.resources.select_visitor
+import proqueue.composeapp.generated.resources.service_duration_minutes
 import xyz.sattar.javid.proqueue.core.ui.collectWithLifecycleAware
 import xyz.sattar.javid.proqueue.core.ui.components.AppButton
 import xyz.sattar.javid.proqueue.core.utils.DateTimeUtils
 import xyz.sattar.javid.proqueue.ui.theme.AppTheme
 import kotlin.time.ExperimentalTime
-import androidx.compose.foundation.layout.WindowInsets
-import org.jetbrains.compose.resources.stringResource
-import proqueue.composeapp.generated.resources.Res
-import proqueue.composeapp.generated.resources.appointment_create_action
-import proqueue.composeapp.generated.resources.appointment_time
-import proqueue.composeapp.generated.resources.choose_time
-import proqueue.composeapp.generated.resources.confirm
-import proqueue.composeapp.generated.resources.create_appointment_title
-import proqueue.composeapp.generated.resources.example_30
-import proqueue.composeapp.generated.resources.edit_appointment
-import proqueue.composeapp.generated.resources.hour_label
-import proqueue.composeapp.generated.resources.minute_label
-import proqueue.composeapp.generated.resources.select_visitor
-import proqueue.composeapp.generated.resources.service_duration_minutes
-import proqueue.composeapp.generated.resources.back
-import proqueue.composeapp.generated.resources.cancel
-import androidx.compose.ui.graphics.Color
 
 @Composable
 fun CreateAppointmentScreen(
@@ -186,6 +186,7 @@ fun CreateAppointmentScreenContent(
                     modifier = Modifier
                         .fillMaxSize()
                         .verticalScroll(rememberScrollState())
+                        .imePadding()
                         .padding(16.dp),
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
