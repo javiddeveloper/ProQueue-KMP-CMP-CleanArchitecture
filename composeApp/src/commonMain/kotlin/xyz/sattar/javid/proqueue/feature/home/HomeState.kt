@@ -32,8 +32,8 @@ data class QueueItem(
 )
 
 data class DashboardStats(
-    val totalVisitors: Int = 0,
-    val cancelledVisitors: Int = 0,
-    val avgVisitorsPerDay: Float = 0f,
-    val peakHours: String = ""
+    val totalAppointments: Int = 0,
+    val completedAppointments: Int = 0,
+    val noShowAppointments: Int = 0,
+    val totalVisitors: Int = 0
 )

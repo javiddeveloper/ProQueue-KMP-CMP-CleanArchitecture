@@ -40,6 +40,9 @@ fun AppTheme(
     content: @Composable () -> Unit
 ) {
     val colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme
+    
+    SystemAppearance(!darkTheme)
+
     CompositionLocalProvider(
         LocalLayoutDirection provides LayoutDirection.Rtl
     ) {
@@ -49,5 +52,7 @@ fun AppTheme(
             content = content
         )
     }
-
 }
+
+@Composable
+expect fun SystemAppearance(isDark: Boolean)

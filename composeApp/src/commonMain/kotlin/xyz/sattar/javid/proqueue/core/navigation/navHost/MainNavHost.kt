@@ -109,10 +109,7 @@ fun MainNavHost(
         ) {
             composable<AppScreens.Home> {
                 selectedTab = MainTab.Home
-                HomeScreen(
-                    onNavigateToCreateBusiness = onNavigateToCreateBusiness,
-                    onNavigateToCreateVisitor = onNavigateToCreateVisitor
-                )
+                HomeScreen()
             }
 
             composable<AppScreens.Visitors> {
@@ -131,6 +128,9 @@ fun MainNavHost(
                 VisitorSelectionScreen(
                     onNavigateToCreateAppointment = { visitorId ->
                         navController.navigate(AppScreens.CreateAppointment(visitorId))
+                    },
+                    onNavigateToEditVisitor = { visitorId ->
+                        navController.navigate(AppScreens.EditVisitor(visitorId))
                     },
                     onNavigateToCreateVisitor = {
                         navController.navigate(AppScreens.CreateVisitor)
@@ -153,6 +153,19 @@ fun MainNavHost(
                 CreateVisitorRoute(
                     onContinue = { visitorId ->
                         navController.navigate(AppScreens.CreateAppointment(visitorId))
+                    },
+                    onNavigateBack = {
+                        navController.popBackStack()
+                    }
+                )
+            }
+
+            composable<AppScreens.EditVisitor> { backStackEntry ->
+                val args = backStackEntry.toRoute<AppScreens.EditVisitor>()
+                CreateVisitorRoute(
+                    visitorId = args.visitorId,
+                    onContinue = { visitorId ->
+                        navController.popBackStack() // Return after edit
                     },
                     onNavigateBack = {
                         navController.popBackStack()

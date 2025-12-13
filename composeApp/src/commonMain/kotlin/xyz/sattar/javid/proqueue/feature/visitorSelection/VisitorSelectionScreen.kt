@@ -22,6 +22,7 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.PersonAdd
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -39,6 +40,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -80,6 +83,7 @@ import proqueue.composeapp.generated.resources.no_business_found
 fun VisitorSelectionScreen(
     viewModel: VisitorSelectionViewModel = koinViewModel<VisitorSelectionViewModel>(),
     onNavigateToCreateAppointment: (Long) -> Unit,
+    onNavigateToEditVisitor: (Long) -> Unit,
     onNavigateToCreateVisitor: () -> Unit,
     onNavigateBack: () -> Unit
 ) {
@@ -92,6 +96,7 @@ fun VisitorSelectionScreen(
     HandleEvents(
         events = viewModel.events,
         onNavigateToCreateAppointment = onNavigateToCreateAppointment,
+        onNavigateToEditVisitor = onNavigateToEditVisitor,
         onNavigateToCreateVisitor = onNavigateToCreateVisitor,
         onNavigateBack = onNavigateBack
     )
@@ -182,7 +187,7 @@ fun VisitorSelectionScreenContent(
                 .padding(paddingValues)
         ) {
             when {
-                uiState.filteredVisitors.isEmpty() -> {
+                uiState.filteredVisitors.isEmpty() && uiState.searchQuery.isEmpty() -> {
                     Box(
                         modifier = modifier
                             .fillMaxSize()
@@ -211,7 +216,7 @@ fun VisitorSelectionScreenContent(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(16.dp),
-                placeholder = { Text(stringResource(Res.string.search_placeholder)) },
+                        placeholder = { Text(stringResource(Res.string.search_placeholder)) },
                         leadingIcon = {
                             Icon(
                                 imageVector = Icons.Default.Search,
@@ -290,6 +295,7 @@ fun VisitorItem(
     onEdit: () -> Unit,
     onDelete: () -> Unit
 ) {
+    var showMenu by remember { mutableStateOf(false) }
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -328,19 +334,52 @@ fun VisitorItem(
                 }
             }
 
-            Row {
-                IconButton(onClick = onEdit) {
+            Box {
+                IconButton(onClick = { showMenu = true }) {
                     Icon(
-                        imageVector = Icons.Default.Edit,
-                        contentDescription = stringResource(Res.string.edit),
-                        tint = MaterialTheme.colorScheme.primary
+                        imageVector = Icons.Default.MoreVert,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
-                IconButton(onClick = onDelete) {
-                    Icon(
-                        imageVector = Icons.Default.Delete,
-                        contentDescription = stringResource(Res.string.delete),
-                        tint = MaterialTheme.colorScheme.error
+
+                DropdownMenu(
+                    expanded = showMenu,
+                    onDismissRequest = { showMenu = false }
+                ) {
+                    DropdownMenuItem(
+                        text = { Text(stringResource(Res.string.edit)) },
+                        onClick = {
+                            showMenu = false
+                            onEdit()
+                        },
+                        leadingIcon = {
+                            Icon(
+                                imageVector = Icons.Default.Edit,
+                                contentDescription = null,
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
+                    )
+                    DropdownMenuItem(
+                        text = {
+                            Text(
+                                stringResource(Res.string.delete),
+                                color = MaterialTheme.colorScheme.error
+                            )
+                        },
+                        onClick = {
+                            showMenu = false
+                            onDelete()
+                        },
+                        leadingIcon = {
+                            Icon(
+                                imageVector = Icons.Default.Delete,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.error,
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
                     )
                 }
             }
@@ -352,6 +391,7 @@ fun VisitorItem(
 fun HandleEvents(
     events: Flow<VisitorSelectionEvent>,
     onNavigateToCreateAppointment: (Long) -> Unit,
+    onNavigateToEditVisitor: (Long) -> Unit,
     onNavigateToCreateVisitor: () -> Unit,
     onNavigateBack: () -> Unit
 ) {
@@ -371,12 +411,14 @@ fun HandleEvents(
             }
 
             VisitorSelectionEvent.NavigateBack -> {
-                scope.launch {
-                    onNavigateBack()
-                }
+
+                onNavigateBack()
+
             }
 
-            else -> {}
+            is VisitorSelectionEvent.NavigateToEditVisitor -> {
+                onNavigateToEditVisitor(it.visitorId)
+            }
         }
     }
 }

@@ -18,7 +18,7 @@ interface AppointmentDao {
         WHERE businessId = :businessId 
         AND DATE(appointmentDate/1000, 'unixepoch') = DATE(:date/1000, 'unixepoch')
         AND status = 'WAITING'
-        ORDER BY createdAt ASC
+        ORDER BY ABS(appointmentDate - :date) ASC
     """)
     suspend fun getWaitingQueue(businessId: Long, date: Long): List<AppointmentWithDetailsEntity>
 
@@ -35,7 +35,7 @@ interface AppointmentDao {
     @Query("""
         SELECT * FROM Appointment 
         WHERE businessId = :businessId 
-        ORDER BY appointmentDate DESC
+        ORDER BY appointmentDate ASC
     """)
     suspend fun getTodayAppointments(businessId: Long): List<AppointmentWithDetailsEntity>
 

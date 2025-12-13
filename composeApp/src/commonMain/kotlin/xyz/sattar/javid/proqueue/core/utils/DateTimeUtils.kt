@@ -92,6 +92,21 @@ object DateTimeUtils {
         return "$hoursPart$separator$minutesPart زمان انتظار"
     }
 
+    fun formatDate(timestamp: Long): String {
+        val instant = Instant.fromEpochMilliseconds(timestamp)
+        val localDateTime = instant.toLocalDateTime(TimeZone.currentSystemDefault())
+
+        val persianDate = gregorianToJalali(
+            localDateTime.year,
+            localDateTime.monthNumber,
+            localDateTime.dayOfMonth
+        )
+
+        return "${persianDate.year}/${
+            persianDate.month.toString().padStart(2, '0')
+        }/${persianDate.dayOfMonth.toString().padStart(2, '0')}"
+    }
+
     fun formatDateTime(timestamp: Long): String {
         val instant = Instant.fromEpochMilliseconds(timestamp)
         val localDateTime = instant.toLocalDateTime(TimeZone.currentSystemDefault())

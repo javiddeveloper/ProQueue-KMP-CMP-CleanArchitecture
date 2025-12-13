@@ -7,11 +7,15 @@ import xyz.sattar.javid.proqueue.core.ui.BaseViewModel
 import xyz.sattar.javid.proqueue.core.utils.DateTimeUtils
 import xyz.sattar.javid.proqueue.domain.usecase.GetTodayAppointmentsUseCase
 import xyz.sattar.javid.proqueue.domain.usecase.RemoveAppointmentUseCase
+import xyz.sattar.javid.proqueue.domain.usecase.MarkAppointmentCompletedUseCase
+import xyz.sattar.javid.proqueue.domain.usecase.MarkAppointmentNoShowUseCase
 import kotlin.time.ExperimentalTime
 
 class LastVisitorsViewModel(
     private val getTodayAppointmentsUseCase: GetTodayAppointmentsUseCase,
-    private val removeAppointmentUseCase: RemoveAppointmentUseCase
+    private val removeAppointmentUseCase: RemoveAppointmentUseCase,
+    private val markAppointmentCompletedUseCase: MarkAppointmentCompletedUseCase,
+    private val markAppointmentNoShowUseCase: MarkAppointmentNoShowUseCase
 ) : BaseViewModel<LastVisitorsState, LastVisitorsState.PartialState, LastVisitorsEvent, LastVisitorsIntent>(
     initialState = LastVisitorsState()
 ) {
@@ -27,6 +31,8 @@ class LastVisitorsViewModel(
                 sendEvent(LastVisitorsEvent.NavigateToEditAppointment(intent.appointmentId))
             }
             is LastVisitorsIntent.OnDeleteAppointment -> deleteAppointment(intent.appointmentId)
+            is LastVisitorsIntent.OnMarkCompleted -> markCompleted(intent.appointmentId)
+            is LastVisitorsIntent.OnMarkNoShow -> markNoShow(intent.appointmentId)
             LastVisitorsIntent.DismissDialog -> flow {
                 emit(LastVisitorsState.PartialState.ShowOptionsDialog(null))
             }
@@ -106,5 +112,50 @@ class LastVisitorsViewModel(
             emit(LastVisitorsState.PartialState.ShowMessage(e.message ?: "خطا در حذف نوبت"))
         }
     }
-}
 
+    private fun markCompleted(appointmentId: Long): Flow<LastVisitorsState.PartialState> = flow {
+        try {
+            val success = markAppointmentCompletedUseCase(appointmentId)
+            if (success) {
+                val business = BusinessStateHolder.selectedBusiness.value
+                if (business != null) {
+                    val today = DateTimeUtils.systemCurrentMilliseconds()
+                    val appointments = getTodayAppointmentsUseCase(business.id, today)
+                    emit(
+                        LastVisitorsState.PartialState.LoadAppointments(
+                            appointments = appointments,
+                            totalCount = appointments.size
+                        )
+                    )
+                }
+            } else {
+                emit(LastVisitorsState.PartialState.ShowMessage("خطا در تکمیل نوبت"))
+            }
+        } catch (e: Exception) {
+            emit(LastVisitorsState.PartialState.ShowMessage(e.message ?: "خطا در تکمیل نوبت"))
+        }
+    }
+
+    private fun markNoShow(appointmentId: Long): Flow<LastVisitorsState.PartialState> = flow {
+        try {
+            val success = markAppointmentNoShowUseCase(appointmentId)
+            if (success) {
+                val business = BusinessStateHolder.selectedBusiness.value
+                if (business != null) {
+                    val today = DateTimeUtils.systemCurrentMilliseconds()
+                    val appointments = getTodayAppointmentsUseCase(business.id, today)
+                    emit(
+                        LastVisitorsState.PartialState.LoadAppointments(
+                            appointments = appointments,
+                            totalCount = appointments.size
+                        )
+                    )
+                }
+            } else {
+                emit(LastVisitorsState.PartialState.ShowMessage("خطا در ثبت عدم مراجعه"))
+            }
+        } catch (e: Exception) {
+            emit(LastVisitorsState.PartialState.ShowMessage(e.message ?: "خطا در ثبت عدم مراجعه"))
+        }
+    }
+}

@@ -5,9 +5,11 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -21,7 +23,11 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Snackbar
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -40,10 +46,12 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
-import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import proqueue.composeapp.generated.resources.Res
+import proqueue.composeapp.generated.resources.confirm
 import proqueue.composeapp.generated.resources.create_visitor
+import proqueue.composeapp.generated.resources.edit
+import proqueue.composeapp.generated.resources.edit_visitor
 import proqueue.composeapp.generated.resources.phone
 import proqueue.composeapp.generated.resources.register_visitor
 import proqueue.composeapp.generated.resources.visitor_name
@@ -51,10 +59,6 @@ import xyz.sattar.javid.proqueue.core.ui.collectWithLifecycleAware
 import xyz.sattar.javid.proqueue.core.ui.components.AppButton
 import xyz.sattar.javid.proqueue.core.ui.components.AppTextField
 import xyz.sattar.javid.proqueue.ui.theme.AppTheme
-// removed duplicate imports
-import proqueue.composeapp.generated.resources.edit
-import proqueue.composeapp.generated.resources.edit_visitor
-import androidx.compose.foundation.layout.WindowInsets
 
 @Composable
 fun CreateVisitorRoute(
@@ -91,7 +95,17 @@ fun CreateVisitorRoute(
         uiState = uiState,
         onIntent = { intent ->
             if (intent is CreateVisitorIntent.CreateVisitor) {
-                viewModel.sendIntent(intent.copy(id = visitorId ?: 0))
+                if (visitorId != null) {
+                    viewModel.sendIntent(
+                        CreateVisitorIntent.EditVisitor(
+                            fullName = intent.fullName,
+                            phoneNumber = intent.phoneNumber,
+                            visitorId = visitorId
+                        )
+                    )
+                } else {
+                    viewModel.sendIntent(intent)
+                }
             } else {
                 viewModel.sendIntent(intent)
             }
@@ -116,14 +130,36 @@ fun CreateVisitorScreen(
     onPhoneNumber: (String) -> Unit,
     isEditing: Boolean = false
 ) {
+    val snackbarHostState = remember { SnackbarHostState() }
+    LaunchedEffect(uiState.message) {
+        val msg = uiState.message
+        if (msg != null) {
+            snackbarHostState.showSnackbar(msg)
+        }
+    }
     Scaffold(
+        snackbarHost = {
+            SnackbarHost(hostState = snackbarHostState) { data ->
+                Snackbar(
+                    containerColor = MaterialTheme.colorScheme.error,
+                    contentColor = MaterialTheme.colorScheme.onError,
+                    action = {
+                        TextButton(onClick = { data.dismiss() }) {
+                            Text(stringResource(Res.string.confirm))
+                        }
+                    }
+                ) {
+                    Text(data.visuals.message)
+                }
+            }
+        },
         contentWindowInsets = WindowInsets(0),
         topBar = {
             TopAppBar(
                 title = {
                     Text(
                         if (isEditing) stringResource(Res.string.edit_visitor) else stringResource(Res.string.create_visitor),
-                        style = MaterialTheme.typography.titleLarge
+                        style = MaterialTheme.typography.titleMedium
                     )
                 },
                 navigationIcon = {
@@ -148,6 +184,7 @@ fun CreateVisitorScreen(
                 .background(MaterialTheme.colorScheme.background)
                 .padding(paddingValues)
                 .verticalScroll(rememberScrollState())
+                .imePadding()
                 .padding(horizontal = 24.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
@@ -176,6 +213,7 @@ fun CreateVisitorScreen(
 
             AppTextField(
                 enabled = !uiState.isLoading,
+                maxLength = 11,
                 value = phoneNumber,
                 onValueChange = onPhoneNumber,
                 label = stringResource(Res.string.phone),
@@ -206,19 +244,13 @@ fun CreateVisitorScreen(
                         onIntent(CreateVisitorIntent.CreateVisitor(fullName, phoneNumber))
                     },
                     modifier = Modifier.weight(1f),
-                    enabled = !uiState.isLoading && fullName.isNotBlank()
+                    enabled = !uiState.isLoading && fullName.isNotBlank()&& phoneNumber.isNotBlank()
                 )
             }
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            uiState.message?.let {
-                Text(
-                    text = it,
-                    color = MaterialTheme.colorScheme.error,
-                    style = MaterialTheme.typography.bodyMedium
-                )
-            }
+            
         }
     }
 }
@@ -239,6 +271,12 @@ fun HandleEvents(
             }
 
             CreateVisitorEvent.BackPressed -> {
+                scope.launch {
+                    onNavigateBack()
+                }
+            }
+
+            is CreateVisitorEvent.VisitorUpdated ->  {
                 scope.launch {
                     onNavigateBack()
                 }

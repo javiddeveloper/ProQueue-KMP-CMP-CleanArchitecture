@@ -23,6 +23,13 @@ class CreateVisitorViewModel(
                 intent.phoneNumber,
                 intent.id
             )
+
+            is CreateVisitorIntent.EditVisitor -> editVisitor(
+                intent.fullName,
+                intent.phoneNumber,
+                intent.visitorId
+            )
+
             is CreateVisitorIntent.LoadVisitor -> loadVisitor(intent.visitorId)
             CreateVisitorIntent.BackPress -> {
                 sendEvent(CreateVisitorEvent.BackPressed)
@@ -39,7 +46,7 @@ class CreateVisitorViewModel(
                 currentState.copy(visitorCreated = true, isLoading = false, message = null)
 
             is CreateVisitorState.PartialState.IsLoading ->
-                currentState.copy(visitorCreated = false, isLoading = true, message = null)
+                currentState.copy(visitorCreated = false, isLoading = partialState.isLoading, message = null)
 
             is CreateVisitorState.PartialState.ShowMessage ->
                 currentState.copy(
@@ -47,6 +54,7 @@ class CreateVisitorViewModel(
                     isLoading = false,
                     message = partialState.message
                 )
+
             is CreateVisitorState.PartialState.VisitorLoaded ->
                 currentState.copy(
                     loadedVisitor = partialState.visitor,
@@ -78,7 +86,7 @@ class CreateVisitorViewModel(
         id: Long
     ): Flow<CreateVisitorState.PartialState> = flow {
         emit(CreateVisitorState.PartialState.IsLoading(true))
-        
+
         val currentTime = DateTimeUtils.systemCurrentMilliseconds()
         val visitorId = visitorUpsertUseCase.invoke(
             Visitor(
@@ -88,12 +96,35 @@ class CreateVisitorViewModel(
                 createdAt = currentTime
             )
         )
-        
+
         emit(CreateVisitorState.PartialState.VisitorCreated)
         if (visitorId != -1L) {
             sendEvent(CreateVisitorEvent.VisitorCreated(visitorId))
         } else {
             emit(CreateVisitorState.PartialState.ShowMessage("خطا در ذخیره مراجع"))
+        }
+    }
+
+    private fun editVisitor(
+        fullName: String,
+        phoneNumber: String,
+        visitorId: Long?
+    ): Flow<CreateVisitorState.PartialState> = flow {
+        emit(CreateVisitorState.PartialState.IsLoading(true))
+        if (visitorId != null) {
+            val originalCreatedAt = uiState.value.loadedVisitor?.createdAt ?: DateTimeUtils.systemCurrentMilliseconds()
+            visitorUpsertUseCase.invoke(
+                Visitor(
+                    id = visitorId,
+                    fullName = fullName,
+                    phoneNumber = phoneNumber,
+                    createdAt = originalCreatedAt
+                )
+            )
+            emit(CreateVisitorState.PartialState.IsLoading(false))
+            sendEvent(CreateVisitorEvent.VisitorUpdated(visitorId))
+        } else {
+            emit(CreateVisitorState.PartialState.ShowMessage("خطا در بروزرسانی مراجع"))
         }
     }
 }

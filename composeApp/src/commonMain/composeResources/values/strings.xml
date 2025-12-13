@@ -20,6 +20,17 @@
     <string name="quick_access">دسترسی سریع</string>
     <string name="add_customer">افزودن مشتری</string>
     <string name="queue_title">صف</string>
+    <string name="today_total_appointments">کل نوبت‌های امروز</string>
+    <string name="completed_visitors">تکمیل‌شده‌ها</string>
+    <string name="queue_tab">صف</string>
+    <string name="visitors_tab">مراجعین</string>
+    <string name="contact_options">گزینه‌های تماس</string>
+    <string name="sms">پیامک</string>
+    <string name="whatsapp">واتساپ</string>
+    <string name="telegram">تلگرام</string>
+    <string name="phone_call">تماس تلفنی</string>
+    <string name="complete_action">تکمیل شده</string>
+    <string name="no_show_action">عدم مراجعه</string>
     
     <!-- Last Visitors Screen -->
     <string name="no_visitors_yet">هنوز مشتری ثبت نشده است</string>
@@ -39,15 +50,19 @@
     <string name="to_label">تا</string>
     
     <!-- Settings Screen -->
-    <string name="app_version">نسخه %s</string>
     <string name="theme_appearance">تم و ظاهر</string>
     <string name="theme_settings">تنظیمات رنگ و تم</string>
     <string name="notifications">اعلان‌ها</string>
     <string name="manage_notifications">مدیریت اعلان‌ها</string>
-    <string name="about_app">درباره برنامه</string>
+    <string name="contact_me">تماس با ما</string>
     <string name="more_info">اطلاعات بیشتر</string>
     <string name="logout">خروج از حساب کاربری</string>
-    
+    <string name="instagram">اینستاگرام</string>
+    <string name="market">دیگر برنامه ها</string>
+    <string name="notification_title">اطلاعیه</string>
+    <string name="coming_soon_message">این بخش به زودی راه اندازی می‌شود</string>
+    <string name="app_version">نسخه</string>
+
     <!-- Business Selection -->
     <string name="change_business">تغییر کسب‌وکار</string>
     <string name="business_list">لیست کسب‌وکارها</string>

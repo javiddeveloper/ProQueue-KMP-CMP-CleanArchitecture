@@ -101,7 +101,9 @@ val appModule: Module = module {
     viewModel { 
         LastVisitorsViewModel(
             get(), // GetTodayAppointmentsUseCase
-            get()  // RemoveAppointmentUseCase
+            get(), // RemoveAppointmentUseCase
+            get(), // MarkAppointmentCompletedUseCase
+            get()  // MarkAppointmentNoShowUseCase
         )
     }
     viewModel { VisitorSelectionViewModel(get(), get()) }

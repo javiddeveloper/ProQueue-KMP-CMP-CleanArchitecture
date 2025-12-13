@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -29,11 +30,13 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -45,6 +48,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.flow.Flow
@@ -54,25 +58,40 @@ import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.viewmodel.koinViewModel
 import proqueue.composeapp.generated.resources.Res
-import proqueue.composeapp.generated.resources.about_app
 import proqueue.composeapp.generated.resources.appName
 import proqueue.composeapp.generated.resources.app_version
 import proqueue.composeapp.generated.resources.cancel
 import proqueue.composeapp.generated.resources.change_business
+import proqueue.composeapp.generated.resources.coming_soon_message
 import proqueue.composeapp.generated.resources.compose_multiplatform
+import proqueue.composeapp.generated.resources.confirm
+import proqueue.composeapp.generated.resources.contact_me
 import proqueue.composeapp.generated.resources.delete
 import proqueue.composeapp.generated.resources.delete_business
 import proqueue.composeapp.generated.resources.delete_business_confirmation
+import proqueue.composeapp.generated.resources.google_play
+import proqueue.composeapp.generated.resources.instagram
 import proqueue.composeapp.generated.resources.manage_notifications
+import proqueue.composeapp.generated.resources.market
 import proqueue.composeapp.generated.resources.more_info
+import proqueue.composeapp.generated.resources.notification_title
 import proqueue.composeapp.generated.resources.notifications
 import proqueue.composeapp.generated.resources.settings_menu_item
 import proqueue.composeapp.generated.resources.smart_queue_management
 import proqueue.composeapp.generated.resources.theme_appearance
 import proqueue.composeapp.generated.resources.theme_settings
+import proqueue.composeapp.generated.resources.whatsapp
+import xyz.sattar.javid.proqueue.core.state.ThemeStateHolder
 import xyz.sattar.javid.proqueue.core.ui.collectWithLifecycleAware
+import xyz.sattar.javid.proqueue.core.utils.openInstagram
+import xyz.sattar.javid.proqueue.core.utils.openUrl
+import xyz.sattar.javid.proqueue.core.utils.openWhatsApp
 import xyz.sattar.javid.proqueue.ui.theme.AppTheme
+import xyz.sattar.javid.proqueue.core.prefs.PreferencesManager
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
     viewModel: SettingsViewModel = koinViewModel<SettingsViewModel>(),
@@ -80,6 +99,12 @@ fun SettingsScreen(
     onChangeBusiness: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val scope = rememberCoroutineScope()
+    var showContactSheet by remember { mutableStateOf(false) }
+    val sheetState = rememberModalBottomSheetState()
+
+    // Theme Toggle Logic
+    val isDarkTheme by ThemeStateHolder.isDarkTheme.collectAsState()
 
     LaunchedEffect(Unit) {
         viewModel.sendIntent(SettingsIntent.LoadSettings)
@@ -91,10 +116,102 @@ fun SettingsScreen(
         onChangeBusiness = onChangeBusiness
     )
 
+    if (showContactSheet) {
+        ModalBottomSheet(
+            onDismissRequest = { showContactSheet = false },
+            sheetState = sheetState
+        ) {
+            ContactUsContent(
+                onDismiss = {
+                    scope.launch { sheetState.hide() }.invokeOnCompletion {
+                        if (!sheetState.isVisible) {
+                            showContactSheet = false
+                        }
+                    }
+                }
+            )
+        }
+    }
+
     SettingsScreenContent(
         uiState = uiState,
-        onIntent = viewModel::sendIntent
+        onIntent = viewModel::sendIntent,
+        onThemeToggle = {
+            val newTheme = !isDarkTheme
+            scope.launch { PreferencesManager.setDarkTheme(newTheme) }
+        },
+        onContactUsClick = { showContactSheet = true }
     )
+}
+
+@Composable
+fun ContactUsContent(onDismiss: () -> Unit) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        Text(
+            text = stringResource(Res.string.contact_me),
+            style = MaterialTheme.typography.titleLarge,
+            modifier = Modifier.padding(bottom = 8.dp)
+        )
+
+        ContactItem(
+            painter = painterResource(Res.drawable.instagram),
+            title = stringResource(Res.string.instagram),
+            onClick = {
+                openInstagram("javiddev") // Replace with actual ID
+                onDismiss()
+            }
+        )
+        ContactItem(
+            painter = painterResource(Res.drawable.whatsapp),
+            title = stringResource(Res.string.whatsapp),
+            onClick = {
+                openWhatsApp("+989399018941") // Replace with actual number
+                onDismiss()
+            }
+        )
+        ContactItem(
+            painter = painterResource(Res.drawable.google_play),
+            title = stringResource(Res.string.market),
+            onClick = {
+                openUrl("https://cafebazaar.ir/developer/nice_javid")
+                onDismiss()
+            }
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+    }
+}
+
+@Composable
+fun ContactItem(
+    painter: Painter,
+    title: String,
+    onClick: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
+            .padding(12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        Icon(
+            painter = painter,
+            contentDescription = null,
+            modifier = Modifier.size(24.dp),
+            tint = MaterialTheme.colorScheme.onSurface
+        )
+        Text(
+            text = title,
+            style = MaterialTheme.typography.bodyLarge
+        )
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -102,9 +219,25 @@ fun SettingsScreen(
 fun SettingsScreenContent(
     modifier: Modifier = Modifier,
     uiState: SettingsState,
-    onIntent: (SettingsIntent) -> Unit
+    onIntent: (SettingsIntent) -> Unit,
+    onThemeToggle: () -> Unit,
+    onContactUsClick: () -> Unit
 ) {
     var showDeleteDialog by remember { mutableStateOf(false) }
+    var showNotificationToast by remember { mutableStateOf(false) } // Placeholder toast state
+
+    if (showNotificationToast) {
+        AlertDialog(
+            onDismissRequest = { showNotificationToast = false },
+            confirmButton = {
+                TextButton(onClick = { showNotificationToast = false }) {
+                    Text(stringResource(Res.string.confirm))
+                }
+            },
+            title = { Text(stringResource(Res.string.notification_title)) },
+            text = { Text(stringResource(Res.string.coming_soon_message)) }
+        )
+    }
 
     if (showDeleteDialog) {
         AlertDialog(
@@ -150,8 +283,9 @@ fun SettingsScreenContent(
                 .fillMaxSize()
                 .background(MaterialTheme.colorScheme.background)
                 .verticalScroll(rememberScrollState())
+                .imePadding()
                 .padding(paddingValues)
-                .padding(horizontal = 16.dp),
+                .padding(start = 16.dp, end = 16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             // App Info
@@ -180,7 +314,7 @@ fun SettingsScreenContent(
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = stringResource(Res.string.app_version, uiState.appVersion),
+                    text = "${stringResource(Res.string.app_version)} ${uiState.appVersion}",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -234,7 +368,7 @@ fun SettingsScreenContent(
                         icon = Icons.Default.Palette,
                         title = stringResource(Res.string.theme_appearance),
                         subtitle = stringResource(Res.string.theme_settings),
-                        onClick = { /* TODO */ }
+                        onClick = onThemeToggle
                     )
 
                     HorizontalDivider()
@@ -243,16 +377,16 @@ fun SettingsScreenContent(
                         icon = Icons.Default.Notifications,
                         title = stringResource(Res.string.notifications),
                         subtitle = stringResource(Res.string.manage_notifications),
-                        onClick = { /* TODO */ }
+                        onClick = { showNotificationToast = true }
                     )
 
                     HorizontalDivider()
 
                     SettingsItem(
                         icon = Icons.Default.Info,
-                        title = stringResource(Res.string.about_app),
+                        title = stringResource(Res.string.contact_me),
                         subtitle = stringResource(Res.string.more_info),
-                        onClick = { onIntent(SettingsIntent.OnAboutClick) }
+                        onClick = onContactUsClick
                     )
                 }
             }
@@ -350,7 +484,9 @@ fun PreviewSettingsScreen() {
     AppTheme {
         SettingsScreenContent(
             uiState = SettingsState(),
-            onIntent = {}
+            onIntent = {},
+            onThemeToggle = {},
+            onContactUsClick = { }
         )
     }
 }
