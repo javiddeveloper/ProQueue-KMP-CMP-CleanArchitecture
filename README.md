@@ -1,35 +1,37 @@
-This is a Kotlin Multiplatform project targeting Android, iOS.
+# ProQueue
 
-* [/composeApp](./composeApp/src) is for code that will be shared across your Compose Multiplatform applications.
-  It contains several subfolders:
-  - [commonMain](./composeApp/src/commonMain/kotlin) is for code that’s common for all targets.
-  - Other folders are for Kotlin code that will be compiled for only the platform indicated in the folder name.
-    For example, if you want to use Apple’s CoreCrypto for the iOS part of your Kotlin app,
-    the [iosMain](./composeApp/src/iosMain/kotlin) folder would be the right place for such calls.
-    Similarly, if you want to edit the Desktop (JVM) specific part, the [jvmMain](./composeApp/src/jvmMain/kotlin)
-    folder is the appropriate location.
+## Introduction
+- ProQueue is a smart queue and appointment management app for small businesses, built once and delivered on Android and iOS.
+- It streamlines visitor registration, scheduling, daily queue tracking, and lightweight messaging to improve service efficiency.
 
-* [/iosApp](./iosApp/iosApp) contains iOS applications. Even if you’re sharing your UI with Compose Multiplatform,
-  you need this entry point for your iOS app. This is also where you should add SwiftUI code for your project.
+## Architecture
+- Kotlin Multiplatform shared core with platform-specific integrations where needed.
+- MVI pattern (Model–View–Intent): intents are processed in the ViewModel, emitting flows of PartialState that are reduced into an immutable UI State; one-off actions are delivered via event channels.
+- Unidirectional data flow with ViewModel intents, partial states, reducer, and event channels.
+- Repository and use-case layers isolate data and business logic from UI.
+- Navigation uses a typed route system for safe screen transitions.
+- State holders manage global app state (theme and selected business) outside screen lifecycles.
 
-### Build and Run Android Application
+## Technologies
+- UI: JetBrains Compose Multiplatform, Material 3, Compose Resources.
+- DI: Koin (core, compose, android).
+- Data: Room (multiplatform driver), SQLite bundled driver.
+- Persistence: SharedPreferences (Android), NSUserDefaults (iOS) for lightweight settings.
+- Networking: Ktor client with Kotlinx Serialization (extensible for future remote sync).
+- Concurrency: Kotlin coroutines and flows.
+- Navigation: Compose Navigation with typed routes.
 
-To build and run the development version of the Android app, use the run configuration from the run widget
-in your IDE’s toolbar or build it directly from the terminal:
-- on macOS/Linux
-  ```shell
-  ./gradlew :composeApp:assembleDebug
-  ```
-- on Windows
-  ```shell
-  .\gradlew.bat :composeApp:assembleDebug
-  ```
+## About Me
+- Hi, I’m Javid — a Kotlin Multiplatform engineer focused on clean architectures and pragmatic cross‑platform delivery.
+- I enjoy building robust, testable app cores with polished Compose UIs across Android and iOS.
 
-### Build and Run iOS Application
+## Project Structure
+- `composeApp/src/commonMain/kotlin`: shared UI, state, domain, and data layers.
+- `composeApp/src/androidMain/kotlin`: Android actual implementations and platform services.
+- `composeApp/src/iosMain/kotlin`: iOS actual implementations and platform services.
+- `iosApp/`: iOS application entry point and Xcode integration.
 
-To build and run the development version of the iOS app, use the run configuration from the run widget
-in your IDE’s toolbar or open the [/iosApp](./iosApp) directory in Xcode and run it from there.
-
----
-
-Learn more about [Kotlin Multiplatform](https://www.jetbrains.com/help/kotlin-multiplatform-dev/get-started.html)…
+## Build & Run
+- Android (macOS/Linux): `./gradlew :composeApp:assembleDebug`
+- Android (Windows): `.\gradlew.bat :composeApp:assembleDebug`
+- iOS: open `iosApp` in Xcode and run.
