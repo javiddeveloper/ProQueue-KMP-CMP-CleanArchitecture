@@ -54,7 +54,6 @@ import proqueue.composeapp.generated.resources.phone
 import xyz.sattar.javid.proqueue.core.ui.collectWithLifecycleAware
 import xyz.sattar.javid.proqueue.core.ui.components.AppButton
 import xyz.sattar.javid.proqueue.core.ui.components.AppTextField
-import xyz.sattar.javid.proqueue.core.ui.components.ProfileImagePicker
 import xyz.sattar.javid.proqueue.ui.theme.AppTheme
 
 @Composable
@@ -158,8 +157,6 @@ fun CreateBusinessScreen(
             verticalArrangement = Arrangement.Center
         ) {
             Spacer(modifier = Modifier.height(24.dp))
-
-            ProfileImagePicker(imageUrl = null)
 
             AppTextField(
                 value = title,
