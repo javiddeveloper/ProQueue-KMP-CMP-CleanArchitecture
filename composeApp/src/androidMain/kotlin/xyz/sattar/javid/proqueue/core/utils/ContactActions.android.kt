@@ -33,7 +33,7 @@ actual fun openUrl(url: String) {
 }
 
 actual fun openInstagram(username: String) {
-    launchUri("https://www.instagram.com/$username/?hl=en")
+    launchUri("https://instagram.com/$username")
 }
 
 actual fun openTwitter(username: String) {

@@ -52,6 +52,8 @@ import xyz.sattar.javid.proqueue.core.utils.openTelegram
 import xyz.sattar.javid.proqueue.core.utils.openPhoneDial
 import xyz.sattar.javid.proqueue.feature.home.QueueItem
 
+import xyz.sattar.javid.proqueue.core.utils.formatPhoneNumberForAction
+
 @Composable
 fun QueueItemCard(
     item: QueueItem,
@@ -137,21 +139,21 @@ fun QueueItemCard(
                 DropdownMenu(expanded = showMenu, onDismissRequest = { showMenu = false }) {
                     DropdownMenuItem(text = { Text(stringResource(Res.string.sms)) }, onClick = {
                         showMenu = false
-                        openSms(item.visitorPhone)
+                        openSms(formatPhoneNumberForAction(item.visitorPhone))
                         onSendMessage("SMS")
                     })
                     DropdownMenuItem(
                         text = { Text(stringResource(Res.string.whatsapp)) },
                         onClick = {
                             showMenu = false
-                            openWhatsApp(item.visitorPhone)
+                            openWhatsApp(formatPhoneNumberForAction(item.visitorPhone))
                             onSendMessage("WHATSAPP")
                         })
                     DropdownMenuItem(
                         text = { Text(stringResource(Res.string.telegram)) },
                         onClick = {
                             showMenu = false
-                            openTelegram(item.visitorPhone)
+                            openTelegram(formatPhoneNumberForAction(item.visitorPhone))
                             onSendMessage("TELEGRAM")
                         })
                     DropdownMenuItem(
