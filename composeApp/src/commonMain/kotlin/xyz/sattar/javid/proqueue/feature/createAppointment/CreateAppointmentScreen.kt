@@ -51,6 +51,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.flow.Flow
 import kotlinx.datetime.toLocalDateTime
@@ -311,6 +312,7 @@ fun CreateAppointmentScreenContent(
                     AppTextField(
                         value = serviceDuration,
                         maxLength = 3,
+                        keyboardType = KeyboardType.Number,
                         onValueChange = { serviceDuration = it },
                         modifier = Modifier.fillMaxWidth(),
                         leadingIcon = {
