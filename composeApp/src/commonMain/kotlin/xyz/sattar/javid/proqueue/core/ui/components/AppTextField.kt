@@ -25,8 +25,9 @@ import androidx.compose.ui.unit.dp
 fun AppTextField(
     value: String,
     onValueChange: (String) -> Unit,
-    label: String,
+    label: String? = null,
     maxLine: Int = 1,
+    maxLength: Int = Int.MAX_VALUE,
     modifier: Modifier = Modifier,
     isError: Boolean = false,
     errorMessage: String? = null,
@@ -38,16 +39,22 @@ fun AppTextField(
     enabled: Boolean,
 ) {
     Column(modifier = modifier) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(bottom = 8.dp)
-        )
+        if (label != null) {
+            Text(
+                text = label,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+        }
 
         OutlinedTextField(
             value = value,
-            onValueChange = onValueChange,
+            onValueChange = {
+                if (it.length <= maxLength) {
+                    onValueChange(it)
+                }
+            },
             modifier = Modifier
                 .fillMaxWidth()
                 .then(

@@ -178,6 +178,7 @@ fun CreateVisitorScreen(
 
             AppTextField(
                 enabled = !uiState.isLoading,
+                maxLength = 11,
                 value = phoneNumber,
                 onValueChange = onPhoneNumber,
                 label = stringResource(Res.string.phone),

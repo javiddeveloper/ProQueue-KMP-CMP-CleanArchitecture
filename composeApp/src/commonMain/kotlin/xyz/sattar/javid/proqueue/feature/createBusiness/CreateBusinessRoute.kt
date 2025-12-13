@@ -182,6 +182,7 @@ fun CreateBusinessScreen(
 
             AppTextField(
                 enabled = !uiState.isLoading,
+                maxLength = 3,
                 value = defaultProgress,
                 onValueChange = onDefaultProgress,
                 label = stringResource(Res.string.default_time_service),
@@ -202,6 +203,7 @@ fun CreateBusinessScreen(
 
             AppTextField(
                 enabled = !uiState.isLoading,
+                maxLength = 11,
                 value = phone,
                 onValueChange = onPhone,
                 label = stringResource(Res.string.phone),
