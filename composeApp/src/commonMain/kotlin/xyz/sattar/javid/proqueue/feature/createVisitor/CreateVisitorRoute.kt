@@ -51,11 +51,10 @@ import xyz.sattar.javid.proqueue.core.ui.collectWithLifecycleAware
 import xyz.sattar.javid.proqueue.core.ui.components.AppButton
 import xyz.sattar.javid.proqueue.core.ui.components.AppTextField
 import xyz.sattar.javid.proqueue.ui.theme.AppTheme
-// removed duplicate imports
-import proqueue.composeapp.generated.resources.edit
-import proqueue.composeapp.generated.resources.edit_visitor
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.imePadding
+import proqueue.composeapp.generated.resources.edit
+import proqueue.composeapp.generated.resources.edit_visitor
 
 @Composable
 fun CreateVisitorRoute(
@@ -92,7 +91,17 @@ fun CreateVisitorRoute(
         uiState = uiState,
         onIntent = { intent ->
             if (intent is CreateVisitorIntent.CreateVisitor) {
-                viewModel.sendIntent(intent.copy(id = visitorId ?: 0))
+                if (visitorId != null) {
+                    viewModel.sendIntent(
+                        CreateVisitorIntent.EditVisitor(
+                            fullName = intent.fullName,
+                            phoneNumber = intent.phoneNumber,
+                            visitorId = visitorId
+                        )
+                    )
+                } else {
+                    viewModel.sendIntent(intent)
+                }
             } else {
                 viewModel.sendIntent(intent)
             }
