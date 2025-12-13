@@ -170,7 +170,7 @@ fun LastVisitorsScreenContent(
 
                 else -> {
                     Column(modifier = Modifier.fillMaxSize()) {
-                        var selectedTab by rememberSaveable { mutableStateOf(1) }
+                        var selectedTab by rememberSaveable { mutableStateOf(0) }
                         PrimaryTabRow(
                             selectedTabIndex = selectedTab,
                             containerColor = MaterialTheme.colorScheme.background,
