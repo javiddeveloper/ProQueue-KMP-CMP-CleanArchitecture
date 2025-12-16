@@ -126,6 +126,7 @@ fun CreateAppointmentScreenContent(
     var selectedDate by remember { mutableStateOf(DateTimeUtils.systemCurrentMilliseconds()) }
     var selectedTime by remember { mutableStateOf("09:00") }
     var serviceDuration by remember { mutableStateOf(uiState.serviceDuration?.toString() ?: "30") }
+    var serviceDurationError by remember { mutableStateOf<String?>(null) }
     var showTimeDialog by remember { mutableStateOf(false) }
 
     LaunchedEffect(uiState) {
@@ -313,7 +314,10 @@ fun CreateAppointmentScreenContent(
                         value = serviceDuration,
                         maxLength = 3,
                         keyboardType = KeyboardType.Number,
-                        onValueChange = { serviceDuration = it },
+                        onValueChange = {
+                            serviceDuration = it
+                            serviceDurationError = null
+                        },
                         modifier = Modifier.fillMaxWidth(),
                         leadingIcon = {
                             Icon(
@@ -323,7 +327,8 @@ fun CreateAppointmentScreenContent(
                                 tint = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         },
-                        errorMessage = "",
+                        isError = serviceDurationError != null,
+                        errorMessage = serviceDurationError,
                         enabled = !uiState.isLoading,
                     )
 
@@ -337,7 +342,8 @@ fun CreateAppointmentScreenContent(
                         onClick = {
                             selectedVisitorId?.let { visitorId ->
                                 // Parse time and create timestamp
-                                val duration = serviceDuration.toIntOrNull()
+                                val duration = serviceDuration.trim().toIntOrNull()
+                                serviceDurationError = if (duration == null) "مدت زمان سرویس باید عدد باشد" else null
                                 onIntent(
                                     CreateAppointmentIntent.CreateAppointment(
                                         visitorId = visitorId,
@@ -351,7 +357,7 @@ fun CreateAppointmentScreenContent(
                             }
                         },
                         modifier = Modifier.fillMaxWidth(),
-                        enabled = selectedVisitorId != null && serviceDuration.isNotBlank()
+                        enabled = selectedVisitorId != null
                     )
 
                     Spacer(modifier = Modifier.height(16.dp))
