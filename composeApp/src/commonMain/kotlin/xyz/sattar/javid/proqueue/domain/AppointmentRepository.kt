@@ -17,4 +17,5 @@ interface AppointmentRepository {
     suspend fun getAppointmentById(appointmentId: Long): Appointment?
     suspend fun getAllWaitingAppointments(businessId: Long): List<AppointmentWithDetails>
     suspend fun deleteAppointmentsByVisitorId(visitorId: Long)
+    suspend fun getConflictingAppointments(businessId: Long, startTime: Long, endTime: Long, defaultDuration: Int): List<AppointmentWithDetails>
 }

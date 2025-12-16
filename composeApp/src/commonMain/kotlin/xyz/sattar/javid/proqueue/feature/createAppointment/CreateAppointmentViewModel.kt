@@ -3,8 +3,17 @@ package xyz.sattar.javid.proqueue.feature.createAppointment
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
+import org.jetbrains.compose.resources.getString
+import proqueue.composeapp.generated.resources.Res
+import proqueue.composeapp.generated.resources.error_loading_visitors
+import proqueue.composeapp.generated.resources.appointment_not_found
+import proqueue.composeapp.generated.resources.error_loading_appointment
+import proqueue.composeapp.generated.resources.select_business_error
+import proqueue.composeapp.generated.resources.error_saving_appointment
+import proqueue.composeapp.generated.resources.operation_error
 import xyz.sattar.javid.proqueue.core.state.BusinessStateHolder
 import xyz.sattar.javid.proqueue.core.ui.BaseViewModel
+import xyz.sattar.javid.proqueue.domain.usecase.CheckAppointmentConflictUseCase
 import xyz.sattar.javid.proqueue.domain.usecase.CreateAppointmentUseCase
 import xyz.sattar.javid.proqueue.domain.usecase.GetAppointmentByIdUseCase
 import xyz.sattar.javid.proqueue.domain.usecase.GetVisitorByIdUseCase
@@ -15,7 +24,8 @@ class CreateAppointmentViewModel(
     private val getVisitorByIdUseCase: GetVisitorByIdUseCase,
     private val createAppointmentUseCase: CreateAppointmentUseCase,
     private val getAppointmentByIdUseCase: GetAppointmentByIdUseCase,
-    private val updateAppointmentUseCase: UpdateAppointmentUseCase
+    private val updateAppointmentUseCase: UpdateAppointmentUseCase,
+    private val checkAppointmentConflictUseCase: CheckAppointmentConflictUseCase
 ) : BaseViewModel<CreateAppointmentState, CreateAppointmentState.PartialState, CreateAppointmentEvent, CreateAppointmentIntent>(
     initialState = CreateAppointmentState()
 ) {
@@ -32,7 +42,7 @@ class CreateAppointmentViewModel(
                 } catch (e: Exception) {
                     emit(
                         ShowMessage(
-                            e.message ?: "خطا در بارگذاری لیست مراجعین"
+                            e.message ?: getString(Res.string.error_loading_visitors)
                         )
                     )
                 }
@@ -43,12 +53,16 @@ class CreateAppointmentViewModel(
                     createAppointment(
                         intent.visitorId,
                         intent.appointmentDate,
-                        intent.serviceDuration
+                        intent.serviceDuration,
+                        intent.force
                     )
                 )
             }
             CreateAppointmentIntent.BackPress -> sendEvent(CreateAppointmentEvent.NavigateBack)
             CreateAppointmentIntent.AppointmentCreated -> sendEvent(CreateAppointmentEvent.AppointmentCreated)
+            CreateAppointmentIntent.DismissConflictDialog -> flow {
+                emit(DismissConflictDialog)
+            }
         }
     }
 
@@ -87,6 +101,17 @@ class CreateAppointmentViewModel(
                     appointmentCreated = true,
                     isLoading = false
                 )
+            is CreateAppointmentState.PartialState.ShowConflictDialog ->
+                currentState.copy(
+                    showConflictDialog = true,
+                    conflictingVisitorName = partialState.visitorName,
+                    isLoading = false
+                )
+            CreateAppointmentState.PartialState.DismissConflictDialog ->
+                currentState.copy(
+                    showConflictDialog = false,
+                    conflictingVisitorName = null
+                )
         }
     }
 
@@ -109,12 +134,12 @@ class CreateAppointmentViewModel(
                         )
                     )
                 } else {
-                    emit(CreateAppointmentState.PartialState.ShowMessage("نوبت یافت نشد"))
+                    emit(CreateAppointmentState.PartialState.ShowMessage(getString(Res.string.appointment_not_found)))
                 }
             } catch (e: Exception) {
                 emit(
                     CreateAppointmentState.PartialState.ShowMessage(
-                        e.message ?: "خطا در بارگذاری نوبت"
+                        e.message ?: getString(Res.string.error_loading_appointment)
                     )
                 )
             }
@@ -123,14 +148,37 @@ class CreateAppointmentViewModel(
     private fun createAppointment(
         visitorId: Long,
         appointmentDate: Long,
-        serviceDuration: Int?
+        serviceDuration: Int?,
+        force: Boolean
     ): Flow<CreateAppointmentState.PartialState> = flow {
         emit(CreateAppointmentState.PartialState.IsLoading(true))
         try {
             val business = BusinessStateHolder.selectedBusiness.value
             if (business == null) {
-                emit(CreateAppointmentState.PartialState.ShowMessage("لطفاً ابتدا یک کسب‌وکار انتخاب کنید"))
+                emit(CreateAppointmentState.PartialState.ShowMessage(getString(Res.string.select_business_error)))
                 return@flow
+            }
+
+            if (!force) {
+                val duration = serviceDuration ?: business.defaultServiceDuration ?: 30
+                val defaultDuration = business.defaultServiceDuration ?: 30
+                var conflicts = checkAppointmentConflictUseCase(
+                    businessId = business.id,
+                    startTime = appointmentDate,
+                    duration = duration,
+                    defaultDuration = defaultDuration
+                )
+
+                val editingId = uiState.value.editingAppointmentId
+                if (editingId != null) {
+                    conflicts = conflicts.filter { it.appointment.id != editingId }
+                }
+
+                if (conflicts.isNotEmpty()) {
+                    val conflict = conflicts.first()
+                    emit(CreateAppointmentState.PartialState.ShowConflictDialog(conflict.visitor.fullName))
+                    return@flow
+                }
             }
 
             val editingId = uiState.value.editingAppointmentId
@@ -152,10 +200,10 @@ class CreateAppointmentViewModel(
                 emit(CreateAppointmentState.PartialState.AppointmentCreated)
                 sendEvent(CreateAppointmentEvent.AppointmentCreated)
             } else {
-                emit(CreateAppointmentState.PartialState.ShowMessage("خطا در ذخیره نوبت"))
+                emit(CreateAppointmentState.PartialState.ShowMessage(getString(Res.string.error_saving_appointment)))
             }
         } catch (e: Exception) {
-            emit(CreateAppointmentState.PartialState.ShowMessage(e.message ?: "خطا در عملیات"))
+            emit(CreateAppointmentState.PartialState.ShowMessage(e.message ?: getString(Res.string.operation_error)))
         }
     }
 }

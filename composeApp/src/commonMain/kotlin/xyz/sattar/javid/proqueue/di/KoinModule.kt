@@ -13,6 +13,7 @@ import xyz.sattar.javid.proqueue.domain.BusinessRepository
 import xyz.sattar.javid.proqueue.domain.MessageRepository
 import xyz.sattar.javid.proqueue.domain.VisitorRepository
 import xyz.sattar.javid.proqueue.domain.usecase.BusinessUpsertUseCase
+import xyz.sattar.javid.proqueue.domain.usecase.CheckAppointmentConflictUseCase
 import xyz.sattar.javid.proqueue.domain.usecase.CreateAppointmentUseCase
 import xyz.sattar.javid.proqueue.domain.usecase.DeleteBusinessUseCase
 import xyz.sattar.javid.proqueue.domain.usecase.DeleteVisitorUseCase
@@ -70,6 +71,7 @@ val appModule: Module = module {
     factory { GetTodayStatsUseCase(get()) }
     factory { GetAppointmentByIdUseCase(get()) }
     factory { UpdateAppointmentUseCase(get()) }
+    factory { CheckAppointmentConflictUseCase(get()) }
 
     // Message UseCases
     factory { SendMessageUseCase(get()) }
@@ -87,7 +89,7 @@ val appModule: Module = module {
     // ViewModels
     viewModel { CreateBusinessViewModel(get(), get(), get()) }
     viewModel { CreateVisitorViewModel(get(), get(), get()) }
-    viewModel { CreateAppointmentViewModel(get(), get(), get(), get()) }
+    viewModel { CreateAppointmentViewModel(get(), get(), get(), get(), get()) }
     viewModel { 
         HomeViewModel(
             get(), // GetWaitingQueueUseCase
