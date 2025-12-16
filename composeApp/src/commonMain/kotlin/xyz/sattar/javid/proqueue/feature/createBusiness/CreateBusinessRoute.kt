@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -24,7 +25,11 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Snackbar
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -40,7 +45,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.viewmodel.koinViewModel
@@ -48,6 +52,7 @@ import proqueue.composeapp.generated.resources.Res
 import proqueue.composeapp.generated.resources.accept
 import proqueue.composeapp.generated.resources.address
 import proqueue.composeapp.generated.resources.business_name
+import proqueue.composeapp.generated.resources.confirm
 import proqueue.composeapp.generated.resources.create_business
 import proqueue.composeapp.generated.resources.default_time_service
 import proqueue.composeapp.generated.resources.phone
@@ -116,7 +121,29 @@ fun CreateBusinessScreen(
     onAddress: (String) -> Unit,
     onDefaultProgress: (String) -> Unit,
 ) {
+    val snackbarHostState = remember { SnackbarHostState() }
+    LaunchedEffect(uiState.message) {
+        val msg = uiState.message
+        if (msg != null) {
+            snackbarHostState.showSnackbar(msg)
+        }
+    }
     Scaffold(
+        snackbarHost = {
+            SnackbarHost(hostState = snackbarHostState) { data ->
+                Snackbar(
+                    containerColor = MaterialTheme.colorScheme.error,
+                    contentColor = MaterialTheme.colorScheme.onError,
+                    action = {
+                        TextButton(onClick = { data.dismiss() }) {
+                            Text(stringResource(Res.string.confirm))
+                        }
+                    }
+                ) {
+                    Text(data.visuals.message)
+                }
+            }
+        },
         topBar = {
             TopAppBar(
                 title = {
@@ -152,6 +179,7 @@ fun CreateBusinessScreen(
                 .background(MaterialTheme.colorScheme.background)
                 .padding(paddingValues)
                 .verticalScroll(rememberScrollState())
+                .imePadding()
                 .padding(horizontal = 24.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
@@ -179,6 +207,7 @@ fun CreateBusinessScreen(
 
             AppTextField(
                 enabled = !uiState.isLoading,
+                maxLength = 3,
                 value = defaultProgress,
                 onValueChange = onDefaultProgress,
                 label = stringResource(Res.string.default_time_service),
@@ -199,6 +228,7 @@ fun CreateBusinessScreen(
 
             AppTextField(
                 enabled = !uiState.isLoading,
+                maxLength = 11,
                 value = phone,
                 onValueChange = onPhone,
                 label = stringResource(Res.string.phone),
@@ -264,13 +294,7 @@ fun CreateBusinessScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            uiState.message?.let {
-                Text(
-                    text = it,
-                    color = MaterialTheme.colorScheme.error,
-                    style = MaterialTheme.typography.bodyMedium
-                )
-            }
+            
             if (uiState.business != null) {
                 Text(uiState.business.title)
             }

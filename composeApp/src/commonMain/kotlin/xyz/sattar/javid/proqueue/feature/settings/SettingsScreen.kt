@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -29,11 +30,13 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -45,6 +48,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.flow.Flow
@@ -55,41 +59,37 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.viewmodel.koinViewModel
 import proqueue.composeapp.generated.resources.Res
 import proqueue.composeapp.generated.resources.appName
+import proqueue.composeapp.generated.resources.app_version
 import proqueue.composeapp.generated.resources.cancel
 import proqueue.composeapp.generated.resources.change_business
+import proqueue.composeapp.generated.resources.coming_soon_message
 import proqueue.composeapp.generated.resources.compose_multiplatform
+import proqueue.composeapp.generated.resources.confirm
+import proqueue.composeapp.generated.resources.contact_me
 import proqueue.composeapp.generated.resources.delete
 import proqueue.composeapp.generated.resources.delete_business
 import proqueue.composeapp.generated.resources.delete_business_confirmation
+import proqueue.composeapp.generated.resources.google_play
+import proqueue.composeapp.generated.resources.instagram
 import proqueue.composeapp.generated.resources.manage_notifications
+import proqueue.composeapp.generated.resources.market
 import proqueue.composeapp.generated.resources.more_info
+import proqueue.composeapp.generated.resources.notification_title
 import proqueue.composeapp.generated.resources.notifications
 import proqueue.composeapp.generated.resources.settings_menu_item
 import proqueue.composeapp.generated.resources.smart_queue_management
 import proqueue.composeapp.generated.resources.theme_appearance
 import proqueue.composeapp.generated.resources.theme_settings
-import xyz.sattar.javid.proqueue.core.ui.collectWithLifecycleAware
-import xyz.sattar.javid.proqueue.ui.theme.AppTheme
-import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.rememberModalBottomSheetState
-import xyz.sattar.javid.proqueue.core.utils.openInstagram
-import xyz.sattar.javid.proqueue.core.utils.openTwitter
-import xyz.sattar.javid.proqueue.core.utils.openUrl
-import androidx.compose.material.icons.filled.Phone
-import androidx.compose.material.icons.filled.Close
-import proqueue.composeapp.generated.resources.contact_me
-import xyz.sattar.javid.proqueue.core.utils.openWhatsApp
-import proqueue.composeapp.generated.resources.instagram
 import proqueue.composeapp.generated.resources.whatsapp
-import proqueue.composeapp.generated.resources.market
-import proqueue.composeapp.generated.resources.notification_title
-import proqueue.composeapp.generated.resources.coming_soon_message
-import proqueue.composeapp.generated.resources.confirm
-import proqueue.composeapp.generated.resources.app_version
-import proqueue.composeapp.generated.resources.google_play
-import androidx.compose.ui.graphics.painter.Painter
-
 import xyz.sattar.javid.proqueue.core.state.ThemeStateHolder
+import xyz.sattar.javid.proqueue.core.ui.collectWithLifecycleAware
+import xyz.sattar.javid.proqueue.core.utils.openInstagram
+import xyz.sattar.javid.proqueue.core.utils.openUrl
+import xyz.sattar.javid.proqueue.core.utils.openWhatsApp
+import xyz.sattar.javid.proqueue.ui.theme.AppTheme
+import xyz.sattar.javid.proqueue.core.prefs.PreferencesManager
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -137,7 +137,8 @@ fun SettingsScreen(
         uiState = uiState,
         onIntent = viewModel::sendIntent,
         onThemeToggle = {
-            ThemeStateHolder.toggleTheme()
+            val newTheme = !isDarkTheme
+            scope.launch { PreferencesManager.setDarkTheme(newTheme) }
         },
         onContactUsClick = { showContactSheet = true }
     )
@@ -282,6 +283,7 @@ fun SettingsScreenContent(
                 .fillMaxSize()
                 .background(MaterialTheme.colorScheme.background)
                 .verticalScroll(rememberScrollState())
+                .imePadding()
                 .padding(paddingValues)
                 .padding(start = 16.dp, end = 16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),

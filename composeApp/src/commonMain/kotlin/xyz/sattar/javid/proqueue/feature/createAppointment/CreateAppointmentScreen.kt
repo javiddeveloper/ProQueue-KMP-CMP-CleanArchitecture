@@ -7,10 +7,13 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -29,8 +32,10 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Snackbar
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -46,34 +51,32 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.launch
 import kotlinx.datetime.toLocalDateTime
+import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.viewmodel.koinViewModel
-import xyz.sattar.javid.proqueue.core.ui.collectWithLifecycleAware
-import xyz.sattar.javid.proqueue.core.ui.components.AppButton
-import xyz.sattar.javid.proqueue.core.utils.DateTimeUtils
-import xyz.sattar.javid.proqueue.ui.theme.AppTheme
-import kotlin.time.ExperimentalTime
-import androidx.compose.foundation.layout.WindowInsets
-import org.jetbrains.compose.resources.stringResource
 import proqueue.composeapp.generated.resources.Res
 import proqueue.composeapp.generated.resources.appointment_create_action
 import proqueue.composeapp.generated.resources.appointment_time
+import proqueue.composeapp.generated.resources.back
+import proqueue.composeapp.generated.resources.cancel
 import proqueue.composeapp.generated.resources.choose_time
 import proqueue.composeapp.generated.resources.confirm
 import proqueue.composeapp.generated.resources.create_appointment_title
-import proqueue.composeapp.generated.resources.example_30
 import proqueue.composeapp.generated.resources.edit_appointment
 import proqueue.composeapp.generated.resources.hour_label
 import proqueue.composeapp.generated.resources.minute_label
 import proqueue.composeapp.generated.resources.select_visitor
 import proqueue.composeapp.generated.resources.service_duration_minutes
-import proqueue.composeapp.generated.resources.back
-import proqueue.composeapp.generated.resources.cancel
-import androidx.compose.ui.graphics.Color
+import xyz.sattar.javid.proqueue.core.ui.collectWithLifecycleAware
+import xyz.sattar.javid.proqueue.core.ui.components.AppButton
+import xyz.sattar.javid.proqueue.core.ui.components.AppTextField
+import xyz.sattar.javid.proqueue.core.utils.DateTimeUtils
+import xyz.sattar.javid.proqueue.ui.theme.AppTheme
+import kotlin.time.ExperimentalTime
 
 @Composable
 fun CreateAppointmentScreen(
@@ -144,7 +147,29 @@ fun CreateAppointmentScreenContent(
         }
     }
 
+    val snackbarHostState = remember { SnackbarHostState() }
+    LaunchedEffect(uiState.message) {
+        val msg = uiState.message
+        if (msg != null) {
+            snackbarHostState.showSnackbar(msg)
+        }
+    }
     Scaffold(
+        snackbarHost = {
+            SnackbarHost(hostState = snackbarHostState) { data ->
+                Snackbar(
+                    containerColor = MaterialTheme.colorScheme.error,
+                    contentColor = MaterialTheme.colorScheme.onError,
+                    action = {
+                        TextButton(onClick = { data.dismiss() }) {
+                            Text(stringResource(Res.string.confirm))
+                        }
+                    }
+                ) {
+                    Text(data.visuals.message)
+                }
+            }
+        },
         contentWindowInsets = WindowInsets(0),
         topBar = {
             TopAppBar(
@@ -186,6 +211,7 @@ fun CreateAppointmentScreenContent(
                     modifier = Modifier
                         .fillMaxSize()
                         .verticalScroll(rememberScrollState())
+                        .imePadding()
                         .padding(16.dp),
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
@@ -283,29 +309,27 @@ fun CreateAppointmentScreenContent(
                         fontWeight = FontWeight.SemiBold
                     )
 
-                    OutlinedTextField(
+                    AppTextField(
                         value = serviceDuration,
+                        maxLength = 3,
+                        keyboardType = KeyboardType.Number,
                         onValueChange = { serviceDuration = it },
                         modifier = Modifier.fillMaxWidth(),
-                        placeholder = { Text(stringResource(Res.string.example_30)) },
                         leadingIcon = {
                             Icon(
                                 imageVector = Icons.Default.Timer,
-                                contentDescription = null
+                                contentDescription = null,
+                                modifier = Modifier.size(24.dp),
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         },
-                        singleLine = true
+                        errorMessage = "",
+                        enabled = !uiState.isLoading,
                     )
 
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    if (uiState.message != null) {
-                        Text(
-                            uiState.message,
-                            modifier = Modifier.fillMaxWidth().padding(16.dp),
-                            color = Color.Red
-                        )
-                    }
+                    
 
                     // Create/Update Button
                     AppButton(

@@ -13,24 +13,20 @@ actual fun openUrl(url: String) {
     }
 }
 
-private fun sanitizePhone(phone: String): String {
-    return phone.filter { it.isDigit() || it == '+' }
-}
-
 actual fun openSms(phone: String) {
-    openUrl("sms:${sanitizePhone(phone)}")
+    openUrl("sms:${normalizePhone(phone)}")
 }
 
 actual fun openWhatsApp(phone: String) {
-    openUrl("https://wa.me/${sanitizePhone(phone)}")
+    openUrl("https://wa.me/${normalizePhone(phone)}")
 }
 
 actual fun openTelegram(phone: String) {
-    openUrl("https://t.me/${sanitizePhone(phone)}")
+    openUrl("https://t.me/${normalizePhone(phone)}")
 }
 
 actual fun openPhoneDial(phone: String) {
-    openUrl("tel:${sanitizePhone(phone)}")
+    openUrl("tel:${normalizePhone(phone)}")
 }
 
 actual fun openInstagram(username: String) {
@@ -40,4 +36,3 @@ actual fun openInstagram(username: String) {
 actual fun openTwitter(username: String) {
     openUrl("https://twitter.com/$username")
 }
-

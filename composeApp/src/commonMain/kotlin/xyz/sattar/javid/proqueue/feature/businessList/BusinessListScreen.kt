@@ -88,7 +88,6 @@ fun BusinessListScreenContent(
     onIntent: (BusinessListIntent) -> Unit
 ) {
     Scaffold(
-        contentWindowInsets = WindowInsets.safeDrawing,
         topBar = {
             TopAppBar(
                 title = {
@@ -97,7 +96,6 @@ fun BusinessListScreenContent(
                         style = MaterialTheme.typography.titleLarge
                     )
                 },
-                windowInsets = WindowInsets.safeDrawing,
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.background
                 )

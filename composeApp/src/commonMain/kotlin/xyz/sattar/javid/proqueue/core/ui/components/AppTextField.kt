@@ -5,8 +5,13 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
@@ -20,8 +25,9 @@ import androidx.compose.ui.unit.dp
 fun AppTextField(
     value: String,
     onValueChange: (String) -> Unit,
-    label: String,
+    label: String? = null,
     maxLine: Int = 1,
+    maxLength: Int = Int.MAX_VALUE,
     modifier: Modifier = Modifier,
     isError: Boolean = false,
     errorMessage: String? = null,
@@ -33,16 +39,22 @@ fun AppTextField(
     enabled: Boolean,
 ) {
     Column(modifier = modifier) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(bottom = 8.dp)
-        )
+        if (label != null) {
+            Text(
+                text = label,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+        }
 
         OutlinedTextField(
             value = value,
-            onValueChange = onValueChange,
+            onValueChange = {
+                if (it.length <= maxLength) {
+                    onValueChange(it)
+                }
+            },
             modifier = Modifier
                 .fillMaxWidth()
                 .then(
@@ -54,7 +66,22 @@ fun AppTextField(
             isError = isError,
             leadingIcon = leadingIcon,
             maxLines = maxLine,
-            trailingIcon = trailingIcon,
+            trailingIcon = if (value.isNotEmpty() && !readOnly && enabled) {
+                {
+                    IconButton(
+                        onClick = { onValueChange("") },
+                        modifier = Modifier.size(25.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Close,
+                            contentDescription = "Clear",
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            } else {
+                trailingIcon
+            },
             keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
             colors = OutlinedTextFieldDefaults.colors(
                 focusedBorderColor = MaterialTheme.colorScheme.primary,
