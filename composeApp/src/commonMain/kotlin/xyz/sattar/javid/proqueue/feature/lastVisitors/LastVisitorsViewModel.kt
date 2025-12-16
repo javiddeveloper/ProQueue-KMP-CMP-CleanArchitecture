@@ -36,6 +36,9 @@ class LastVisitorsViewModel(
             LastVisitorsIntent.DismissDialog -> flow {
                 emit(LastVisitorsState.PartialState.ShowOptionsDialog(null))
             }
+            is LastVisitorsIntent.OnTabSelected -> flow {
+                emit(LastVisitorsState.PartialState.TabSelected(intent.index))
+            }
         }
     }
 
@@ -59,6 +62,8 @@ class LastVisitorsViewModel(
                     selectedAppointmentId = partialState.appointmentId,
                     showOptionsDialog = partialState.appointmentId != null
                 )
+            is LastVisitorsState.PartialState.TabSelected ->
+                currentState.copy(selectedTab = partialState.index)
         }
     }
 

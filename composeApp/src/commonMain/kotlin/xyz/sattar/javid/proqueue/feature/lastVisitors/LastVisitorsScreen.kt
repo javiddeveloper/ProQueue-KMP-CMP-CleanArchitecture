@@ -170,45 +170,44 @@ fun LastVisitorsScreenContent(
 
                 else -> {
                     Column(modifier = Modifier.fillMaxSize()) {
-                        var selectedTab by rememberSaveable { mutableStateOf(0) }
                         PrimaryTabRow(
-                            selectedTabIndex = selectedTab,
+                            selectedTabIndex = uiState.selectedTab,
                             containerColor = MaterialTheme.colorScheme.background,
                             contentColor = MaterialTheme.colorScheme.onSurface,
                             modifier = Modifier.fillMaxWidth(),
                             divider = { androidx.compose.material3.Divider(color = MaterialTheme.colorScheme.outlineVariant) }
                         ) {
                             Tab(
-                                selected = selectedTab == 0,
-                                onClick = { selectedTab = 0 },
+                                selected = uiState.selectedTab == 0,
+                                onClick = { onIntent(LastVisitorsIntent.OnTabSelected(0)) },
                                 modifier = Modifier.weight(1f).height(58.dp),
                                 text = {
                                     Text(
                                         text = stringResource(Res.string.queue_tab),
                                         style = MaterialTheme.typography.bodyLarge,
-                                        fontSize = if (selectedTab == 0) 18.sp else 16.sp ,
-                                        color = if (selectedTab == 0) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
-                                        fontWeight = if (selectedTab == 0) FontWeight.Bold else FontWeight.SemiBold
+                                        fontSize = if (uiState.selectedTab == 0) 18.sp else 16.sp ,
+                                        color = if (uiState.selectedTab == 0) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                                        fontWeight = if (uiState.selectedTab == 0) FontWeight.Bold else FontWeight.SemiBold
                                     )
                                 }
                             )
                             Tab(
-                                selected = selectedTab == 1,
-                                onClick = { selectedTab = 1 },
+                                selected = uiState.selectedTab == 1,
+                                onClick = { onIntent(LastVisitorsIntent.OnTabSelected(1)) },
                                 modifier = Modifier.weight(1f).height(58.dp),
                                 text = {
                                     Text(
                                         text = stringResource(Res.string.visitors_tab),
                                         style = MaterialTheme.typography.bodyLarge,
-                                        fontSize = if (selectedTab == 1) 18.sp else 16.sp ,
-                                        color = if (selectedTab == 1) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
-                                        fontWeight = if (selectedTab == 1) FontWeight.Bold else FontWeight.SemiBold
+                                        fontSize = if (uiState.selectedTab == 1) 18.sp else 16.sp ,
+                                        color = if (uiState.selectedTab == 1) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                                        fontWeight = if (uiState.selectedTab == 1) FontWeight.Bold else FontWeight.SemiBold
                                     )
                                 }
                             )
                         }
                         Spacer(modifier = Modifier.height(8.dp))
-                        if (selectedTab == 0) {
+                        if (uiState.selectedTab == 0) {
                             val now = DateTimeUtils.systemCurrentMilliseconds()
                             val waiting = uiState.appointments
                                 .filter { it.appointment.status == "WAITING" }
