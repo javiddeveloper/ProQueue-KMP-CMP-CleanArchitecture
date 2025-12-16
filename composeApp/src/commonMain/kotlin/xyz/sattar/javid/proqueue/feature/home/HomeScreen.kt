@@ -187,7 +187,7 @@ fun DashboardStatsSection(stats: DashboardStats) {
             )
             StatCard(
                 modifier = Modifier.weight(1f),
-                title = "کل بازدیدکنندگان",
+                title = "کل مراجعین",
                 value = stats.totalVisitors.toString(),
                 color = MaterialTheme.colorScheme.secondaryContainer,
                 icon = Icons.Default.People
