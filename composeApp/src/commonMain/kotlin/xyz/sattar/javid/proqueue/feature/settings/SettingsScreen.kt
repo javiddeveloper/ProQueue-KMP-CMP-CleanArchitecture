@@ -137,8 +137,9 @@ fun SettingsScreen(
         uiState = uiState,
         onIntent = viewModel::sendIntent,
         onThemeToggle = {
-            val newTheme = !isDarkTheme
-            scope.launch { PreferencesManager.setDarkTheme(newTheme) }
+            val target = !isDarkTheme
+            ThemeStateHolder.setDarkTheme(target)
+            scope.launch { PreferencesManager.setDarkTheme(target) }
         },
         onContactUsClick = { showContactSheet = true }
     )

@@ -5,6 +5,7 @@ import android.content.SharedPreferences
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import xyz.sattar.javid.proqueue.ProQueueApp
+import androidx.core.content.edit
 
 actual object PreferencesManager {
     private val context: Context get() = ProQueueApp.appContext
@@ -24,14 +25,17 @@ actual object PreferencesManager {
     actual val defaultBusinessId: Flow<Long?> = _defaultBusinessId
 
     actual suspend fun setDarkTheme(isDark: Boolean) {
-        prefs.edit().putBoolean(KEY_DARK_THEME, isDark).apply()
+        prefs.edit(commit = true) { putBoolean(KEY_DARK_THEME, isDark) }
         _isDarkTheme.value = isDark
     }
 
     actual suspend fun setDefaultBusinessId(id: Long?) {
-        prefs.edit().apply {
-            if (id == null) remove(KEY_DEFAULT_BUSINESS_ID) else putLong(KEY_DEFAULT_BUSINESS_ID, id)
-        }.apply()
+        prefs.edit(commit = true) {
+            if (id == null) remove(KEY_DEFAULT_BUSINESS_ID) else putLong(
+                KEY_DEFAULT_BUSINESS_ID,
+                id
+            )
+        }
         _defaultBusinessId.value = id
     }
 }

@@ -22,14 +22,12 @@ class CreateBusinessViewModel(
                     intent.title,
                     intent.phone,
                     intent.address,
-                    intent.defaultProgress,
-                    intent.logoPath
+                    intent.defaultProgress
                 )
             }
 
             CreateBusinessIntent.BackPress -> sendEvent(CreateBusinessEvent.BackPressed)
             CreateBusinessIntent.BusinessCreated -> sendEvent(CreateBusinessEvent.NavigateToBusiness)
-            is CreateBusinessIntent.OnImageSelected -> saveImage(intent.bytes)
         }
     }
 
@@ -77,7 +75,6 @@ class CreateBusinessViewModel(
         phone: String,
         address: String,
         defaultProgress: String,
-        logoPath: String
     ): Flow<CreateBusinessState.PartialState> = flow {
         emit(CreateBusinessState.PartialState.IsLoading(true))
         businessUpsertUseCase.invoke(
@@ -85,7 +82,7 @@ class CreateBusinessViewModel(
                 title = businessName,
                 phone = phone,
                 address = address,
-                logoPath = logoPath.ifEmpty { "Sample_path.jpg" },
+                logoPath = uiState.value.logoPath ?: "Sample_path.jpg",
                 id = 0,
                 defaultServiceDuration = defaultProgress.toIntOrNull() ?: 15,
                 workStartHour = 9,
