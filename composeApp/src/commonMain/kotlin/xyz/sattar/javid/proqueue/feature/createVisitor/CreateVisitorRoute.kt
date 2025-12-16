@@ -71,6 +71,8 @@ fun CreateVisitorRoute(
 
     var fullName by remember { mutableStateOf("") }
     var phoneNumber by remember { mutableStateOf("") }
+    var nameError by remember { mutableStateOf<String?>(null) }
+    var phoneError by remember { mutableStateOf<String?>(null) }
 
     LaunchedEffect(visitorId) {
         if (visitorId != null) {
@@ -112,9 +114,19 @@ fun CreateVisitorRoute(
         },
         fullName = fullName,
         phoneNumber = phoneNumber,
-        onFullName = { fullName = it },
-        onPhoneNumber = { phoneNumber = it },
-        isEditing = visitorId != null
+        onFullName = {
+            fullName = it
+            nameError = null
+        },
+        onPhoneNumber = {
+            phoneNumber = it
+            phoneError = null
+        },
+        isEditing = visitorId != null,
+        nameError = nameError,
+        phoneError = phoneError,
+        onNameErrorUpdate = { nameError = it },
+        onPhoneErrorUpdate = { phoneError = it }
     )
 }
 
@@ -128,7 +140,11 @@ fun CreateVisitorScreen(
     phoneNumber: String,
     onFullName: (String) -> Unit,
     onPhoneNumber: (String) -> Unit,
-    isEditing: Boolean = false
+    isEditing: Boolean = false,
+    nameError: String? = null,
+    phoneError: String? = null,
+    onNameErrorUpdate: (String?) -> Unit = {},
+    onPhoneErrorUpdate: (String?) -> Unit = {}
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
     LaunchedEffect(uiState.message) {
@@ -205,7 +221,8 @@ fun CreateVisitorScreen(
                         tint = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 },
-                errorMessage = "",
+                isError = nameError != null,
+                errorMessage = nameError,
                 enabled = !uiState.isLoading,
             )
 
@@ -217,8 +234,8 @@ fun CreateVisitorScreen(
                 value = phoneNumber,
                 onValueChange = onPhoneNumber,
                 label = stringResource(Res.string.phone),
-                isError = false,
-                errorMessage = "",
+                isError = phoneError != null,
+                errorMessage = phoneError,
                 leadingIcon = {
                     Icon(
                         imageVector = Icons.Default.Phone,
@@ -241,10 +258,18 @@ fun CreateVisitorScreen(
                 AppButton(
                     text = if (isEditing) stringResource(Res.string.edit) else stringResource(Res.string.register_visitor),
                     onClick = {
-                        onIntent(CreateVisitorIntent.CreateVisitor(fullName, phoneNumber))
+                        val name = fullName.trim()
+                        val phone = phoneNumber.trim()
+                        val nameInvalid = name.length < 3
+                        val phoneInvalid = phone.length < 3
+                        onNameErrorUpdate(if (nameInvalid) "نام صحیح نیست" else null)
+                        onPhoneErrorUpdate(if (phoneInvalid) "شماره تلفن صحیح نیست" else null)
+                        if (!nameInvalid && !phoneInvalid) {
+                            onIntent(CreateVisitorIntent.CreateVisitor(name, phone))
+                        }
                     },
                     modifier = Modifier.weight(1f),
-                    enabled = !uiState.isLoading && fullName.isNotBlank()&& phoneNumber.isNotBlank()
+                    enabled = !uiState.isLoading
                 )
             }
 
@@ -295,7 +320,11 @@ fun PreviewCreateVisitorScreen() {
             fullName = "",
             phoneNumber = "",
             onFullName = {},
-            onPhoneNumber = {}
+            onPhoneNumber = {},
+            nameError = null,
+            phoneError = null,
+            onNameErrorUpdate = {},
+            onPhoneErrorUpdate = {}
         )
     }
 }
