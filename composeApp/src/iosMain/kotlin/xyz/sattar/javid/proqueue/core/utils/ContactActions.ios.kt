@@ -14,19 +14,19 @@ actual fun openUrl(url: String) {
 }
 
 actual fun openSms(phone: String) {
-    openUrl("sms:${normalizePhone(phone)}")
+    openUrl("sms:${formatPhoneNumberForAction(phone)}")
 }
 
 actual fun openWhatsApp(phone: String) {
-    openUrl("https://wa.me/${normalizePhone(phone)}")
+    openUrl("https://wa.me/${formatPhoneNumberForAction(phone)}")
 }
 
 actual fun openTelegram(phone: String) {
-    openUrl("https://t.me/${normalizePhone(phone)}")
+    openUrl("https://t.me/${formatPhoneNumberForAction(phone)}")
 }
 
 actual fun openPhoneDial(phone: String) {
-    openUrl("tel:${normalizePhone(phone)}")
+    openUrl("tel:${formatPhoneNumberForAction(phone)}")
 }
 
 actual fun openInstagram(username: String) {
