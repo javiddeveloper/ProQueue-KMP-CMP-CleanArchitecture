@@ -54,12 +54,14 @@ sealed interface MainTab {
     val title: StringResource
     val iconSelected: ImageVector
     val iconUnSelected: ImageVector
+    val route: AppScreens
 
     @Serializable
     data object Home : MainTab {
         override val title = Res.string.home_menu_item
         override val iconSelected = Icons.Filled.Home
         override val iconUnSelected = Icons.Outlined.Home
+        override val route = AppScreens.Home
     }
 
     @Serializable
@@ -67,6 +69,7 @@ sealed interface MainTab {
         override val title = Res.string.last_visitors_menu_item
         override val iconSelected = Icons.Filled.People
         override val iconUnSelected = Icons.Outlined.People
+        override val route = AppScreens.Visitors
     }
 
     @Serializable
@@ -74,5 +77,6 @@ sealed interface MainTab {
         override val title = Res.string.settings_menu_item
         override val iconSelected = Icons.Filled.Settings
         override val iconUnSelected = Icons.Outlined.Settings
+        override val route = AppScreens.Settings
     }
 }
