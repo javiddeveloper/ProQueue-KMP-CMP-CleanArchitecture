@@ -11,7 +11,7 @@ data class LastVisitorsState(
     val message: String? = null,
     val selectedAppointmentId: Long? = null,
     val showOptionsDialog: Boolean = false,
-    val selectedTab: Int = 0
+    val selectedTab: Int = 1
 ) {
     sealed class PartialState {
         data class IsLoading(val isLoading: Boolean) : PartialState()

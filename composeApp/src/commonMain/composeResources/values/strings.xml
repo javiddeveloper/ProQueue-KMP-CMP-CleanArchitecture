@@ -38,6 +38,8 @@
     <string name="last_visitors_title">نوبت های اخیر</string>
     <string name="create_appointment">ایجاد نوبت جدید</string>
     <string name="total_appointments_today">تعداد کل نوبت‌های امروز</string>
+    <string name="people_in_queue_count">تعداد افراد در صف</string>
+    <string name="total_visitors_count">تعداد کل مراجعین</string>
     <string name="empty_appointments_title">هنوز نوبتی ثبت نشده</string>
     <string name="empty_appointments_subtitle">با زدن دکمه + می‌توانید نوبت جدید ایجاد کنید</string>
     <string name="overdue_time">زمان رد شده</string>
