@@ -2,7 +2,6 @@ package xyz.sattar.javid.proqueue.core.utils
 
 import android.content.Intent
 import android.net.Uri
-import androidx.compose.ui.platform.LocalContext
 import androidx.core.net.toUri
 
 private fun launchUri(uri: String) {
@@ -12,20 +11,20 @@ private fun launchUri(uri: String) {
 }
 
 actual fun openSms(phone: String) {
-    launchUri("sms:$phone")
+    launchUri("sms:${formatPhoneNumberForAction(phone)}")
 }
 
 actual fun openWhatsApp(phone: String) {
-    launchUri("https://wa.me/$phone")
+    launchUri("https://wa.me/${formatPhoneNumberForAction(phone)}")
 }
 
 actual fun openTelegram(phone: String) {
-    launchUri("https://t.me/$phone")
+    launchUri("https://t.me/${formatPhoneNumberForAction(phone)}")
 }
 
 actual fun openPhoneDial(phone: String) {
     val context = xyz.sattar.javid.proqueue.ProQueueApp.appContext
-    val intent = Intent(Intent.ACTION_DIAL, "tel:$phone".toUri()).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+    val intent = Intent(Intent.ACTION_DIAL, "tel:${formatPhoneNumberForAction(phone)}".toUri()).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
     context.startActivity(intent)
 }
 
