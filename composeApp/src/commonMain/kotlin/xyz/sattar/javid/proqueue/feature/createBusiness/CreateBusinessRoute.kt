@@ -307,7 +307,7 @@ fun CreateBusinessScreen(
                         val a = address.trim()
                         val d = defaultProgress.trim()
                         val titleInvalid = t.length < 3
-                        val phoneInvalid = p.length < 3
+                        val phoneInvalid = p.length < 7
                         val defaultInvalid = d.isNotEmpty() && d.toIntOrNull() == null
                         onTitleErrorUpdate(if (titleInvalid) "نام کسب‌وکار صحیح نیست" else null)
                         onPhoneErrorUpdate(if (phoneInvalid) "شماره تلفن صحیح نیست" else null)
