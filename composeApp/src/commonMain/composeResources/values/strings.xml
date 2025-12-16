@@ -15,7 +15,7 @@
     <string name="register_visitor">ثبت</string>
 
     <!-- Home Screen -->
-    <string name="welcome_to_proqueue">به ProQueue خوش آمدید</string>
+    <string name="welcome_to_proqueue">به نوبت یار خوش آمدید</string>
     <string name="smart_queue_management">سیستم مدیریت نوبت‌دهی هوشمند</string>
     <string name="quick_access">دسترسی سریع</string>
     <string name="add_customer">افزودن مشتری</string>
