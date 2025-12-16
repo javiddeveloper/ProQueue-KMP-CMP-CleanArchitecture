@@ -78,6 +78,11 @@ import xyz.sattar.javid.proqueue.core.utils.DateTimeUtils
 import xyz.sattar.javid.proqueue.ui.theme.AppTheme
 import kotlin.time.ExperimentalTime
 
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.graphics.Color
+
 @Composable
 fun CreateAppointmentScreen(
     visitorId: Long? = null,
@@ -373,6 +378,57 @@ fun CreateAppointmentScreenContent(
                         showTimeDialog = false
                     },
                     onDismiss = { showTimeDialog = false }
+                )
+            }
+
+            // Conflict Dialog
+            if (uiState.showConflictDialog) {
+                AlertDialog(
+                    onDismissRequest = { onIntent(CreateAppointmentIntent.DismissConflictDialog) },
+                    title = { Text("تداخل نوبت") },
+                    text = {
+                        Text(
+                            text = buildAnnotatedString {
+                                append("شما قبلا در همین بازه برای کاربر با نام \n ")
+                                withStyle(
+                                    style = SpanStyle(
+                                        fontWeight = FontWeight.Bold,
+                                        color = Color.Red
+                                    )
+                                ) {
+                                    append(uiState.conflictingVisitorName ?: "")
+                                }
+                                append(" نوبت ثبت کردید. آیا مطمئن هستید که می‌خواهید با تداخل نوبت ثبت کنید؟")
+                            }
+                        )
+                    },
+                    confirmButton = {
+                        TextButton(
+                            onClick = {
+                                selectedVisitorId?.let { visitorId ->
+                                    val duration = serviceDuration.trim().toIntOrNull()
+                                    onIntent(
+                                        CreateAppointmentIntent.CreateAppointment(
+                                            visitorId = visitorId,
+                                            appointmentDate = DateTimeUtils.combineDateAndTime(
+                                                selectedDate,
+                                                selectedTime
+                                            ),
+                                            serviceDuration = duration,
+                                            force = true
+                                        )
+                                    )
+                                }
+                            }
+                        ) {
+                            Text("بله، ثبت شود")
+                        }
+                    },
+                    dismissButton = {
+                        TextButton(onClick = { onIntent(CreateAppointmentIntent.DismissConflictDialog) }) {
+                            Text("خیر")
+                        }
+                    }
                 )
             }
         }

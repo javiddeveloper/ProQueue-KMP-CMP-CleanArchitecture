@@ -5,6 +5,7 @@ import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
 import xyz.sattar.javid.proqueue.core.state.BusinessStateHolder
 import xyz.sattar.javid.proqueue.core.ui.BaseViewModel
+import xyz.sattar.javid.proqueue.domain.usecase.CheckAppointmentConflictUseCase
 import xyz.sattar.javid.proqueue.domain.usecase.CreateAppointmentUseCase
 import xyz.sattar.javid.proqueue.domain.usecase.GetAppointmentByIdUseCase
 import xyz.sattar.javid.proqueue.domain.usecase.GetVisitorByIdUseCase
@@ -15,7 +16,8 @@ class CreateAppointmentViewModel(
     private val getVisitorByIdUseCase: GetVisitorByIdUseCase,
     private val createAppointmentUseCase: CreateAppointmentUseCase,
     private val getAppointmentByIdUseCase: GetAppointmentByIdUseCase,
-    private val updateAppointmentUseCase: UpdateAppointmentUseCase
+    private val updateAppointmentUseCase: UpdateAppointmentUseCase,
+    private val checkAppointmentConflictUseCase: CheckAppointmentConflictUseCase
 ) : BaseViewModel<CreateAppointmentState, CreateAppointmentState.PartialState, CreateAppointmentEvent, CreateAppointmentIntent>(
     initialState = CreateAppointmentState()
 ) {
@@ -43,12 +45,16 @@ class CreateAppointmentViewModel(
                     createAppointment(
                         intent.visitorId,
                         intent.appointmentDate,
-                        intent.serviceDuration
+                        intent.serviceDuration,
+                        intent.force
                     )
                 )
             }
             CreateAppointmentIntent.BackPress -> sendEvent(CreateAppointmentEvent.NavigateBack)
             CreateAppointmentIntent.AppointmentCreated -> sendEvent(CreateAppointmentEvent.AppointmentCreated)
+            CreateAppointmentIntent.DismissConflictDialog -> flow {
+                emit(DismissConflictDialog)
+            }
         }
     }
 
@@ -87,6 +93,17 @@ class CreateAppointmentViewModel(
                     appointmentCreated = true,
                     isLoading = false
                 )
+            is CreateAppointmentState.PartialState.ShowConflictDialog ->
+                currentState.copy(
+                    showConflictDialog = true,
+                    conflictingVisitorName = partialState.visitorName,
+                    isLoading = false
+                )
+            CreateAppointmentState.PartialState.DismissConflictDialog ->
+                currentState.copy(
+                    showConflictDialog = false,
+                    conflictingVisitorName = null
+                )
         }
     }
 
@@ -123,7 +140,8 @@ class CreateAppointmentViewModel(
     private fun createAppointment(
         visitorId: Long,
         appointmentDate: Long,
-        serviceDuration: Int?
+        serviceDuration: Int?,
+        force: Boolean
     ): Flow<CreateAppointmentState.PartialState> = flow {
         emit(CreateAppointmentState.PartialState.IsLoading(true))
         try {
@@ -131,6 +149,28 @@ class CreateAppointmentViewModel(
             if (business == null) {
                 emit(CreateAppointmentState.PartialState.ShowMessage("لطفاً ابتدا یک کسب‌وکار انتخاب کنید"))
                 return@flow
+            }
+
+            if (!force) {
+                val duration = serviceDuration ?: business.defaultServiceDuration ?: 30
+                val defaultDuration = business.defaultServiceDuration ?: 30
+                var conflicts = checkAppointmentConflictUseCase(
+                    businessId = business.id,
+                    startTime = appointmentDate,
+                    duration = duration,
+                    defaultDuration = defaultDuration
+                )
+
+                val editingId = uiState.value.editingAppointmentId
+                if (editingId != null) {
+                    conflicts = conflicts.filter { it.appointment.id != editingId }
+                }
+
+                if (conflicts.isNotEmpty()) {
+                    val conflict = conflicts.first()
+                    emit(CreateAppointmentState.PartialState.ShowConflictDialog(conflict.visitor.fullName))
+                    return@flow
+                }
             }
 
             val editingId = uiState.value.editingAppointmentId
