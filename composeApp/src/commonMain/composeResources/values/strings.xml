@@ -98,4 +98,18 @@
     <string name="hour_label">ساعت:</string>
     <string name="minute_label">دقیقه:</string>
     <string name="confirm">تایید</string>
+
+    <!-- Conflict Dialog & Errors -->
+    <string name="service_duration_error">مدت زمان سرویس باید عدد باشد</string>
+    <string name="conflict_dialog_title">تداخل نوبت</string>
+    <string name="conflict_dialog_message_prefix">شما قبلا برای کاربر با نام </string>
+    <string name="conflict_dialog_message_suffix"> نوبت ثبت کردید. آیا مطمئن هستید که می‌خواهید در همین بازه نوبت جدید ثبت کنید؟</string>
+    <string name="yes_force_create">بله، ثبت شود</string>
+    <string name="no">خیر</string>
+    <string name="select_business_error">لطفاً ابتدا یک کسب‌وکار انتخاب کنید</string>
+    <string name="appointment_not_found">نوبت یافت نشد</string>
+    <string name="error_loading_appointment">خطا در بارگذاری نوبت</string>
+    <string name="error_saving_appointment">خطا در ذخیره نوبت</string>
+    <string name="operation_error">خطا در عملیات</string>
+    <string name="error_loading_visitors">خطا در بارگذاری لیست مراجعین</string>
 </resources>

@@ -71,6 +71,12 @@ import proqueue.composeapp.generated.resources.hour_label
 import proqueue.composeapp.generated.resources.minute_label
 import proqueue.composeapp.generated.resources.select_visitor
 import proqueue.composeapp.generated.resources.service_duration_minutes
+import proqueue.composeapp.generated.resources.service_duration_error
+import proqueue.composeapp.generated.resources.conflict_dialog_title
+import proqueue.composeapp.generated.resources.conflict_dialog_message_prefix
+import proqueue.composeapp.generated.resources.conflict_dialog_message_suffix
+import proqueue.composeapp.generated.resources.yes_force_create
+import proqueue.composeapp.generated.resources.no
 import xyz.sattar.javid.proqueue.core.ui.collectWithLifecycleAware
 import xyz.sattar.javid.proqueue.core.ui.components.AppButton
 import xyz.sattar.javid.proqueue.core.ui.components.AppTextField
@@ -342,13 +348,14 @@ fun CreateAppointmentScreenContent(
                     
 
                     // Create/Update Button
+                    val serviceDurationErrorMsg = stringResource(Res.string.service_duration_error)
                     AppButton(
                         text = if (uiState.editingAppointmentId != null) stringResource(Res.string.edit_appointment) else stringResource(Res.string.appointment_create_action),
                         onClick = {
                             selectedVisitorId?.let { visitorId ->
                                 // Parse time and create timestamp
                                 val duration = serviceDuration.trim().toIntOrNull()
-                                serviceDurationError = if (duration == null) "مدت زمان سرویس باید عدد باشد" else null
+                                serviceDurationError = if (duration == null) serviceDurationErrorMsg else null
                                 onIntent(
                                     CreateAppointmentIntent.CreateAppointment(
                                         visitorId = visitorId,
@@ -383,13 +390,15 @@ fun CreateAppointmentScreenContent(
 
             // Conflict Dialog
             if (uiState.showConflictDialog) {
+                val prefix = stringResource(Res.string.conflict_dialog_message_prefix)
+                val suffix = stringResource(Res.string.conflict_dialog_message_suffix)
                 AlertDialog(
                     onDismissRequest = { onIntent(CreateAppointmentIntent.DismissConflictDialog) },
-                    title = { Text("تداخل نوبت") },
+                    title = { Text(stringResource(Res.string.conflict_dialog_title)) },
                     text = {
                         Text(
                             text = buildAnnotatedString {
-                                append("شما قبلا در همین بازه برای کاربر با نام \n ")
+                                append(prefix)
                                 withStyle(
                                     style = SpanStyle(
                                         fontWeight = FontWeight.Bold,
@@ -398,7 +407,7 @@ fun CreateAppointmentScreenContent(
                                 ) {
                                     append(uiState.conflictingVisitorName ?: "")
                                 }
-                                append(" نوبت ثبت کردید. آیا مطمئن هستید که می‌خواهید با تداخل نوبت ثبت کنید؟")
+                                append(suffix)
                             }
                         )
                     },
@@ -421,12 +430,12 @@ fun CreateAppointmentScreenContent(
                                 }
                             }
                         ) {
-                            Text("بله، ثبت شود")
+                            Text(stringResource(Res.string.yes_force_create))
                         }
                     },
                     dismissButton = {
                         TextButton(onClick = { onIntent(CreateAppointmentIntent.DismissConflictDialog) }) {
-                            Text("خیر")
+                            Text(stringResource(Res.string.no))
                         }
                     }
                 )
