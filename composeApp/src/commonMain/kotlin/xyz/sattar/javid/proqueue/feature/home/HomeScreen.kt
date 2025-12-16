@@ -13,6 +13,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.slideInVertically
 import androidx.compose.material3.Card
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Cancel
@@ -31,6 +35,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -81,6 +88,12 @@ fun HomeScreenContent(
     uiState: HomeState,
     onIntent: (HomeIntent) -> Unit
 ) {
+    var visible by remember { mutableStateOf(false) }
+
+    LaunchedEffect(Unit) {
+        visible = true
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -104,15 +117,47 @@ fun HomeScreenContent(
                 .padding(paddingValues),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            item { BusinessInfoHeader(uiState) }
-
             item {
-                DateHeader()
+                AnimatedVisibility(
+                    visible = visible,
+                    enter = slideInVertically(initialOffsetY = { 50 }) + fadeIn(
+                        animationSpec = tween(
+                            durationMillis = 500,
+                            delayMillis = 300
+                        )
+                    )
+                ) {
+                    BusinessInfoHeader(uiState)
+                }
             }
 
             item {
-                // Dashboard Stats
-                DashboardStatsSection(stats = uiState.stats)
+                AnimatedVisibility(
+                    visible = visible,
+                    enter = slideInVertically(initialOffsetY = { 50 }) + fadeIn(
+                        animationSpec = tween(
+                            durationMillis = 500,
+                            delayMillis = 200
+                        )
+                    )
+                ) {
+                    DateHeader()
+                }
+            }
+
+            item {
+                AnimatedVisibility(
+                    visible = visible,
+                    enter = slideInVertically(initialOffsetY = { 50 }) + fadeIn(
+                        animationSpec = tween(
+                            durationMillis = 500,
+                            delayMillis = 100
+                        )
+                    )
+                ) {
+                    // Dashboard Stats
+                    DashboardStatsSection(stats = uiState.stats)
+                }
             }
 
             // Queue moved to LastVisitors pager
@@ -187,7 +232,7 @@ fun DashboardStatsSection(stats: DashboardStats) {
             )
             StatCard(
                 modifier = Modifier.weight(1f),
-                title = "کل بازدیدکنندگان",
+                title = "کل مراجعین",
                 value = stats.totalVisitors.toString(),
                 color = MaterialTheme.colorScheme.secondaryContainer,
                 icon = Icons.Default.People

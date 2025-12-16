@@ -12,32 +12,21 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.EventNote
-import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.PrimaryTabRow
-import androidx.compose.material3.TabRowDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Tab
@@ -51,11 +40,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -65,22 +52,20 @@ import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.viewmodel.koinViewModel
 import proqueue.composeapp.generated.resources.Res
-import proqueue.composeapp.generated.resources.change_appointment
 import proqueue.composeapp.generated.resources.create_appointment
-import proqueue.composeapp.generated.resources.delete_appointment
 import proqueue.composeapp.generated.resources.empty_appointments_subtitle
 import proqueue.composeapp.generated.resources.empty_appointments_title
 import proqueue.composeapp.generated.resources.last_visitors_title
 import proqueue.composeapp.generated.resources.overdue_time
+import proqueue.composeapp.generated.resources.people_in_queue_count
 import proqueue.composeapp.generated.resources.queue_tab
 import proqueue.composeapp.generated.resources.status_cancelled
 import proqueue.composeapp.generated.resources.status_completed
 import proqueue.composeapp.generated.resources.status_no_show
 import proqueue.composeapp.generated.resources.status_waiting
-import proqueue.composeapp.generated.resources.total_appointments_today
-import proqueue.composeapp.generated.resources.visitors_tab
 import proqueue.composeapp.generated.resources.to_label
-import kotlin.math.abs
+import proqueue.composeapp.generated.resources.total_visitors_count
+import proqueue.composeapp.generated.resources.visitors_tab
 import xyz.sattar.javid.proqueue.core.ui.collectWithLifecycleAware
 import xyz.sattar.javid.proqueue.core.ui.components.QueueItemCard
 import xyz.sattar.javid.proqueue.core.utils.DateTimeUtils
@@ -90,6 +75,7 @@ import xyz.sattar.javid.proqueue.domain.model.Business
 import xyz.sattar.javid.proqueue.domain.model.Visitor
 import xyz.sattar.javid.proqueue.feature.home.QueueItem
 import xyz.sattar.javid.proqueue.ui.theme.AppTheme
+import kotlin.math.abs
 
 @Composable
 fun LastVisitorsScreen(
@@ -170,49 +156,54 @@ fun LastVisitorsScreenContent(
 
                 else -> {
                     Column(modifier = Modifier.fillMaxSize()) {
-                        var selectedTab by rememberSaveable { mutableStateOf(0) }
                         PrimaryTabRow(
-                            selectedTabIndex = selectedTab,
+                            selectedTabIndex = uiState.selectedTab,
                             containerColor = MaterialTheme.colorScheme.background,
                             contentColor = MaterialTheme.colorScheme.onSurface,
                             modifier = Modifier.fillMaxWidth(),
                             divider = { androidx.compose.material3.Divider(color = MaterialTheme.colorScheme.outlineVariant) }
                         ) {
                             Tab(
-                                selected = selectedTab == 0,
-                                onClick = { selectedTab = 0 },
+                                selected = uiState.selectedTab == 0,
+                                onClick = { onIntent(LastVisitorsIntent.OnTabSelected(0)) },
                                 modifier = Modifier.weight(1f).height(58.dp),
                                 text = {
                                     Text(
                                         text = stringResource(Res.string.queue_tab),
                                         style = MaterialTheme.typography.bodyLarge,
-                                        fontSize = if (selectedTab == 0) 18.sp else 16.sp ,
-                                        color = if (selectedTab == 0) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
-                                        fontWeight = if (selectedTab == 0) FontWeight.Bold else FontWeight.SemiBold
+                                        fontSize = if (uiState.selectedTab == 0) 18.sp else 16.sp ,
+                                        color = if (uiState.selectedTab == 0) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                                        fontWeight = if (uiState.selectedTab == 0) FontWeight.Bold else FontWeight.SemiBold
                                     )
                                 }
                             )
                             Tab(
-                                selected = selectedTab == 1,
-                                onClick = { selectedTab = 1 },
+                                selected = uiState.selectedTab == 1,
+                                onClick = { onIntent(LastVisitorsIntent.OnTabSelected(1)) },
                                 modifier = Modifier.weight(1f).height(58.dp),
                                 text = {
                                     Text(
                                         text = stringResource(Res.string.visitors_tab),
                                         style = MaterialTheme.typography.bodyLarge,
-                                        fontSize = if (selectedTab == 1) 18.sp else 16.sp ,
-                                        color = if (selectedTab == 1) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
-                                        fontWeight = if (selectedTab == 1) FontWeight.Bold else FontWeight.SemiBold
+                                        fontSize = if (uiState.selectedTab == 1) 18.sp else 16.sp ,
+                                        color = if (uiState.selectedTab == 1) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                                        fontWeight = if (uiState.selectedTab == 1) FontWeight.Bold else FontWeight.SemiBold
                                     )
                                 }
                             )
                         }
                         Spacer(modifier = Modifier.height(8.dp))
-                        if (selectedTab == 0) {
+                        if (uiState.selectedTab == 0) {
                             val now = DateTimeUtils.systemCurrentMilliseconds()
                             val waiting = uiState.appointments
                                 .filter { it.appointment.status == "WAITING" }
                                 .sortedBy { abs(it.appointment.appointmentDate - now) }
+                            
+                            TotalCountHeader(
+                                title = stringResource(Res.string.people_in_queue_count),
+                                count = waiting.size
+                            )
+                            
                             if (waiting.isEmpty()) {
                                 EmptyState(modifier = Modifier.align(Alignment.CenterHorizontally))
                             } else {
@@ -250,7 +241,10 @@ fun LastVisitorsScreenContent(
                                 }
                             }
                         } else {
-                            TotalCountHeader(count = uiState.totalCount)
+                            TotalCountHeader(
+                                title = stringResource(Res.string.total_visitors_count),
+                                count = uiState.totalCount
+                            )
                             AppointmentsList(
                                 appointments = uiState.appointments,
                                 onEditClick = { appointmentId ->
@@ -269,11 +263,15 @@ fun LastVisitorsScreenContent(
 }
 
 @Composable
-fun TotalCountHeader(count: Int) {
+fun TotalCountHeader(
+    title: String,
+    count: Int
+) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp),
+            .padding(horizontal = 16.dp)
+            .padding(bottom = 16.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.primaryContainer
         ),
@@ -288,7 +286,7 @@ fun TotalCountHeader(count: Int) {
             Text(
                 modifier = Modifier
                     .padding(horizontal = 16.dp, vertical = 8.dp),
-                text = stringResource(Res.string.total_appointments_today),
+                text = title,
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onPrimaryContainer
             )
@@ -319,8 +317,6 @@ fun AppointmentsList(
             .padding(horizontal = 16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        item { Spacer(modifier = Modifier.height(4.dp)) }
-
         items(appointments) { appointmentWithDetails ->
             AppointmentCard(
                 appointmentWithDetails = appointmentWithDetails,

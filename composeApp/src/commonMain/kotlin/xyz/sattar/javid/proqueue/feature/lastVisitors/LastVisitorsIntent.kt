@@ -9,4 +9,5 @@ sealed interface LastVisitorsIntent {
     data class OnMarkCompleted(val appointmentId: Long) : LastVisitorsIntent
     data class OnMarkNoShow(val appointmentId: Long) : LastVisitorsIntent
     data object DismissDialog : LastVisitorsIntent
+    data class OnTabSelected(val index: Int) : LastVisitorsIntent
 }
