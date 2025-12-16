@@ -85,7 +85,7 @@ val appModule: Module = module {
     factory { CreateVisitorState() }
 
     // ViewModels
-    viewModel { CreateBusinessViewModel(get(), get()) }
+    viewModel { CreateBusinessViewModel(get(), get(), get()) }
     viewModel { CreateVisitorViewModel(get(), get(), get()) }
     viewModel { CreateAppointmentViewModel(get(), get(), get(), get()) }
     viewModel { 
