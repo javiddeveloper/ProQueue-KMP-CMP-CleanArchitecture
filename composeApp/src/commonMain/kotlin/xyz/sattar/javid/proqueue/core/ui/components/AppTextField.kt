@@ -61,7 +61,7 @@ fun AppTextField(
                     if (onClick != null) {
                         Modifier.clickable(onClick = onClick)
                     } else Modifier
-                ),
+            ),
             readOnly = readOnly,
             isError = isError,
             leadingIcon = leadingIcon,
