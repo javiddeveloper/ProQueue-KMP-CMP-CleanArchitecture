@@ -261,7 +261,7 @@ fun CreateVisitorScreen(
                         val name = fullName.trim()
                         val phone = phoneNumber.trim()
                         val nameInvalid = name.length < 3
-                        val phoneInvalid = phone.length < 3
+                        val phoneInvalid = phone.length < 7
                         onNameErrorUpdate(if (nameInvalid) "نام صحیح نیست" else null)
                         onPhoneErrorUpdate(if (phoneInvalid) "شماره تلفن صحیح نیست" else null)
                         if (!nameInvalid && !phoneInvalid) {
