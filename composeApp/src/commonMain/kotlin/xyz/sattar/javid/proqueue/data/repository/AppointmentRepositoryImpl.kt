@@ -17,14 +17,14 @@ class AppointmentRepositoryImpl(
     private val businessDao: BusinessDao,
     private val visitorDao: VisitorDao
 ) : AppointmentRepository {
-    override suspend fun createAppointment(appointment: Appointment): Boolean {
+    override suspend fun createAppointment(appointment: Appointment): Long {
         return try {
             val hasActive = appointmentDao.hasActiveAppointment(
                 appointment.businessId,
                 appointment.visitorId,
                 appointment.appointmentDate
             )
-            if (hasActive) return false
+            if (hasActive) return -1L
 
             val lastPosition = appointmentDao.getLastQueuePosition(
                 appointment.businessId,
@@ -34,9 +34,8 @@ class AppointmentRepositoryImpl(
             appointmentDao.upsertAppointment(
                 appointment.toEntity()
             )
-            true
         } catch (e: Exception) {
-            false
+            -1L
         }
     }
 

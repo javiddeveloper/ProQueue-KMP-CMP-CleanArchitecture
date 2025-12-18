@@ -41,6 +41,7 @@ import xyz.sattar.javid.proqueue.feature.settings.SettingsViewModel
 import xyz.sattar.javid.proqueue.feature.visitorSelection.VisitorSelectionViewModel
 import xyz.sattar.javid.proqueue.domain.usecase.GetAppointmentByIdUseCase
 import xyz.sattar.javid.proqueue.domain.usecase.UpdateAppointmentUseCase
+import xyz.sattar.javid.proqueue.feature.notifications.NotificationsViewModel
 
 val appModule: Module = module {
     // DAOs
@@ -64,7 +65,7 @@ val appModule: Module = module {
     // Appointment UseCases
     factory { GetWaitingQueueUseCase(get()) }
     factory { GetTodayAppointmentsUseCase(get()) }
-    factory { CreateAppointmentUseCase(get()) }
+    factory { CreateAppointmentUseCase(get(), get(), get(), get()) }
     factory { RemoveAppointmentUseCase(get()) }
     factory { MarkAppointmentCompletedUseCase(get()) }
     factory { MarkAppointmentNoShowUseCase(get()) }
@@ -110,5 +111,6 @@ val appModule: Module = module {
     }
     viewModel { VisitorSelectionViewModel(get(), get()) }
     viewModel { SettingsViewModel(get()) }
+    viewModel { NotificationsViewModel(get(), get()) }
     viewModel { BusinessListViewModel(get()) }
 }

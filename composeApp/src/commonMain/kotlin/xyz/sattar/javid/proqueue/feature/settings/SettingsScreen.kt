@@ -101,7 +101,8 @@ import proqueue.composeapp.generated.resources.main_icon
 fun SettingsScreen(
     viewModel: SettingsViewModel = koinViewModel<SettingsViewModel>(),
     onNavigateToAbout: () -> Unit = {},
-    onChangeBusiness: () -> Unit = {}
+    onChangeBusiness: () -> Unit = {},
+    onNavigateToNotifications: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val scope = rememberCoroutineScope()
@@ -119,7 +120,8 @@ fun SettingsScreen(
     HandleEvents(
         events = viewModel.events,
         onNavigateToAbout = onNavigateToAbout,
-        onChangeBusiness = onChangeBusiness
+        onChangeBusiness = onChangeBusiness,
+        onNavigateToNotifications = onNavigateToNotifications
     )
 
     if (showContactSheet) {
@@ -464,7 +466,7 @@ fun SettingsScreenContent(
                         icon = Icons.Default.Notifications,
                         title = stringResource(Res.string.notifications),
                         subtitle = stringResource(Res.string.manage_notifications),
-                        onClick = { showNotificationToast = true }
+                        onClick = { onIntent(SettingsIntent.OnNotificationsClick) }
                     )
 
                     HorizontalDivider()
@@ -539,11 +541,12 @@ fun SettingsItem(
 fun HandleEvents(
     events: Flow<SettingsEvent>,
     onNavigateToAbout: () -> Unit,
-    onChangeBusiness: () -> Unit
+    onChangeBusiness: () -> Unit,
+    onNavigateToNotifications: () -> Unit
 ) {
     val scope = rememberCoroutineScope()
-    events.collectWithLifecycleAware {
-        when (it) {
+    events.collectWithLifecycleAware { event ->
+        when (event) {
             SettingsEvent.NavigateToAbout -> {
                 scope.launch {
                     onNavigateToAbout()
@@ -559,6 +562,12 @@ fun HandleEvents(
             SettingsEvent.BusinessDeleted -> {
                 scope.launch {
                     onChangeBusiness()
+                }
+            }
+
+            SettingsEvent.NavigateToNotifications -> {
+                scope.launch {
+                    onNavigateToNotifications()
                 }
             }
         }
