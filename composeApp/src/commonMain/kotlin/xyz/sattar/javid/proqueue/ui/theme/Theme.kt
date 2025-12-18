@@ -9,6 +9,8 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.LayoutDirection
+import xyz.sattar.javid.proqueue.core.state.AppThemeMode
+
 
 private val DarkColorScheme = darkColorScheme(
     primary = PrimaryPurple,
@@ -31,17 +33,22 @@ private val LightColorScheme = lightColorScheme(
     onSurface = LightOnSurface,
     onSurfaceVariant = LightOnSurfaceVariant,
     outline = LightBorder,
-    error = ErrorColor
-)
+    error = ErrorColor)
+
 
 @Composable
 fun AppTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
+    themeMode: AppThemeMode = AppThemeMode.SYSTEM,
     content: @Composable () -> Unit
 ) {
-    val colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme
+    val isDarkTheme = when (themeMode) {
+        AppThemeMode.SYSTEM -> isSystemInDarkTheme()
+        AppThemeMode.LIGHT -> false
+        AppThemeMode.DARK -> true
+    }
+    val colorScheme = if (isDarkTheme) DarkColorScheme else LightColorScheme
     
-    SystemAppearance(!darkTheme)
+    SystemAppearance(!isDarkTheme)
 
     CompositionLocalProvider(
         LocalLayoutDirection provides LayoutDirection.Rtl

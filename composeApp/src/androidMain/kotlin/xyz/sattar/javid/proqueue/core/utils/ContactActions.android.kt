@@ -2,7 +2,7 @@ package xyz.sattar.javid.proqueue.core.utils
 
 import android.content.Intent
 import android.net.Uri
-import androidx.compose.ui.platform.LocalContext
+import androidx.core.net.toUri
 
 private fun launchUri(uri: String) {
     val context = xyz.sattar.javid.proqueue.ProQueueApp.appContext
@@ -11,20 +11,20 @@ private fun launchUri(uri: String) {
 }
 
 actual fun openSms(phone: String) {
-    launchUri("sms:${normalizePhone(phone)}")
+    launchUri("sms:${formatPhoneNumberForAction(phone)}")
 }
 
 actual fun openWhatsApp(phone: String) {
-    launchUri("https://wa.me/${normalizePhone(phone)}")
+    launchUri("https://wa.me/${formatPhoneNumberForAction(phone)}")
 }
 
 actual fun openTelegram(phone: String) {
-    launchUri("https://t.me/${normalizePhone(phone)}")
+    launchUri("https://t.me/${formatPhoneNumberForAction(phone)}")
 }
 
 actual fun openPhoneDial(phone: String) {
     val context = xyz.sattar.javid.proqueue.ProQueueApp.appContext
-    val intent = Intent(Intent.ACTION_DIAL, Uri.parse("tel:${normalizePhone(phone)}")).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+    val intent = Intent(Intent.ACTION_DIAL, "tel:${formatPhoneNumberForAction(phone)}".toUri()).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
     context.startActivity(intent)
 }
 
@@ -33,7 +33,7 @@ actual fun openUrl(url: String) {
 }
 
 actual fun openInstagram(username: String) {
-    launchUri("https://www.instagram.com/$username/?hl=en")
+    launchUri("https://instagram.com/$username")
 }
 
 actual fun openTwitter(username: String) {

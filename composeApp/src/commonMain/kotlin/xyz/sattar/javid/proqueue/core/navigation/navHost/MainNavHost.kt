@@ -12,6 +12,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.navigation.NavDestination.Companion.hierarchy
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -35,23 +37,26 @@ fun MainNavHost(
 ) {
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
-    val currentRoute = navBackStackEntry?.destination?.route
-
-    val screensWithBottomBar = setOf(
-        AppScreens.Home::class.qualifiedName,
-        AppScreens.Visitors::class.qualifiedName,
-        AppScreens.Settings::class.qualifiedName
-    )
-
-    val shouldShowBottomBar = currentRoute in screensWithBottomBar
-
-    var selectedTab by remember { mutableStateOf<MainTab>(MainTab.Home) }
+    val currentDestination = navBackStackEntry?.destination
 
     val tabs = listOf(
         MainTab.Home,
         MainTab.LastVisitors,
         MainTab.Settings
     )
+
+    // Determine if the bottom bar should be shown
+    val shouldShowBottomBar = tabs.any { tab ->
+        currentDestination?.hierarchy?.any {
+            it.route == tab.route::class.qualifiedName
+        } == true
+    }
+
+    val selectedTab = tabs.find { tab ->
+        currentDestination?.hierarchy?.any {
+            it.route == tab.route::class.qualifiedName
+        } == true
+    } ?: MainTab.Home
 
     Scaffold(
         bottomBar = {
@@ -68,30 +73,18 @@ fun MainNavHost(
                     tabs = tabs,
                     selectedTab = selectedTab,
                     onTabSelected = { tab ->
-                        selectedTab = tab
-                        when (tab) {
-                            MainTab.Home -> navController.navigate(AppScreens.Home) {
-                                popUpTo(AppScreens.Home) {
-                                    inclusive = false
+                        if (selectedTab != tab) {
+                            navController.navigate(tab.route) {
+                                // Pop up to the start destination of the graph to
+                                // avoid building up a large stack of destinations
+                                // on the back stack as users select items
+                                popUpTo(navController.graph.findStartDestination().id) {
                                     saveState = true
                                 }
+                                // Avoid multiple copies of the same destination when
+                                // reselecting the same item
                                 launchSingleTop = true
-                                restoreState = true
-                            }
-                            MainTab.LastVisitors -> navController.navigate(AppScreens.Visitors) {
-                                popUpTo(AppScreens.Home) {
-                                    inclusive = false
-                                    saveState = true
-                                }
-                                launchSingleTop = true
-                                restoreState = true
-                            }
-                            MainTab.Settings -> navController.navigate(AppScreens.Settings) {
-                                popUpTo(AppScreens.Home) {
-                                    inclusive = false
-                                    saveState = true
-                                }
-                                launchSingleTop = true
+                                // Restore state when reselecting a previously selected item
                                 restoreState = true
                             }
                         }
@@ -108,12 +101,10 @@ fun MainNavHost(
                 .padding(bottom = if (shouldShowBottomBar) paddingValues.calculateBottomPadding() else paddingValues.calculateBottomPadding())
         ) {
             composable<AppScreens.Home> {
-                selectedTab = MainTab.Home
                 HomeScreen()
             }
 
             composable<AppScreens.Visitors> {
-                selectedTab = MainTab.LastVisitors
                 LastVisitorsScreen(
                     onNavigateToCreateAppointment = {
                         navController.navigate(AppScreens.VisitorSelection)
@@ -142,7 +133,6 @@ fun MainNavHost(
             }
 
             composable<AppScreens.Settings> {
-                selectedTab = MainTab.Settings
                 SettingsScreen(
                     onNavigateToAbout = {},
                     onChangeBusiness = onChangeBusiness

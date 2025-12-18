@@ -8,11 +8,13 @@ data class CreateBusinessState (
     val isLoading: Boolean = false,
     val businessCreated: Boolean = false,
     val business: Business? = null,
-    val message: String? = null
+    val message: String? = null,
+    val logoPath: String? = null
 ){
     sealed class PartialState{
         data class IsLoading(val isLoading: Boolean): PartialState()
         data class ShowMessage(val message: String): PartialState()
         object BusinessCreated: PartialState()
+        data class LogoSelected(val path: String): PartialState()
     }
 }

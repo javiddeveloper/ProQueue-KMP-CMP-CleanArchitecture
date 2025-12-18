@@ -12,7 +12,9 @@ data class CreateAppointmentState(
     val appointmentDate: Long = 0L,
     val appointmentCreated: Boolean = false,
     val serviceDuration: Int? = null,
-    val editingAppointmentId: Long? = null
+    val editingAppointmentId: Long? = null,
+    val showConflictDialog: Boolean = false,
+    val conflictingVisitorName: String? = null
 ) {
     sealed class PartialState {
         data class IsLoading(val isLoading: Boolean) : PartialState()
@@ -25,6 +27,8 @@ data class CreateAppointmentState(
             val appointmentId: Long
         ) : PartialState()
         data object AppointmentCreated : PartialState()
+        data class ShowConflictDialog(val visitorName: String) : PartialState()
+        data object DismissConflictDialog : PartialState()
     }
 }
 

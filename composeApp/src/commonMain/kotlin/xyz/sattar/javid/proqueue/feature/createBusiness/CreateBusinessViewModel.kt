@@ -5,10 +5,11 @@ import kotlinx.coroutines.flow.flow
 import xyz.sattar.javid.proqueue.core.ui.BaseViewModel
 import xyz.sattar.javid.proqueue.domain.model.Business
 import xyz.sattar.javid.proqueue.domain.usecase.BusinessUpsertUseCase
+import kotlinx.coroutines.launch
 
 class CreateBusinessViewModel(
     initialState: CreateBusinessState,
-    private val businessUpsertUseCase: BusinessUpsertUseCase
+    private val businessUpsertUseCase: BusinessUpsertUseCase,
 ) : BaseViewModel<CreateBusinessState, CreateBusinessState.PartialState, CreateBusinessEvent, CreateBusinessIntent>(
     initialState
 ) {
@@ -28,6 +29,7 @@ class CreateBusinessViewModel(
         }
     }
 
+
     override fun reduceState(
         currentState: CreateBusinessState,
         partialState: CreateBusinessState.PartialState
@@ -37,7 +39,7 @@ class CreateBusinessViewModel(
                 currentState.copy(businessCreated = true, isLoading = false, message = null)
 
             is CreateBusinessState.PartialState.IsLoading ->
-                currentState.copy(businessCreated = false, isLoading = true, message = null)
+                currentState.copy(businessCreated = false, isLoading = partialState.isLoading, message = null)
 
             is CreateBusinessState.PartialState.ShowMessage ->
                 currentState.copy(
@@ -45,7 +47,8 @@ class CreateBusinessViewModel(
                     isLoading = false,
                     message = partialState.message
                 )
-
+            is CreateBusinessState.PartialState.LogoSelected ->
+                currentState.copy(logoPath = partialState.path, isLoading = false)
         }
     }
 
@@ -56,7 +59,7 @@ class CreateBusinessViewModel(
         businessName: String,
         phone: String,
         address: String,
-        defaultProgress: String
+        defaultProgress: String,
     ): Flow<CreateBusinessState.PartialState> = flow {
         emit(CreateBusinessState.PartialState.IsLoading(true))
         businessUpsertUseCase.invoke(
@@ -64,9 +67,9 @@ class CreateBusinessViewModel(
                 title = businessName,
                 phone = phone,
                 address = address,
-                logoPath = "Sample_path.jpg",
+                logoPath = uiState.value.logoPath ?: "Sample_path.jpg",
                 id = 0,
-                defaultServiceDuration = defaultProgress.toInt(),
+                defaultServiceDuration = defaultProgress.toIntOrNull() ?: 15,
                 workStartHour = 9,
                 workEndHour = 17,
                 notificationEnabled = false,
@@ -75,6 +78,4 @@ class CreateBusinessViewModel(
         )
         emit(CreateBusinessState.PartialState.BusinessCreated)
     }
-
-
 }

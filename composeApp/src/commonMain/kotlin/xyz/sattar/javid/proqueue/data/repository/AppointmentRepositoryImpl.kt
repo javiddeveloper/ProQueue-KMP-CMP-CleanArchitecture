@@ -163,4 +163,19 @@ class AppointmentRepositoryImpl(
             // Log error
         }
     }
+
+    override suspend fun getConflictingAppointments(
+        businessId: Long,
+        startTime: Long,
+        endTime: Long,
+        defaultDuration: Int
+    ): List<AppointmentWithDetails> {
+        return try {
+            appointmentDao.getConflictingAppointments(businessId, startTime, endTime, defaultDuration).map {
+                it.toDomain()
+            }
+        } catch (e: Exception) {
+            emptyList()
+        }
+    }
 }

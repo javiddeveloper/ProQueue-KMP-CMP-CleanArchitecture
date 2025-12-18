@@ -150,6 +150,22 @@ interface AppointmentDao {
         )
     """)
     suspend fun hasActiveAppointment(businessId: Long, visitorId: Long, date: Long): Boolean
+
+    @Transaction
+    @Query("""
+        SELECT * FROM Appointment 
+        WHERE businessId = :businessId 
+        AND status != 'CANCELLED'
+        AND appointmentDate < :endTime 
+        AND (appointmentDate + COALESCE(serviceDuration, :defaultDuration) * 60 * 1000) > :startTime
+    """)
+    suspend fun getConflictingAppointments(
+        businessId: Long, 
+        startTime: Long, 
+        endTime: Long, 
+        defaultDuration: Int
+    ): List<AppointmentWithDetailsEntity>
+
     @Query("DELETE FROM Appointment WHERE visitorId = :visitorId")
     suspend fun deleteAppointmentsByVisitorId(visitorId: Long)
 }

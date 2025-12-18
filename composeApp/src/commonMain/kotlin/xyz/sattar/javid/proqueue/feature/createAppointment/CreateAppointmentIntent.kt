@@ -6,8 +6,10 @@ sealed interface CreateAppointmentIntent {
     data class CreateAppointment(
         val visitorId: Long,
         val appointmentDate: Long,
-        val serviceDuration: Int?
+        val serviceDuration: Int?,
+        val force: Boolean = false
     ) : CreateAppointmentIntent
     data object BackPress : CreateAppointmentIntent
     data object AppointmentCreated : CreateAppointmentIntent
+    data object DismissConflictDialog : CreateAppointmentIntent
 }

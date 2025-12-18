@@ -15,7 +15,7 @@
     <string name="register_visitor">ثبت</string>
 
     <!-- Home Screen -->
-    <string name="welcome_to_proqueue">به ProQueue خوش آمدید</string>
+    <string name="welcome_to_proqueue">به نوبت یار خوش آمدید</string>
     <string name="smart_queue_management">سیستم مدیریت نوبت‌دهی هوشمند</string>
     <string name="quick_access">دسترسی سریع</string>
     <string name="add_customer">افزودن مشتری</string>
@@ -38,6 +38,8 @@
     <string name="last_visitors_title">نوبت های اخیر</string>
     <string name="create_appointment">ایجاد نوبت جدید</string>
     <string name="total_appointments_today">تعداد کل نوبت‌های امروز</string>
+    <string name="people_in_queue_count">تعداد افراد در صف</string>
+    <string name="total_visitors_count">تعداد کل مراجعین</string>
     <string name="empty_appointments_title">هنوز نوبتی ثبت نشده</string>
     <string name="empty_appointments_subtitle">با زدن دکمه + می‌توانید نوبت جدید ایجاد کنید</string>
     <string name="overdue_time">زمان رد شده</string>
@@ -52,6 +54,10 @@
     <!-- Settings Screen -->
     <string name="theme_appearance">تم و ظاهر</string>
     <string name="theme_settings">تنظیمات رنگ و تم</string>
+    <string name="theme_system">مطابق با سیستم</string>
+    <string name="theme_light">روشن</string>
+    <string name="theme_dark">تیره</string>
+    <string name="select_theme">انتخاب تم</string>
     <string name="notifications">اعلان‌ها</string>
     <string name="manage_notifications">مدیریت اعلان‌ها</string>
     <string name="contact_me">تماس با ما</string>
@@ -98,4 +104,18 @@
     <string name="hour_label">ساعت:</string>
     <string name="minute_label">دقیقه:</string>
     <string name="confirm">تایید</string>
+
+    <!-- Conflict Dialog & Errors -->
+    <string name="service_duration_error">مدت زمان سرویس باید عدد باشد</string>
+    <string name="conflict_dialog_title">تداخل نوبت</string>
+    <string name="conflict_dialog_message_prefix">شما قبلا برای کاربر با نام </string>
+    <string name="conflict_dialog_message_suffix"> نوبت ثبت کردید. آیا مطمئن هستید که می‌خواهید در همین بازه نوبت جدید ثبت کنید؟</string>
+    <string name="yes_force_create">بله، ثبت شود</string>
+    <string name="no">خیر</string>
+    <string name="select_business_error">لطفاً ابتدا یک کسب‌وکار انتخاب کنید</string>
+    <string name="appointment_not_found">نوبت یافت نشد</string>
+    <string name="error_loading_appointment">خطا در بارگذاری نوبت</string>
+    <string name="error_saving_appointment">خطا در ذخیره نوبت</string>
+    <string name="operation_error">خطا در عملیات</string>
+    <string name="error_loading_visitors">خطا در بارگذاری لیست مراجعین</string>
 </resources>

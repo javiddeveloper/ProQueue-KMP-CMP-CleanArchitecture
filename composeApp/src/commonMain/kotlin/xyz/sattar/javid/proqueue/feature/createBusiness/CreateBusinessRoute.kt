@@ -59,7 +59,6 @@ import proqueue.composeapp.generated.resources.phone
 import xyz.sattar.javid.proqueue.core.ui.collectWithLifecycleAware
 import xyz.sattar.javid.proqueue.core.ui.components.AppButton
 import xyz.sattar.javid.proqueue.core.ui.components.AppTextField
-import xyz.sattar.javid.proqueue.core.ui.components.ProfileImagePicker
 import xyz.sattar.javid.proqueue.ui.theme.AppTheme
 
 @Composable
@@ -74,6 +73,10 @@ fun CreateBusinessRoute(
     var phone by remember { mutableStateOf("") }
     var address by remember { mutableStateOf("") }
     var defaultProgress by remember { mutableStateOf("") }
+    var titleError by remember { mutableStateOf<String?>(null) }
+    var phoneError by remember { mutableStateOf<String?>(null) }
+    var defaultProgressError by remember { mutableStateOf<String?>(null) }
+    var addressError by remember { mutableStateOf<String?>(null) }
 
     HandleEvents(
         events = viewModel.events,
@@ -94,16 +97,28 @@ fun CreateBusinessRoute(
         defaultProgress = defaultProgress,
         onTitle = {
             title = it
+            titleError = null
         },
         onPhone = {
             phone = it
+            phoneError = null
         },
         onAddress = {
             address = it
+            addressError = null
         },
         onDefaultProgress = {
             defaultProgress = it
+            defaultProgressError = null
         },
+        titleError = titleError,
+        phoneError = phoneError,
+        addressError = addressError,
+        defaultProgressError = defaultProgressError,
+        onTitleErrorUpdate = { titleError = it },
+        onPhoneErrorUpdate = { phoneError = it },
+        onAddressErrorUpdate = { addressError = it },
+        onDefaultProgressErrorUpdate = { defaultProgressError = it },
     )
 }
 
@@ -121,6 +136,14 @@ fun CreateBusinessScreen(
     onPhone: (String) -> Unit,
     onAddress: (String) -> Unit,
     onDefaultProgress: (String) -> Unit,
+    titleError: String? = null,
+    phoneError: String? = null,
+    addressError: String? = null,
+    defaultProgressError: String? = null,
+    onTitleErrorUpdate: (String?) -> Unit = {},
+    onPhoneErrorUpdate: (String?) -> Unit = {},
+    onAddressErrorUpdate: (String?) -> Unit = {},
+    onDefaultProgressErrorUpdate: (String?) -> Unit = {},
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
     LaunchedEffect(uiState.message) {
@@ -187,8 +210,6 @@ fun CreateBusinessScreen(
         ) {
             Spacer(modifier = Modifier.height(24.dp))
 
-            ProfileImagePicker(imageUrl = null)
-
             AppTextField(
                 value = title,
                 onValueChange = onTitle,
@@ -202,7 +223,8 @@ fun CreateBusinessScreen(
                         tint = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 },
-                errorMessage = "",
+                isError = titleError != null,
+                errorMessage = titleError,
                 enabled = !uiState.isLoading,
             )
 
@@ -214,7 +236,7 @@ fun CreateBusinessScreen(
                 value = defaultProgress,
                 onValueChange = onDefaultProgress,
                 label = stringResource(Res.string.default_time_service),
-                isError = false,
+                isError = defaultProgressError != null,
                 leadingIcon = {
                     Icon(
                         imageVector = Icons.Default.Timer,
@@ -223,7 +245,7 @@ fun CreateBusinessScreen(
                         tint = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 },
-                errorMessage = "",
+                errorMessage = defaultProgressError,
                 modifier = Modifier.fillMaxWidth(),
                 keyboardType = KeyboardType.Number
             )
@@ -235,8 +257,8 @@ fun CreateBusinessScreen(
                 value = phone,
                 onValueChange = onPhone,
                 label = stringResource(Res.string.phone),
-                isError = false,
-                errorMessage = "",
+                isError = phoneError != null,
+                errorMessage = phoneError,
                 leadingIcon = {
                     Icon(
                         imageVector = Icons.Default.Phone,
@@ -256,8 +278,8 @@ fun CreateBusinessScreen(
                 value = address,
                 onValueChange = onAddress,
                 label = stringResource(Res.string.address),
-                isError = false,
-                errorMessage = "",
+                isError = addressError != null,
+                errorMessage = addressError,
                 leadingIcon = {
                     Icon(
                         imageVector = Icons.Default.AddLocation,
@@ -280,17 +302,30 @@ fun CreateBusinessScreen(
                 AppButton(
                     text = stringResource(Res.string.accept),
                     onClick = {
-                        onIntent(
-                            CreateBusinessIntent.CreateBusiness(
-                                title,
-                                phone,
-                                address,
-                                defaultProgress
+                        val t = title.trim()
+                        val p = phone.trim()
+                        val a = address.trim()
+                        val d = defaultProgress.trim()
+                        val titleInvalid = t.length < 3
+                        val phoneInvalid = p.length < 7
+                        val defaultInvalid = d.isNotEmpty() && d.toIntOrNull() == null
+                        onTitleErrorUpdate(if (titleInvalid) "نام کسب‌وکار صحیح نیست" else null)
+                        onPhoneErrorUpdate(if (phoneInvalid) "شماره تلفن صحیح نیست" else null)
+                        onAddressErrorUpdate(null)
+                        onDefaultProgressErrorUpdate(if (defaultInvalid) "مدت زمان سرویس باید عدد باشد" else null)
+                        if (!titleInvalid && !phoneInvalid && !defaultInvalid) {
+                            onIntent(
+                                CreateBusinessIntent.CreateBusiness(
+                                    t,
+                                    p,
+                                    a,
+                                    d
+                                )
                             )
-                        )
+                        }
                     },
                     modifier = Modifier.weight(1f),
-                    enabled = !uiState.isLoading && title.isNotBlank()
+                    enabled = !uiState.isLoading
 
                 )
             }
@@ -340,6 +375,14 @@ fun PreviewDashboardScreen() {
             onPhone = {},
             onAddress = {},
             onDefaultProgress = {},
+            titleError = null,
+            phoneError = null,
+            addressError = null,
+            defaultProgressError = null,
+            onTitleErrorUpdate = {},
+            onPhoneErrorUpdate = {},
+            onAddressErrorUpdate = {},
+            onDefaultProgressErrorUpdate = {},
         )
     }
 }

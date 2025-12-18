@@ -2,8 +2,6 @@ package xyz.sattar.javid.proqueue.di
 
 import org.koin.android.ext.koin.androidContext
 import org.koin.dsl.module
-import xyz.sattar.javid.proqueue.core.utils.FileStorage
-import xyz.sattar.javid.proqueue.core.utils.FileStorageAndroid
 import xyz.sattar.javid.proqueue.data.localDataSource.AppDatabase
 import xyz.sattar.javid.proqueue.db.DbFactoryAndroid
 
@@ -15,6 +13,5 @@ val dbModuleAndroid = module {
         DbFactoryAndroid.initialize()
     }
 
-    single<FileStorage> { FileStorageAndroid(androidContext()) }
 
 }

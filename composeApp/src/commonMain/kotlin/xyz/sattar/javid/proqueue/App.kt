@@ -21,14 +21,14 @@ import xyz.sattar.javid.proqueue.domain.BusinessRepository
 @Composable
 @Preview
 fun App() {
-    val isDarkTheme by ThemeStateHolder.isDarkTheme.collectAsState()
+    val themeMode by ThemeStateHolder.themeMode.collectAsState()
     LaunchedEffect(Unit) {
-        PreferencesManager.isDarkTheme.collect { ThemeStateHolder.setDarkTheme(it) }
+        PreferencesManager.themeMode.collect { ThemeStateHolder.setThemeMode(it) }
     }
     val scope = rememberCoroutineScope()
     val businessRepository: BusinessRepository = koinInject()
 
-    AppTheme(darkTheme = isDarkTheme) {
+    AppTheme(themeMode = themeMode) {
         val selectedBusiness by BusinessStateHolder.selectedBusiness.collectAsState()
 
         LaunchedEffect(Unit) {

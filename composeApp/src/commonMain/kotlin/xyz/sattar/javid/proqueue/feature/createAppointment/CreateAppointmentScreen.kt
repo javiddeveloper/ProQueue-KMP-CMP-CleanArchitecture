@@ -71,12 +71,23 @@ import proqueue.composeapp.generated.resources.hour_label
 import proqueue.composeapp.generated.resources.minute_label
 import proqueue.composeapp.generated.resources.select_visitor
 import proqueue.composeapp.generated.resources.service_duration_minutes
+import proqueue.composeapp.generated.resources.service_duration_error
+import proqueue.composeapp.generated.resources.conflict_dialog_title
+import proqueue.composeapp.generated.resources.conflict_dialog_message_prefix
+import proqueue.composeapp.generated.resources.conflict_dialog_message_suffix
+import proqueue.composeapp.generated.resources.yes_force_create
+import proqueue.composeapp.generated.resources.no
 import xyz.sattar.javid.proqueue.core.ui.collectWithLifecycleAware
 import xyz.sattar.javid.proqueue.core.ui.components.AppButton
 import xyz.sattar.javid.proqueue.core.ui.components.AppTextField
 import xyz.sattar.javid.proqueue.core.utils.DateTimeUtils
 import xyz.sattar.javid.proqueue.ui.theme.AppTheme
 import kotlin.time.ExperimentalTime
+
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.graphics.Color
 
 @Composable
 fun CreateAppointmentScreen(
@@ -126,6 +137,7 @@ fun CreateAppointmentScreenContent(
     var selectedDate by remember { mutableStateOf(DateTimeUtils.systemCurrentMilliseconds()) }
     var selectedTime by remember { mutableStateOf("09:00") }
     var serviceDuration by remember { mutableStateOf(uiState.serviceDuration?.toString() ?: "30") }
+    var serviceDurationError by remember { mutableStateOf<String?>(null) }
     var showTimeDialog by remember { mutableStateOf(false) }
 
     LaunchedEffect(uiState) {
@@ -313,7 +325,10 @@ fun CreateAppointmentScreenContent(
                         value = serviceDuration,
                         maxLength = 3,
                         keyboardType = KeyboardType.Number,
-                        onValueChange = { serviceDuration = it },
+                        onValueChange = {
+                            serviceDuration = it
+                            serviceDurationError = null
+                        },
                         modifier = Modifier.fillMaxWidth(),
                         leadingIcon = {
                             Icon(
@@ -323,7 +338,8 @@ fun CreateAppointmentScreenContent(
                                 tint = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         },
-                        errorMessage = "",
+                        isError = serviceDurationError != null,
+                        errorMessage = serviceDurationError,
                         enabled = !uiState.isLoading,
                     )
 
@@ -332,12 +348,14 @@ fun CreateAppointmentScreenContent(
                     
 
                     // Create/Update Button
+                    val serviceDurationErrorMsg = stringResource(Res.string.service_duration_error)
                     AppButton(
                         text = if (uiState.editingAppointmentId != null) stringResource(Res.string.edit_appointment) else stringResource(Res.string.appointment_create_action),
                         onClick = {
                             selectedVisitorId?.let { visitorId ->
                                 // Parse time and create timestamp
-                                val duration = serviceDuration.toIntOrNull()
+                                val duration = serviceDuration.trim().toIntOrNull()
+                                serviceDurationError = if (duration == null) serviceDurationErrorMsg else null
                                 onIntent(
                                     CreateAppointmentIntent.CreateAppointment(
                                         visitorId = visitorId,
@@ -351,7 +369,7 @@ fun CreateAppointmentScreenContent(
                             }
                         },
                         modifier = Modifier.fillMaxWidth(),
-                        enabled = selectedVisitorId != null && serviceDuration.isNotBlank()
+                        enabled = selectedVisitorId != null
                     )
 
                     Spacer(modifier = Modifier.height(16.dp))
@@ -367,6 +385,59 @@ fun CreateAppointmentScreenContent(
                         showTimeDialog = false
                     },
                     onDismiss = { showTimeDialog = false }
+                )
+            }
+
+            // Conflict Dialog
+            if (uiState.showConflictDialog) {
+                val prefix = stringResource(Res.string.conflict_dialog_message_prefix)
+                val suffix = stringResource(Res.string.conflict_dialog_message_suffix)
+                AlertDialog(
+                    onDismissRequest = { onIntent(CreateAppointmentIntent.DismissConflictDialog) },
+                    title = { Text(stringResource(Res.string.conflict_dialog_title)) },
+                    text = {
+                        Text(
+                            text = buildAnnotatedString {
+                                append(prefix)
+                                withStyle(
+                                    style = SpanStyle(
+                                        fontWeight = FontWeight.Bold,
+                                        color = Color.Red
+                                    )
+                                ) {
+                                    append(uiState.conflictingVisitorName ?: "")
+                                }
+                                append(suffix)
+                            }
+                        )
+                    },
+                    confirmButton = {
+                        TextButton(
+                            onClick = {
+                                selectedVisitorId?.let { visitorId ->
+                                    val duration = serviceDuration.trim().toIntOrNull()
+                                    onIntent(
+                                        CreateAppointmentIntent.CreateAppointment(
+                                            visitorId = visitorId,
+                                            appointmentDate = DateTimeUtils.combineDateAndTime(
+                                                selectedDate,
+                                                selectedTime
+                                            ),
+                                            serviceDuration = duration,
+                                            force = true
+                                        )
+                                    )
+                                }
+                            }
+                        ) {
+                            Text(stringResource(Res.string.yes_force_create))
+                        }
+                    },
+                    dismissButton = {
+                        TextButton(onClick = { onIntent(CreateAppointmentIntent.DismissConflictDialog) }) {
+                            Text(stringResource(Res.string.no))
+                        }
+                    }
                 )
             }
         }
