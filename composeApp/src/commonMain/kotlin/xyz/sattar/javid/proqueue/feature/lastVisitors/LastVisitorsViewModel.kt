@@ -39,6 +39,9 @@ class LastVisitorsViewModel(
             is LastVisitorsIntent.OnTabSelected -> flow {
                 emit(LastVisitorsState.PartialState.TabSelected(intent.index))
             }
+            is LastVisitorsIntent.OnAppointmentClick -> {
+                sendEvent(LastVisitorsEvent.NavigateToVisitorDetails(intent.visitorId))
+            }
         }
     }
 
