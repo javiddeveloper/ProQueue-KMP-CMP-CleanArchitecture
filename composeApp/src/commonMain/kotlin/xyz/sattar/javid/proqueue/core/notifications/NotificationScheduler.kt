@@ -6,7 +6,9 @@ interface NotificationScheduler {
         customerName: String,
         businessName: String,
         triggerAtMillis: Long,
-        minutesBefore: Int
+        minutesBefore: Int,
+        businessId: Long,
+        visitorId: Long
     )
     fun cancelReminder(appointmentId: Long)
     suspend fun hasPermission(): Boolean
