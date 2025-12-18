@@ -43,16 +43,23 @@ class IosNotificationScheduler : NotificationScheduler {
         minutesBefore: Int
     ) {
         val center = UNUserNotificationCenter.currentNotificationCenter()
-        
+
         val content = UNMutableNotificationContent().apply {
             setTitle("یادآوری نوبت")
-            setBody("نوبت $customerName در کسب و کار $businessName تا $minutesBefore دقیقه دیگر نزدیک هست برای اطلاع از نوبت اینجا را لمس کنید")
+            setBody("نوبت $customerName در $businessName تا $minutesBefore دقیقه دیگر نزدیک هست برای اطلاع رسانی نوبت اینجا را لمس کنید")
             setSound(UNNotificationSound.defaultSound())
         }
 
         val timeInterval = (triggerAtMillis - DateTimeUtils.systemCurrentMilliseconds()) / 1000.0
-        // Ensure strictly positive time interval
-        val safeTimeInterval = if (timeInterval <= 0) 1.0 else timeInterval
+
+        val safeTimeInterval = when {
+            timeInterval <= 0 -> {
+                println("Notification time has passed, showing immediately")
+                1.0
+            }
+            timeInterval < 1.0 -> 1.0
+            else -> timeInterval
+        }
 
         val trigger = UNTimeIntervalNotificationTrigger.triggerWithTimeInterval(
             timeInterval = safeTimeInterval,
@@ -68,6 +75,8 @@ class IosNotificationScheduler : NotificationScheduler {
         center.addNotificationRequest(request) { error ->
             if (error != null) {
                 println("Error scheduling notification: ${error.localizedDescription}")
+            } else {
+                println("Notification scheduled successfully for interval: $safeTimeInterval seconds")
             }
         }
     }
