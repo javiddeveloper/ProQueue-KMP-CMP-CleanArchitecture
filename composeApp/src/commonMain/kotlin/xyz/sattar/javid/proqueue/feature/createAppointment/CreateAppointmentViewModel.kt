@@ -194,7 +194,7 @@ class CreateAppointmentViewModel(
                     visitorId = visitorId,
                     appointmentDate = appointmentDate,
                     serviceDuration = serviceDuration
-                )
+                ) > 0
             }
             if (success) {
                 emit(CreateAppointmentState.PartialState.AppointmentCreated)
