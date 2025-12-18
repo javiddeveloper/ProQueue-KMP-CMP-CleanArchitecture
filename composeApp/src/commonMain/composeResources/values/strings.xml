@@ -66,6 +66,11 @@
     <string name="instagram">اینستاگرام</string>
     <string name="market">دیگر برنامه ها</string>
     <string name="notification_title">اطلاعیه</string>
+    <string name="enable_notifications">فعال‌سازی اعلان‌ها</string>
+    <string name="notification_reminder_time">زمان یادآوری (دقیقه قبل از نوبت)</string>
+    <string name="notification_reminder_hint">مثال: 10</string>
+    <string name="save_settings">ذخیره تنظیمات</string>
+    <string name="settings_saved">تنظیمات ذخیره شد</string>
     <string name="coming_soon_message">این بخش به زودی راه اندازی می‌شود</string>
     <string name="app_version">نسخه</string>
 

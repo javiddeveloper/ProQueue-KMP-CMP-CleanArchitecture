@@ -487,7 +487,7 @@ fun TimeSelectionDialog(
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     Text(stringResource(Res.string.minute_label), style = MaterialTheme.typography.titleSmall)
-                    IconButton(onClick = { if (minute >= 15) minute -= 15 }) {
+                    IconButton(onClick = { if (minute >= 5) minute -= 5 }) {
                         Icon(Icons.Default.Remove, contentDescription = null)
                     }
                     Text(
@@ -495,7 +495,7 @@ fun TimeSelectionDialog(
                         style = MaterialTheme.typography.headlineMedium,
                         fontWeight = FontWeight.Bold
                     )
-                    IconButton(onClick = { if (minute < 45) minute += 15 }) {
+                    IconButton(onClick = { if (minute < 55) minute += 5 }) {
                         Icon(Icons.Default.Add, contentDescription = null)
                     }
                 }

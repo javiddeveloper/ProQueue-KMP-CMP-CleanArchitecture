@@ -64,7 +64,7 @@ interface AppointmentDao {
 
 
     @Upsert
-    suspend fun upsertAppointment(appointment: AppointmentEntity)
+    suspend fun upsertAppointment(appointment: AppointmentEntity): Long
 
     @Query("""
         SELECT MAX(appointmentDate) FROM Appointment 

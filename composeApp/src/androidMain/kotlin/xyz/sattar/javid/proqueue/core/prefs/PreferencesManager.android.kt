@@ -17,6 +17,8 @@ actual object PreferencesManager {
 
     private const val KEY_THEME_MODE = "theme_mode"
     private const val KEY_DEFAULT_BUSINESS_ID = "default_business_id"
+    private const val KEY_NOTIFICATIONS_ENABLED = "notifications_enabled"
+    private const val KEY_NOTIFICATION_REMINDER_MINUTES = "notification_reminder_minutes"
 
     private val _themeMode = MutableStateFlow(
         AppThemeMode.values()[prefs.getInt(KEY_THEME_MODE, 0).coerceIn(0, 2)]
@@ -24,9 +26,17 @@ actual object PreferencesManager {
     private val _defaultBusinessId = MutableStateFlow<Long?>(
         if (prefs.contains(KEY_DEFAULT_BUSINESS_ID)) prefs.getLong(KEY_DEFAULT_BUSINESS_ID, 0L) else null
     )
+    private val _notificationsEnabled = MutableStateFlow(
+        prefs.getBoolean(KEY_NOTIFICATIONS_ENABLED, false)
+    )
+    private val _notificationReminderMinutes = MutableStateFlow(
+        prefs.getInt(KEY_NOTIFICATION_REMINDER_MINUTES, 10) // Default 10 minutes
+    )
 
     actual val themeMode: Flow<AppThemeMode> = _themeMode
     actual val defaultBusinessId: Flow<Long?> = _defaultBusinessId
+    actual val notificationsEnabled: Flow<Boolean> = _notificationsEnabled
+    actual val notificationReminderMinutes: Flow<Int> = _notificationReminderMinutes
 
     actual suspend fun setThemeMode(mode: AppThemeMode) {
         prefs.edit(commit = true) { putInt(KEY_THEME_MODE, mode.ordinal) }
@@ -41,5 +51,15 @@ actual object PreferencesManager {
             )
         }
         _defaultBusinessId.value = id
+    }
+
+    actual suspend fun setNotificationsEnabled(enabled: Boolean) {
+        prefs.edit(commit = true) { putBoolean(KEY_NOTIFICATIONS_ENABLED, enabled) }
+        _notificationsEnabled.value = enabled
+    }
+
+    actual suspend fun setNotificationReminderMinutes(minutes: Int) {
+        prefs.edit(commit = true) { putInt(KEY_NOTIFICATION_REMINDER_MINUTES, minutes) }
+        _notificationReminderMinutes.value = minutes
     }
 }

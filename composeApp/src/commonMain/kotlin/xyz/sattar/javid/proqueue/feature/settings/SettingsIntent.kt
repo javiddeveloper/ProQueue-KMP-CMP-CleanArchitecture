@@ -5,4 +5,5 @@ sealed interface SettingsIntent {
     data object OnAboutClick : SettingsIntent
     data object OnChangeBusinessClick : SettingsIntent
     data object OnDeleteBusinessClick : SettingsIntent
+    data object OnNotificationsClick : SettingsIntent
 }

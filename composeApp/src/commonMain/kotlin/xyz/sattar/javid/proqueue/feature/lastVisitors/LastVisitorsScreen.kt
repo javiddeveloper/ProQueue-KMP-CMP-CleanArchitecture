@@ -171,7 +171,7 @@ fun LastVisitorsScreenContent(
                                     Text(
                                         text = stringResource(Res.string.queue_tab),
                                         style = MaterialTheme.typography.bodyLarge,
-                                        fontSize = if (uiState.selectedTab == 0) 18.sp else 16.sp ,
+                                        fontSize = if (uiState.selectedTab == 0) 18.sp else 16.sp,
                                         color = if (uiState.selectedTab == 0) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
                                         fontWeight = if (uiState.selectedTab == 0) FontWeight.Bold else FontWeight.SemiBold
                                     )
@@ -185,7 +185,7 @@ fun LastVisitorsScreenContent(
                                     Text(
                                         text = stringResource(Res.string.visitors_tab),
                                         style = MaterialTheme.typography.bodyLarge,
-                                        fontSize = if (uiState.selectedTab == 1) 18.sp else 16.sp ,
+                                        fontSize = if (uiState.selectedTab == 1) 18.sp else 16.sp,
                                         color = if (uiState.selectedTab == 1) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
                                         fontWeight = if (uiState.selectedTab == 1) FontWeight.Bold else FontWeight.SemiBold
                                     )
@@ -198,12 +198,12 @@ fun LastVisitorsScreenContent(
                             val waiting = uiState.appointments
                                 .filter { it.appointment.status == "WAITING" }
                                 .sortedBy { abs(it.appointment.appointmentDate - now) }
-                            
+
                             TotalCountHeader(
                                 title = stringResource(Res.string.people_in_queue_count),
                                 count = waiting.size
                             )
-                            
+
                             if (waiting.isEmpty()) {
                                 EmptyState(modifier = Modifier.align(Alignment.CenterHorizontally))
                             } else {
@@ -226,10 +226,18 @@ fun LastVisitorsScreenContent(
                                         QueueItemCard(
                                             item = queueItem,
                                             onRemove = {
-                                                onIntent(LastVisitorsIntent.OnDeleteAppointment(queueItem.appointment.id))
+                                                onIntent(
+                                                    LastVisitorsIntent.OnDeleteAppointment(
+                                                        queueItem.appointment.id
+                                                    )
+                                                )
                                             },
                                             onComplete = {
-                                                onIntent(LastVisitorsIntent.OnMarkCompleted(queueItem.appointment.id))
+                                                onIntent(
+                                                    LastVisitorsIntent.OnMarkCompleted(
+                                                        queueItem.appointment.id
+                                                    )
+                                                )
                                             },
                                             onNoShow = {
                                                 onIntent(LastVisitorsIntent.OnMarkNoShow(queueItem.appointment.id))
@@ -359,7 +367,12 @@ fun AppointmentCard(
                 val dateText = DateTimeUtils.formatDateTime(appointment.appointmentDate)
                 val endTimeMs = appointment.appointmentDate + (appointment.serviceDuration
                     ?: appointmentWithDetails.business.defaultServiceDuration) * 60 * 1000L
-                val timeRange = "${DateTimeUtils.formatTime(appointment.appointmentDate)} ${stringResource(Res.string.to_label)} ${DateTimeUtils.formatTime(endTimeMs)}"
+                val timeRange =
+                    " ${DateTimeUtils.formatTime(endTimeMs)} ${stringResource(Res.string.to_label)} ${
+                        DateTimeUtils.formatTime(
+                            appointment.appointmentDate
+                        )
+                    }"
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -403,7 +416,8 @@ fun AppointmentCard(
                 val durationMinutes = appointment.serviceDuration
                     ?: appointmentWithDetails.business.defaultServiceDuration
                 val endTime = appointment.appointmentDate + durationMinutes * 60 * 1000L
-                val overdue = DateTimeUtils.systemCurrentMilliseconds() > endTime && appointment.status == "WAITING"
+                val overdue =
+                    DateTimeUtils.systemCurrentMilliseconds() > endTime && appointment.status == "WAITING"
                 val waitingOrOverdueText =
                     if (overdue) stringResource(Res.string.overdue_time) else DateTimeUtils.calculateWaitingTime(
                         appointment.appointmentDate
