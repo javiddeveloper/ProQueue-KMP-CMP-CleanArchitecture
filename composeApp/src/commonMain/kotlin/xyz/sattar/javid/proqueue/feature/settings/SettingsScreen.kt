@@ -63,7 +63,6 @@ import proqueue.composeapp.generated.resources.app_version
 import proqueue.composeapp.generated.resources.cancel
 import proqueue.composeapp.generated.resources.change_business
 import proqueue.composeapp.generated.resources.coming_soon_message
-import proqueue.composeapp.generated.resources.compose_multiplatform
 import proqueue.composeapp.generated.resources.confirm
 import proqueue.composeapp.generated.resources.contact_me
 import proqueue.composeapp.generated.resources.delete
