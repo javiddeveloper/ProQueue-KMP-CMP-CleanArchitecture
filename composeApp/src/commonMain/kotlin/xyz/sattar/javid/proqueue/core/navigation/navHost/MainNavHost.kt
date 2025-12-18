@@ -30,6 +30,8 @@ import xyz.sattar.javid.proqueue.feature.settings.SettingsScreen
 import xyz.sattar.javid.proqueue.feature.notifications.NotificationsScreen
 import androidx.navigation.toRoute
 
+import xyz.sattar.javid.proqueue.feature.visitorDetails.VisitorDetailsScreen
+
 @Composable
 fun MainNavHost(
     onNavigateToCreateBusiness: () -> Unit = {},
@@ -112,6 +114,9 @@ fun MainNavHost(
                     },
                     onNavigateToEditAppointment = { appointmentId ->
                         navController.navigate(AppScreens.CreateAppointment(appointmentId = appointmentId))
+                    },
+                    onNavigateToVisitorDetails = { visitorId ->
+                        navController.navigate(AppScreens.VisitorDetails(visitorId))
                     }
                 )
             }
@@ -119,7 +124,7 @@ fun MainNavHost(
             composable<AppScreens.VisitorSelection> {
                 VisitorSelectionScreen(
                     onNavigateToCreateAppointment = { visitorId ->
-                        navController.navigate(AppScreens.CreateAppointment(visitorId))
+                        navController.navigate(AppScreens.CreateAppointment(visitorId = visitorId))
                     },
                     onNavigateToEditVisitor = { visitorId ->
                         navController.navigate(AppScreens.EditVisitor(visitorId))
@@ -147,6 +152,19 @@ fun MainNavHost(
                 NotificationsScreen(
                     onNavigateBack = {
                         navController.popBackStack()
+                    }
+                )
+            }
+
+            composable<AppScreens.VisitorDetails> { backStackEntry ->
+                val args = backStackEntry.toRoute<AppScreens.VisitorDetails>()
+                VisitorDetailsScreen(
+                    visitorId = args.visitorId,
+                    onNavigateBack = {
+                        navController.popBackStack()
+                    },
+                    onNavigateToCreateAppointment = { visitorId ->
+                        navController.navigate(AppScreens.CreateAppointment(visitorId))
                     }
                 )
             }
