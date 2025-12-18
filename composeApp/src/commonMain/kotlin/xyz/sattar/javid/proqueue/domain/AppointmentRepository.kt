@@ -13,6 +13,7 @@ interface AppointmentRepository {
     suspend fun updateAppointment(appointmentId: Long, date: Long, duration: Int?): Boolean
     suspend fun removeAppointment(appointmentId: Long): Boolean
     suspend fun getVisitorHistory(visitorId: Long): List<AppointmentWithDetails>
+    suspend fun getVisitorHistoryForBusiness(visitorId: Long, businessId: Long): List<AppointmentWithDetails>
     suspend fun getTodayStats(businessId: Long, date: Long): DashboardStats
     suspend fun getAppointmentById(appointmentId: Long): Appointment?
     suspend fun getAllWaitingAppointments(businessId: Long): List<AppointmentWithDetails>

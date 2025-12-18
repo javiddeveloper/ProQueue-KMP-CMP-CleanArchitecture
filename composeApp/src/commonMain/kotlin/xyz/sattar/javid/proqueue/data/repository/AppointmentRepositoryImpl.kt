@@ -106,6 +106,16 @@ class AppointmentRepositoryImpl(
         }
     }
 
+    override suspend fun getVisitorHistoryForBusiness(visitorId: Long, businessId: Long): List<AppointmentWithDetails> {
+        return try {
+            appointmentDao.getVisitorHistoryForBusiness(visitorId, businessId).map {
+                it.toDomain()
+            }
+        } catch (e: Exception) {
+            emptyList()
+        }
+    }
+
     override suspend fun getTodayStats(businessId: Long, date: Long): DashboardStats {
         return try {
             DashboardStats(

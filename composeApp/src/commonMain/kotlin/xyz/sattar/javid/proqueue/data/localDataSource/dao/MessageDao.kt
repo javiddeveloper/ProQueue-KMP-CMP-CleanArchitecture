@@ -12,4 +12,12 @@ interface MessageDao {
 
     @Query("SELECT * FROM Message WHERE appointmentId = :appointmentId ORDER BY sentAt DESC")
     suspend fun getAppointmentMessages(appointmentId: Long): List<MessageEntity>
+
+    @Query("""
+        SELECT Message.* FROM Message
+        INNER JOIN Appointment ON Message.appointmentId = Appointment.id
+        WHERE Appointment.visitorId = :visitorId AND Appointment.businessId = :businessId
+        ORDER BY Message.sentAt DESC
+    """)
+    suspend fun getMessagesForVisitorAndBusiness(visitorId: Long, businessId: Long): List<MessageEntity>
 }

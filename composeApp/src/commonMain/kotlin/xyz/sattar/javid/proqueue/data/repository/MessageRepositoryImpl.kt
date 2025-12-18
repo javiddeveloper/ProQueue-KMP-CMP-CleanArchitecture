@@ -25,4 +25,12 @@ class MessageRepositoryImpl(
             emptyList()
         }
     }
+
+    override suspend fun getMessagesForVisitorAndBusiness(visitorId: Long, businessId: Long): List<Message> {
+        return try {
+            messageDao.getMessagesForVisitorAndBusiness(visitorId, businessId).map { it.toDomain() }
+        } catch (e: Exception) {
+            emptyList()
+        }
+    }
 }
