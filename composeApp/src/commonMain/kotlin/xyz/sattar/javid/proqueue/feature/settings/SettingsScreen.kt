@@ -81,6 +81,12 @@ import proqueue.composeapp.generated.resources.smart_queue_management
 import proqueue.composeapp.generated.resources.theme_appearance
 import proqueue.composeapp.generated.resources.theme_settings
 import proqueue.composeapp.generated.resources.whatsapp
+import androidx.compose.material3.RadioButton
+import proqueue.composeapp.generated.resources.select_theme
+import proqueue.composeapp.generated.resources.theme_dark
+import proqueue.composeapp.generated.resources.theme_light
+import proqueue.composeapp.generated.resources.theme_system
+import xyz.sattar.javid.proqueue.core.state.AppThemeMode
 import xyz.sattar.javid.proqueue.core.state.ThemeStateHolder
 import xyz.sattar.javid.proqueue.core.ui.collectWithLifecycleAware
 import xyz.sattar.javid.proqueue.core.utils.openInstagram
@@ -88,8 +94,7 @@ import xyz.sattar.javid.proqueue.core.utils.openUrl
 import xyz.sattar.javid.proqueue.core.utils.openWhatsApp
 import xyz.sattar.javid.proqueue.ui.theme.AppTheme
 import xyz.sattar.javid.proqueue.core.prefs.PreferencesManager
-import androidx.compose.runtime.rememberCoroutineScope
-import kotlinx.coroutines.launch
+import proqueue.composeapp.generated.resources.main_icon
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -101,10 +106,11 @@ fun SettingsScreen(
     val uiState by viewModel.uiState.collectAsState()
     val scope = rememberCoroutineScope()
     var showContactSheet by remember { mutableStateOf(false) }
+    var showThemeSheet by remember { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState()
 
     // Theme Toggle Logic
-    val isDarkTheme by ThemeStateHolder.isDarkTheme.collectAsState()
+    val themeMode by ThemeStateHolder.themeMode.collectAsState()
 
     LaunchedEffect(Unit) {
         viewModel.sendIntent(SettingsIntent.LoadSettings)
@@ -133,16 +139,96 @@ fun SettingsScreen(
         }
     }
 
+    if (showThemeSheet) {
+        ModalBottomSheet(
+            onDismissRequest = { showThemeSheet = false },
+            sheetState = sheetState
+        ) {
+            ThemeSelectionContent(
+                currentMode = themeMode,
+                onThemeSelected = { mode ->
+                    ThemeStateHolder.setThemeMode(mode)
+                    scope.launch {
+                        PreferencesManager.setThemeMode(mode)
+                        sheetState.hide()
+                    }.invokeOnCompletion {
+                        if (!sheetState.isVisible) {
+                            showThemeSheet = false
+                        }
+                    }
+                }
+            )
+        }
+    }
+
     SettingsScreenContent(
         uiState = uiState,
         onIntent = viewModel::sendIntent,
-        onThemeToggle = {
-            val target = !isDarkTheme
-            ThemeStateHolder.setDarkTheme(target)
-            scope.launch { PreferencesManager.setDarkTheme(target) }
-        },
+        onThemeToggle = { showThemeSheet = true },
         onContactUsClick = { showContactSheet = true }
     )
+}
+
+@Composable
+fun ThemeSelectionContent(
+    currentMode: AppThemeMode,
+    onThemeSelected: (AppThemeMode) -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        Text(
+            text = stringResource(Res.string.select_theme),
+            style = MaterialTheme.typography.titleLarge,
+            modifier = Modifier.padding(bottom = 8.dp)
+        )
+
+        ThemeItem(
+            title = stringResource(Res.string.theme_system),
+            isSelected = currentMode == AppThemeMode.SYSTEM,
+            onClick = { onThemeSelected(AppThemeMode.SYSTEM) }
+        )
+        ThemeItem(
+            title = stringResource(Res.string.theme_light),
+            isSelected = currentMode == AppThemeMode.LIGHT,
+            onClick = { onThemeSelected(AppThemeMode.LIGHT) }
+        )
+        ThemeItem(
+            title = stringResource(Res.string.theme_dark),
+            isSelected = currentMode == AppThemeMode.DARK,
+            onClick = { onThemeSelected(AppThemeMode.DARK) }
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+    }
+}
+
+@Composable
+fun ThemeItem(
+    title: String,
+    isSelected: Boolean,
+    onClick: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
+            .padding(12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        RadioButton(
+            selected = isSelected,
+            onClick = onClick
+        )
+        Text(
+            text = title,
+            style = MaterialTheme.typography.bodyLarge
+        )
+    }
 }
 
 @Composable
@@ -297,7 +383,7 @@ fun SettingsScreenContent(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Image(
-                    painter = painterResource(Res.drawable.compose_multiplatform),
+                    painter = painterResource(Res.drawable.main_icon),
                     contentDescription = null,
                     modifier = Modifier.size(64.dp)
                 )

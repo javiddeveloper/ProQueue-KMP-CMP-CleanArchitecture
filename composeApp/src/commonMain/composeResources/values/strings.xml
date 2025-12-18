@@ -54,6 +54,10 @@
     <!-- Settings Screen -->
     <string name="theme_appearance">تم و ظاهر</string>
     <string name="theme_settings">تنظیمات رنگ و تم</string>
+    <string name="theme_system">مطابق با سیستم</string>
+    <string name="theme_light">روشن</string>
+    <string name="theme_dark">تیره</string>
+    <string name="select_theme">انتخاب تم</string>
     <string name="notifications">اعلان‌ها</string>
     <string name="manage_notifications">مدیریت اعلان‌ها</string>
     <string name="contact_me">تماس با ما</string>

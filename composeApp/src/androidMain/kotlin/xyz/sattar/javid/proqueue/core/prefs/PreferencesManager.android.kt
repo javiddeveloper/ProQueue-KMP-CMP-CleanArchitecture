@@ -7,26 +7,30 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import xyz.sattar.javid.proqueue.ProQueueApp
 import androidx.core.content.edit
 
+import xyz.sattar.javid.proqueue.core.state.AppThemeMode
+
 actual object PreferencesManager {
     private val context: Context get() = ProQueueApp.appContext
     private val prefs: SharedPreferences by lazy {
         context.getSharedPreferences("settings", Context.MODE_PRIVATE)
     }
 
-    private const val KEY_DARK_THEME = "dark_theme"
+    private const val KEY_THEME_MODE = "theme_mode"
     private const val KEY_DEFAULT_BUSINESS_ID = "default_business_id"
 
-    private val _isDarkTheme = MutableStateFlow(prefs.getBoolean(KEY_DARK_THEME, false))
+    private val _themeMode = MutableStateFlow(
+        AppThemeMode.values()[prefs.getInt(KEY_THEME_MODE, 0).coerceIn(0, 2)]
+    )
     private val _defaultBusinessId = MutableStateFlow<Long?>(
         if (prefs.contains(KEY_DEFAULT_BUSINESS_ID)) prefs.getLong(KEY_DEFAULT_BUSINESS_ID, 0L) else null
     )
 
-    actual val isDarkTheme: Flow<Boolean> = _isDarkTheme
+    actual val themeMode: Flow<AppThemeMode> = _themeMode
     actual val defaultBusinessId: Flow<Long?> = _defaultBusinessId
 
-    actual suspend fun setDarkTheme(isDark: Boolean) {
-        prefs.edit(commit = true) { putBoolean(KEY_DARK_THEME, isDark) }
-        _isDarkTheme.value = isDark
+    actual suspend fun setThemeMode(mode: AppThemeMode) {
+        prefs.edit(commit = true) { putInt(KEY_THEME_MODE, mode.ordinal) }
+        _themeMode.value = mode
     }
 
     actual suspend fun setDefaultBusinessId(id: Long?) {

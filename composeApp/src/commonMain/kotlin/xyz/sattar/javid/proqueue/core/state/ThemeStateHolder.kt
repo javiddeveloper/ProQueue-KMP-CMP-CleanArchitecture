@@ -4,15 +4,15 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
-object ThemeStateHolder {
-    private val _isDarkTheme = MutableStateFlow(false)
-    val isDarkTheme: StateFlow<Boolean> = _isDarkTheme.asStateFlow()
+enum class AppThemeMode {
+    SYSTEM, LIGHT, DARK
+}
 
-    fun setDarkTheme(isDark: Boolean) {
-        _isDarkTheme.value = isDark
-    }
-    
-    fun toggleTheme() {
-        _isDarkTheme.value = !_isDarkTheme.value
+object ThemeStateHolder {
+    private val _themeMode = MutableStateFlow(AppThemeMode.SYSTEM)
+    val themeMode: StateFlow<AppThemeMode> = _themeMode.asStateFlow()
+
+    fun setThemeMode(mode: AppThemeMode) {
+        _themeMode.value = mode
     }
 }
