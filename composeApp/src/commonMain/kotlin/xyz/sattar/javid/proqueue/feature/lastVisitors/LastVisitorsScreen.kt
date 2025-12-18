@@ -55,7 +55,7 @@ import proqueue.composeapp.generated.resources.Res
 import proqueue.composeapp.generated.resources.create_appointment
 import proqueue.composeapp.generated.resources.empty_appointments_subtitle
 import proqueue.composeapp.generated.resources.empty_appointments_title
-import proqueue.composeapp.generated.resources.last_visitors_title
+import proqueue.composeapp.generated.resources.last_visitors_menu_item
 import proqueue.composeapp.generated.resources.overdue_time
 import proqueue.composeapp.generated.resources.people_in_queue_count
 import proqueue.composeapp.generated.resources.queue_tab
@@ -114,7 +114,7 @@ fun LastVisitorsScreenContent(
             TopAppBar(
                 title = {
                     Text(
-                        stringResource(Res.string.last_visitors_title),
+                        stringResource(Res.string.last_visitors_menu_item),
                         style = MaterialTheme.typography.titleLarge
                     )
                 },
