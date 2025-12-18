@@ -34,6 +34,8 @@ sealed class AppScreens {
     @Serializable
     object Settings : AppScreens()
     @Serializable
+    object Notifications : AppScreens()
+    @Serializable
     object Visitors : AppScreens()
     @Serializable
     object CreateBusiness : AppScreens()

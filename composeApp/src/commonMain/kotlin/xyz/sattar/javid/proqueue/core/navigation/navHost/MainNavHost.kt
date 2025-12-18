@@ -27,6 +27,7 @@ import xyz.sattar.javid.proqueue.feature.home.HomeScreen
 import xyz.sattar.javid.proqueue.feature.lastVisitors.LastVisitorsScreen
 import xyz.sattar.javid.proqueue.feature.visitorSelection.VisitorSelectionScreen
 import xyz.sattar.javid.proqueue.feature.settings.SettingsScreen
+import xyz.sattar.javid.proqueue.feature.notifications.NotificationsScreen
 import androidx.navigation.toRoute
 
 @Composable
@@ -135,7 +136,18 @@ fun MainNavHost(
             composable<AppScreens.Settings> {
                 SettingsScreen(
                     onNavigateToAbout = {},
-                    onChangeBusiness = onChangeBusiness
+                    onChangeBusiness = onChangeBusiness,
+                    onNavigateToNotifications = {
+                        navController.navigate(AppScreens.Notifications)
+                    }
+                )
+            }
+
+            composable<AppScreens.Notifications> {
+                NotificationsScreen(
+                    onNavigateBack = {
+                        navController.popBackStack()
+                    }
                 )
             }
 
