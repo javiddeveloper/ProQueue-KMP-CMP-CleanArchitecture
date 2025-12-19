@@ -10,16 +10,22 @@ private fun launchUri(uri: String) {
     context.startActivity(intent)
 }
 
-actual fun openSms(phone: String) {
-    launchUri("sms:${formatPhoneNumberForAction(phone)}")
+actual fun openSms(phone: String, message: String?) {
+    val context = xyz.sattar.javid.proqueue.ProQueueApp.appContext
+    val uri = Uri.parse("smsto:${formatPhoneNumberForAction(phone)}")
+    val intent = Intent(Intent.ACTION_SENDTO, uri).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+    if (!message.isNullOrBlank()) intent.putExtra("sms_body", message)
+    context.startActivity(intent)
 }
 
-actual fun openWhatsApp(phone: String) {
-    launchUri("https://wa.me/${formatPhoneNumberForAction(phone)}")
+actual fun openWhatsApp(phone: String, message: String?) {
+    val encoded = if (message.isNullOrBlank()) "" else "?text=" + Uri.encode(message)
+    launchUri("https://wa.me/${formatPhoneNumberForAction(phone)}$encoded")
 }
 
-actual fun openTelegram(phone: String) {
-    launchUri("https://t.me/${formatPhoneNumberForAction(phone)}")
+actual fun openTelegram(phone: String, message: String?) {
+    val encoded = if (message.isNullOrBlank()) "" else "?url=&text=" + Uri.encode(message)
+    launchUri("https://t.me/share/url$encoded")
 }
 
 actual fun openPhoneDial(phone: String) {
