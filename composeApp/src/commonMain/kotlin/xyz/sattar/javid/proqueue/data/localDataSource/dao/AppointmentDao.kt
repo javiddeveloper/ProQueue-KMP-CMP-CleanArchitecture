@@ -62,6 +62,14 @@ interface AppointmentDao {
     """)
     suspend fun getVisitorHistory(visitorId: Long): List<AppointmentWithDetailsEntity>
 
+    @Transaction
+    @Query("""
+        SELECT * FROM Appointment 
+        WHERE visitorId = :visitorId AND businessId = :businessId
+        ORDER BY appointmentDate DESC
+    """)
+    suspend fun getVisitorHistoryForBusiness(visitorId: Long, businessId: Long): List<AppointmentWithDetailsEntity>
+
 
     @Upsert
     suspend fun upsertAppointment(appointment: AppointmentEntity): Long

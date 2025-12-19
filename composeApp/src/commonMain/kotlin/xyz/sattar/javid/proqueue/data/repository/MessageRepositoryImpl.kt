@@ -25,4 +25,28 @@ class MessageRepositoryImpl(
             emptyList()
         }
     }
+
+    override suspend fun getMessagesForVisitorAndBusiness(visitorId: Long, businessId: Long): List<Message> {
+        return try {
+            messageDao.getMessagesForVisitorAndBusiness(visitorId, businessId).map { it.toDomain() }
+        } catch (e: Exception) {
+            emptyList()
+        }
+    }
+
+    override suspend fun deleteMessage(id: Long): Boolean {
+        return try {
+            messageDao.deleteMessage(id) > 0
+        } catch (e: Exception) {
+            false
+        }
+    }
+
+    override suspend fun deleteMessagesByVisitorId(visitorId: Long): Boolean {
+        return try {
+            messageDao.deleteMessagesByVisitorId(visitorId) >= 0
+        } catch (e: Exception) {
+            false
+        }
+    }
 }

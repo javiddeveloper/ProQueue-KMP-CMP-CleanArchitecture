@@ -5,5 +5,10 @@ sealed interface HomeIntent {
     data class RemoveAppointment(val appointmentId: Long) : HomeIntent
     data class MarkAppointmentCompleted(val appointmentId: Long) : HomeIntent
     data class MarkAppointmentNoShow(val appointmentId: Long) : HomeIntent
-    data class SendMessage(val appointmentId: Long, val type: String) : HomeIntent
+    data class SendMessage(
+        val appointmentId: Long,
+        val type: String,
+        val content: String,
+        val businessTitle: String
+    ) : HomeIntent
 }

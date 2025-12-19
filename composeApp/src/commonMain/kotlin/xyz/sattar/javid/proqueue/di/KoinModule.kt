@@ -18,6 +18,7 @@ import xyz.sattar.javid.proqueue.domain.usecase.CreateAppointmentUseCase
 import xyz.sattar.javid.proqueue.domain.usecase.DeleteBusinessUseCase
 import xyz.sattar.javid.proqueue.domain.usecase.DeleteVisitorUseCase
 import xyz.sattar.javid.proqueue.domain.usecase.GetAllVisitorsUseCase
+import xyz.sattar.javid.proqueue.domain.usecase.GetAppointmentByIdUseCase
 import xyz.sattar.javid.proqueue.domain.usecase.GetTodayAppointmentsUseCase
 import xyz.sattar.javid.proqueue.domain.usecase.GetTodayStatsUseCase
 import xyz.sattar.javid.proqueue.domain.usecase.GetVisitorByIdUseCase
@@ -27,6 +28,7 @@ import xyz.sattar.javid.proqueue.domain.usecase.MarkAppointmentCompletedUseCase
 import xyz.sattar.javid.proqueue.domain.usecase.MarkAppointmentNoShowUseCase
 import xyz.sattar.javid.proqueue.domain.usecase.RemoveAppointmentUseCase
 import xyz.sattar.javid.proqueue.domain.usecase.SendMessageUseCase
+import xyz.sattar.javid.proqueue.domain.usecase.UpdateAppointmentUseCase
 import xyz.sattar.javid.proqueue.domain.usecase.VisitorUpsertUseCase
 import xyz.sattar.javid.proqueue.feature.businessList.BusinessListViewModel
 import xyz.sattar.javid.proqueue.feature.createAppointment.CreateAppointmentViewModel
@@ -36,12 +38,11 @@ import xyz.sattar.javid.proqueue.feature.createVisitor.CreateVisitorState
 import xyz.sattar.javid.proqueue.feature.createVisitor.CreateVisitorViewModel
 import xyz.sattar.javid.proqueue.feature.home.HomeViewModel
 import xyz.sattar.javid.proqueue.feature.lastVisitors.LastVisitorsViewModel
-import xyz.sattar.javid.proqueue.feature.settings.SettingsViewModel
-
-import xyz.sattar.javid.proqueue.feature.visitorSelection.VisitorSelectionViewModel
-import xyz.sattar.javid.proqueue.domain.usecase.GetAppointmentByIdUseCase
-import xyz.sattar.javid.proqueue.domain.usecase.UpdateAppointmentUseCase
 import xyz.sattar.javid.proqueue.feature.notifications.NotificationsViewModel
+import xyz.sattar.javid.proqueue.feature.visitorDetails.VisitorDetailsViewModel
+import xyz.sattar.javid.proqueue.feature.messages.MessagesViewModel
+import xyz.sattar.javid.proqueue.feature.settings.SettingsViewModel
+import xyz.sattar.javid.proqueue.feature.visitorSelection.VisitorSelectionViewModel
 
 val appModule: Module = module {
     // DAOs
@@ -81,7 +82,7 @@ val appModule: Module = module {
     factory { VisitorUpsertUseCase(get()) }
     factory { GetAllVisitorsUseCase(get()) }
     factory { GetVisitorByIdUseCase(get()) }
-    factory { DeleteVisitorUseCase(get(), get()) }
+    factory { DeleteVisitorUseCase(get(), get(), get()) }
 
     // States
     factory { CreateBusinessState() }
@@ -106,11 +107,14 @@ val appModule: Module = module {
             get(), // GetTodayAppointmentsUseCase
             get(), // RemoveAppointmentUseCase
             get(), // MarkAppointmentCompletedUseCase
-            get()  // MarkAppointmentNoShowUseCase
+            get(), // MarkAppointmentNoShowUseCase
+            get()  // SendMessageUseCase
         )
     }
     viewModel { VisitorSelectionViewModel(get(), get()) }
     viewModel { SettingsViewModel(get()) }
     viewModel { NotificationsViewModel(get(), get()) }
     viewModel { BusinessListViewModel(get()) }
+    viewModel { VisitorDetailsViewModel(get(), get(), get(), get()) }
+    viewModel { MessagesViewModel() }
 }

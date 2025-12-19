@@ -16,6 +16,12 @@ import xyz.sattar.javid.proqueue.core.utils.DateTimeUtils
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
+import platform.UserNotifications.UNNotificationResponse
+import platform.UIKit.UIAlertController
+import platform.UIKit.UIAlertAction
+import platform.UIKit.UIAlertActionStyleDefault
+import platform.UIKit.UIApplication
+
 class IosNotificationScheduler : NotificationScheduler {
     
     init {
@@ -32,6 +38,43 @@ class IosNotificationScheduler : NotificationScheduler {
                     UNNotificationPresentationOptionBadge
                 )
             }
+
+            override fun userNotificationCenter(
+                center: UNUserNotificationCenter,
+                didReceiveNotificationResponse: UNNotificationResponse,
+                withCompletionHandler: () -> Unit
+            ) {
+                val userInfo = didReceiveNotificationResponse.notification.request.content.userInfo
+                val businessId = userInfo["businessId"] as? Long ?: -1L
+                val visitorId = userInfo["visitorId"] as? Long ?: -1L
+                val customerName = userInfo["customerName"] as? String ?: ""
+                val businessName = userInfo["businessName"] as? String ?: ""
+                val minutesBefore = userInfo["minutesBefore"] as? Int ?: 0
+
+                val message = "نوتیفیکیشن: $customerName - $businessName ($minutesBefore دقیقه قبل) [Biz: $businessId, Vis: $visitorId]"
+                
+                // Show Alert on Main Thread
+                platform.darwin.dispatch_async(platform.darwin.dispatch_get_main_queue()) {
+                    val rootViewController = UIApplication.sharedApplication.keyWindow?.rootViewController
+                    if (rootViewController != null) {
+                        val alert = UIAlertController.alertControllerWithTitle(
+                            title = "اطلاعات نوتیفیکیشن",
+                            message = message,
+                            preferredStyle = platform.UIKit.UIAlertControllerStyleAlert
+                        )
+                        alert.addAction(
+                            UIAlertAction.actionWithTitle(
+                                title = "باشه",
+                                style = UIAlertActionStyleDefault,
+                                handler = null
+                            )
+                        )
+                        rootViewController.presentViewController(alert, animated = true, completion = null)
+                    }
+                }
+                
+                withCompletionHandler()
+            }
         }
     }
 
@@ -40,14 +83,25 @@ class IosNotificationScheduler : NotificationScheduler {
         customerName: String,
         businessName: String,
         triggerAtMillis: Long,
-        minutesBefore: Int
+        minutesBefore: Int,
+        businessId: Long,
+        visitorId: Long
     ) {
         val center = UNUserNotificationCenter.currentNotificationCenter()
-
+        
         val content = UNMutableNotificationContent().apply {
             setTitle("یادآوری نوبت")
             setBody("نوبت $customerName در $businessName تا $minutesBefore دقیقه دیگر نزدیک هست برای اطلاع رسانی نوبت اینجا را لمس کنید")
             setSound(UNNotificationSound.defaultSound())
+            setUserInfo(
+                mapOf(
+                    "businessId" to businessId,
+                    "visitorId" to visitorId,
+                    "customerName" to customerName,
+                    "businessName" to businessName,
+                    "minutesBefore" to minutesBefore
+                )
+            )
         }
 
         val timeInterval = (triggerAtMillis - DateTimeUtils.systemCurrentMilliseconds()) / 1000.0

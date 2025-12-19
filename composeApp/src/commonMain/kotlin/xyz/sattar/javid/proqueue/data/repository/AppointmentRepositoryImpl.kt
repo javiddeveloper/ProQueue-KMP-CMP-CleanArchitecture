@@ -19,18 +19,6 @@ class AppointmentRepositoryImpl(
 ) : AppointmentRepository {
     override suspend fun createAppointment(appointment: Appointment): Long {
         return try {
-            val hasActive = appointmentDao.hasActiveAppointment(
-                appointment.businessId,
-                appointment.visitorId,
-                appointment.appointmentDate
-            )
-            if (hasActive) return -1L
-
-            val lastPosition = appointmentDao.getLastQueuePosition(
-                appointment.businessId,
-                appointment.appointmentDate
-            ) ?: 0
-
             appointmentDao.upsertAppointment(
                 appointment.toEntity()
             )
@@ -99,6 +87,16 @@ class AppointmentRepositoryImpl(
     override suspend fun getVisitorHistory(visitorId: Long): List<AppointmentWithDetails> {
         return try {
             appointmentDao.getVisitorHistory(visitorId).map {
+                it.toDomain()
+            }
+        } catch (e: Exception) {
+            emptyList()
+        }
+    }
+
+    override suspend fun getVisitorHistoryForBusiness(visitorId: Long, businessId: Long): List<AppointmentWithDetails> {
+        return try {
+            appointmentDao.getVisitorHistoryForBusiness(visitorId, businessId).map {
                 it.toDomain()
             }
         } catch (e: Exception) {

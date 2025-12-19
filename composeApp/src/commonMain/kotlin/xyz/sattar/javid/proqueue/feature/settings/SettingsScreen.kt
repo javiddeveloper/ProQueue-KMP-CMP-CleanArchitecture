@@ -22,6 +22,7 @@ import androidx.compose.material.icons.filled.Factory
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Palette
+import androidx.compose.material.icons.filled.Message
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -94,6 +95,8 @@ import xyz.sattar.javid.proqueue.core.utils.openWhatsApp
 import xyz.sattar.javid.proqueue.ui.theme.AppTheme
 import xyz.sattar.javid.proqueue.core.prefs.PreferencesManager
 import proqueue.composeapp.generated.resources.main_icon
+import proqueue.composeapp.generated.resources.messages_menu_item
+import proqueue.composeapp.generated.resources.messages_ready_subtitle
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -101,7 +104,8 @@ fun SettingsScreen(
     viewModel: SettingsViewModel = koinViewModel<SettingsViewModel>(),
     onNavigateToAbout: () -> Unit = {},
     onChangeBusiness: () -> Unit = {},
-    onNavigateToNotifications: () -> Unit = {}
+    onNavigateToNotifications: () -> Unit = {},
+    onNavigateToMessages: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val scope = rememberCoroutineScope()
@@ -120,7 +124,8 @@ fun SettingsScreen(
         events = viewModel.events,
         onNavigateToAbout = onNavigateToAbout,
         onChangeBusiness = onChangeBusiness,
-        onNavigateToNotifications = onNavigateToNotifications
+        onNavigateToNotifications = onNavigateToNotifications,
+        onNavigateToMessages = onNavigateToMessages
     )
 
     if (showContactSheet) {
@@ -371,7 +376,6 @@ fun SettingsScreenContent(
                 .fillMaxSize()
                 .background(MaterialTheme.colorScheme.background)
                 .verticalScroll(rememberScrollState())
-                .imePadding()
                 .padding(paddingValues)
                 .padding(start = 16.dp, end = 16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -442,31 +446,40 @@ fun SettingsScreenContent(
             }
 
             // Settings Options
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surface
-                )
-            ) {
-                Column(
-                    modifier = Modifier.fillMaxWidth()
-                )
-                {
-                    SettingsItem(
-                        icon = Icons.Default.Palette,
-                        title = stringResource(Res.string.theme_appearance),
-                        subtitle = stringResource(Res.string.theme_settings),
-                        onClick = onThemeToggle
-                    )
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.surface
+                        )
+                    ) {
+                        Column(
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                        {
+                            SettingsItem(
+                                icon = Icons.Default.Palette,
+                                title = stringResource(Res.string.theme_appearance),
+                                subtitle = stringResource(Res.string.theme_settings),
+                                onClick = onThemeToggle
+                            )
 
-                    HorizontalDivider()
+                            HorizontalDivider()
 
-                    SettingsItem(
-                        icon = Icons.Default.Notifications,
-                        title = stringResource(Res.string.notifications),
-                        subtitle = stringResource(Res.string.manage_notifications),
-                        onClick = { onIntent(SettingsIntent.OnNotificationsClick) }
-                    )
+                            SettingsItem(
+                                icon = Icons.Default.Message,
+                                title = stringResource(Res.string.messages_menu_item),
+                                subtitle = stringResource(Res.string.messages_ready_subtitle),
+                                onClick = { onIntent(SettingsIntent.OnMessagesClick) }
+                            )
+
+                            HorizontalDivider()
+
+                            SettingsItem(
+                                icon = Icons.Default.Notifications,
+                                title = stringResource(Res.string.notifications),
+                                subtitle = stringResource(Res.string.manage_notifications),
+                                onClick = { onIntent(SettingsIntent.OnNotificationsClick) }
+                            )
 
                     HorizontalDivider()
 
@@ -541,7 +554,8 @@ fun HandleEvents(
     events: Flow<SettingsEvent>,
     onNavigateToAbout: () -> Unit,
     onChangeBusiness: () -> Unit,
-    onNavigateToNotifications: () -> Unit
+    onNavigateToNotifications: () -> Unit,
+    onNavigateToMessages: () -> Unit
 ) {
     val scope = rememberCoroutineScope()
     events.collectWithLifecycleAware { event ->
@@ -568,6 +582,9 @@ fun HandleEvents(
                 scope.launch {
                     onNavigateToNotifications()
                 }
+            }
+            SettingsEvent.NavigateToMessages -> {
+                scope.launch { onNavigateToMessages() }
             }
         }
     }

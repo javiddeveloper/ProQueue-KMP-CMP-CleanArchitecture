@@ -19,6 +19,7 @@ actual object PreferencesManager {
     private const val KEY_DEFAULT_BUSINESS_ID = "default_business_id"
     private const val KEY_NOTIFICATIONS_ENABLED = "notifications_enabled"
     private const val KEY_NOTIFICATION_REMINDER_MINUTES = "notification_reminder_minutes"
+    private const val KEY_MESSAGE_TEMPLATE_PREFIX = "message_template_" // suffix: businessId
 
     private val _themeMode = MutableStateFlow(
         AppThemeMode.values()[prefs.getInt(KEY_THEME_MODE, 0).coerceIn(0, 2)]
@@ -37,6 +38,7 @@ actual object PreferencesManager {
     actual val defaultBusinessId: Flow<Long?> = _defaultBusinessId
     actual val notificationsEnabled: Flow<Boolean> = _notificationsEnabled
     actual val notificationReminderMinutes: Flow<Int> = _notificationReminderMinutes
+    private val templateFlows = mutableMapOf<Long, MutableStateFlow<String?>>()
 
     actual suspend fun setThemeMode(mode: AppThemeMode) {
         prefs.edit(commit = true) { putInt(KEY_THEME_MODE, mode.ordinal) }
@@ -61,5 +63,30 @@ actual object PreferencesManager {
     actual suspend fun setNotificationReminderMinutes(minutes: Int) {
         prefs.edit(commit = true) { putInt(KEY_NOTIFICATION_REMINDER_MINUTES, minutes) }
         _notificationReminderMinutes.value = minutes
+    }
+
+    actual fun messageTemplate(businessId: Long): Flow<String?> {
+        return templateFlows.getOrPut(businessId) {
+            val key = KEY_MESSAGE_TEMPLATE_PREFIX + businessId
+            MutableStateFlow(
+                if (prefs.contains(key)) prefs.getString(key, null) else null
+            )
+        }
+    }
+
+    actual suspend fun setMessageTemplate(businessId: Long, template: String) {
+        val key = KEY_MESSAGE_TEMPLATE_PREFIX + businessId
+        prefs.edit(commit = true) { putString(key, template) }
+        val flow = templateFlows.getOrPut(businessId) { MutableStateFlow(null) }
+        flow.value = template
+    }
+
+    actual fun getMessageTemplate(businessId: Long): String? {
+        val key = KEY_MESSAGE_TEMPLATE_PREFIX + businessId
+        return if (prefs.contains(key)) prefs.getString(key, null) else null
+    }
+
+    actual fun getNotificationReminderMinutes(): Int {
+        return prefs.getInt(KEY_NOTIFICATION_REMINDER_MINUTES, 20)
     }
 }

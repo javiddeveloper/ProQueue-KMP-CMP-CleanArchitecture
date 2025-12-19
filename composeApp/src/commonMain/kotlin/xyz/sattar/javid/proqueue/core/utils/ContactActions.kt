@@ -1,8 +1,8 @@
 package xyz.sattar.javid.proqueue.core.utils
 
-expect fun openSms(phone: String)
-expect fun openWhatsApp(phone: String)
-expect fun openTelegram(phone: String)
+expect fun openSms(phone: String, message: String? = null)
+expect fun openWhatsApp(phone: String, message: String? = null)
+expect fun openTelegram(phone: String, message: String? = null)
 expect fun openPhoneDial(phone: String)
 expect fun openUrl(url: String)
 expect fun openInstagram(username: String)

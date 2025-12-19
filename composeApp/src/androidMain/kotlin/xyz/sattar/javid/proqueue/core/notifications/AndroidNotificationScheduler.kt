@@ -20,13 +20,17 @@ class AndroidNotificationScheduler(
         customerName: String,
         businessName: String,
         triggerAtMillis: Long,
-        minutesBefore: Int
+        minutesBefore: Int,
+        businessId: Long,
+        visitorId: Long
     ) {
         val intent = Intent(context, ReminderReceiver::class.java).apply {
             putExtra("appointmentId", appointmentId)
             putExtra("customerName", customerName)
             putExtra("businessName", businessName)
             putExtra("minutesBefore", minutesBefore)
+            putExtra("businessId", businessId)
+            putExtra("visitorId", visitorId)
         }
         
         val pendingIntent = PendingIntent.getBroadcast(

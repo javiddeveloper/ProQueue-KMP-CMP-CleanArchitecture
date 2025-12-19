@@ -1,6 +1,7 @@
 package xyz.sattar.javid.proqueue.feature.lastVisitors
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -24,6 +25,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.PrimaryTabRow
@@ -55,7 +57,7 @@ import proqueue.composeapp.generated.resources.Res
 import proqueue.composeapp.generated.resources.create_appointment
 import proqueue.composeapp.generated.resources.empty_appointments_subtitle
 import proqueue.composeapp.generated.resources.empty_appointments_title
-import proqueue.composeapp.generated.resources.last_visitors_title
+import proqueue.composeapp.generated.resources.last_visitors_menu_item
 import proqueue.composeapp.generated.resources.overdue_time
 import proqueue.composeapp.generated.resources.people_in_queue_count
 import proqueue.composeapp.generated.resources.queue_tab
@@ -68,6 +70,8 @@ import proqueue.composeapp.generated.resources.total_visitors_count
 import proqueue.composeapp.generated.resources.visitors_tab
 import xyz.sattar.javid.proqueue.core.ui.collectWithLifecycleAware
 import xyz.sattar.javid.proqueue.core.ui.components.QueueItemCard
+import xyz.sattar.javid.proqueue.core.ui.components.SectionTabs
+import xyz.sattar.javid.proqueue.core.ui.components.EmptyState
 import xyz.sattar.javid.proqueue.core.utils.DateTimeUtils
 import xyz.sattar.javid.proqueue.domain.model.Appointment
 import xyz.sattar.javid.proqueue.domain.model.AppointmentWithDetails
@@ -81,7 +85,8 @@ import kotlin.math.abs
 fun LastVisitorsScreen(
     viewModel: LastVisitorsViewModel = koinViewModel<LastVisitorsViewModel>(),
     onNavigateToCreateAppointment: () -> Unit = {},
-    onNavigateToEditAppointment: (Long) -> Unit = {}
+    onNavigateToEditAppointment: (Long) -> Unit = {},
+    onNavigateToVisitorDetails: (Long) -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
@@ -92,7 +97,8 @@ fun LastVisitorsScreen(
     HandleEvents(
         events = viewModel.events,
         onNavigateToCreateAppointment = onNavigateToCreateAppointment,
-        onNavigateToEditAppointment = onNavigateToEditAppointment
+        onNavigateToEditAppointment = onNavigateToEditAppointment,
+        onNavigateToVisitorDetails = onNavigateToVisitorDetails
     )
 
     LastVisitorsScreenContent(
@@ -114,7 +120,7 @@ fun LastVisitorsScreenContent(
             TopAppBar(
                 title = {
                     Text(
-                        stringResource(Res.string.last_visitors_title),
+                        stringResource(Res.string.last_visitors_menu_item),
                         style = MaterialTheme.typography.titleLarge
                     )
                 },
@@ -151,49 +157,27 @@ fun LastVisitorsScreenContent(
                 }
 
                 uiState.appointments.isEmpty() -> {
-                    EmptyState(modifier = Modifier.align(Alignment.Center))
+                    EmptyState(
+                        modifier = Modifier.align(Alignment.Center),
+                        icon = Icons.Default.EventNote,
+                        title = stringResource(Res.string.empty_appointments_title),
+                        subtitle = stringResource(Res.string.empty_appointments_subtitle)
+                    )
                 }
 
                 else -> {
                     Column(modifier = Modifier.fillMaxSize()) {
-                        PrimaryTabRow(
-                            selectedTabIndex = uiState.selectedTab,
-                            containerColor = MaterialTheme.colorScheme.background,
-                            contentColor = MaterialTheme.colorScheme.onSurface,
-                            modifier = Modifier.fillMaxWidth(),
-                            divider = { androidx.compose.material3.Divider(color = MaterialTheme.colorScheme.outlineVariant) }
-                        ) {
-                            Tab(
-                                selected = uiState.selectedTab == 0,
-                                onClick = { onIntent(LastVisitorsIntent.OnTabSelected(0)) },
-                                modifier = Modifier.weight(1f).height(58.dp),
-                                text = {
-                                    Text(
-                                        text = stringResource(Res.string.queue_tab),
-                                        style = MaterialTheme.typography.bodyLarge,
-                                        fontSize = if (uiState.selectedTab == 0) 18.sp else 16.sp,
-                                        color = if (uiState.selectedTab == 0) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
-                                        fontWeight = if (uiState.selectedTab == 0) FontWeight.Bold else FontWeight.SemiBold
-                                    )
-                                }
-                            )
-                            Tab(
-                                selected = uiState.selectedTab == 1,
-                                onClick = { onIntent(LastVisitorsIntent.OnTabSelected(1)) },
-                                modifier = Modifier.weight(1f).height(58.dp),
-                                text = {
-                                    Text(
-                                        text = stringResource(Res.string.visitors_tab),
-                                        style = MaterialTheme.typography.bodyLarge,
-                                        fontSize = if (uiState.selectedTab == 1) 18.sp else 16.sp,
-                                        color = if (uiState.selectedTab == 1) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
-                                        fontWeight = if (uiState.selectedTab == 1) FontWeight.Bold else FontWeight.SemiBold
-                                    )
-                                }
-                            )
-                        }
+                        SectionTabs(
+                            labels = listOf(
+                                stringResource(Res.string.visitors_tab),
+                                stringResource(Res.string.queue_tab),
+                            ),
+                            selectedIndex = uiState.selectedTab,
+                            onSelected = { index -> onIntent(LastVisitorsIntent.OnTabSelected(index)) },
+                            modifier = Modifier.fillMaxWidth()
+                        )
                         Spacer(modifier = Modifier.height(8.dp))
-                        if (uiState.selectedTab == 0) {
+                        if (uiState.selectedTab == 1) {
                             val now = DateTimeUtils.systemCurrentMilliseconds()
                             val waiting = uiState.appointments
                                 .filter { it.appointment.status == "WAITING" }
@@ -205,7 +189,12 @@ fun LastVisitorsScreenContent(
                             )
 
                             if (waiting.isEmpty()) {
-                                EmptyState(modifier = Modifier.align(Alignment.CenterHorizontally))
+                                EmptyState(
+                                    modifier = Modifier.align(Alignment.CenterHorizontally),
+                                    icon = Icons.Default.EventNote,
+                                    title = stringResource(Res.string.empty_appointments_title),
+                                    subtitle = stringResource(Res.string.empty_appointments_subtitle)
+                                )
                             } else {
                                 val queueItems = waiting.map { item ->
                                     val duration = (item.appointment.serviceDuration
@@ -242,7 +231,19 @@ fun LastVisitorsScreenContent(
                                             onNoShow = {
                                                 onIntent(LastVisitorsIntent.OnMarkNoShow(queueItem.appointment.id))
                                             },
-                                            onSendMessage = { _ -> }
+                                            onSendMessage = { appointmentId, type, content, businessTitle ->
+                                                onIntent(
+                                                    LastVisitorsIntent.OnSendMessage(
+                                                        appointmentId = appointmentId,
+                                                        type = type,
+                                                        content = content,
+                                                        businessTitle = businessTitle
+                                                    )
+                                                )
+                                            },
+                                            onItemClick = {
+                                                onIntent(LastVisitorsIntent.OnAppointmentClick(queueItem.appointment.visitorId))
+                                            }
                                         )
                                     }
                                     item { Spacer(modifier = Modifier.height(80.dp)) }
@@ -260,6 +261,9 @@ fun LastVisitorsScreenContent(
                                 },
                                 onDeleteClick = { appointmentId ->
                                     onIntent(LastVisitorsIntent.OnDeleteAppointment(appointmentId))
+                                },
+                                onItemClick = { visitorId ->
+                                    onIntent(LastVisitorsIntent.OnAppointmentClick(visitorId))
                                 }
                             )
                         }
@@ -314,26 +318,31 @@ fun TotalCountHeader(
 fun AppointmentsList(
     appointments: List<AppointmentWithDetails>,
     onEditClick: (Long) -> Unit,
-    onDeleteClick: (Long) -> Unit
+    onDeleteClick: (Long) -> Unit,
+    onItemClick: (Long) -> Unit
 ) {
-    val listState = rememberLazyListState()
-
-    LazyColumn(
-        state = listState,
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(horizontal = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        items(appointments) { appointmentWithDetails ->
-            AppointmentCard(
-                appointmentWithDetails = appointmentWithDetails,
-                onEditClick = { onEditClick(appointmentWithDetails.appointment.id) },
-                onDeleteClick = { onDeleteClick(appointmentWithDetails.appointment.id) }
-            )
+    if (appointments.isEmpty()) {
+        EmptyState(
+            modifier = Modifier.fillMaxWidth().padding(32.dp),
+            icon = Icons.Default.EventNote,
+            title = stringResource(Res.string.empty_appointments_title),
+            subtitle = stringResource(Res.string.empty_appointments_subtitle)
+        )
+    } else {
+        LazyColumn(
+            modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            items(appointments) { appointment ->
+                AppointmentCard(
+                    appointmentWithDetails = appointment,
+                    onEditClick = { onEditClick(appointment.appointment.id) },
+                    onDeleteClick = { onDeleteClick(appointment.appointment.id) },
+                    onItemClick = { onItemClick(appointment.appointment.visitorId) }
+                )
+            }
+            item { Spacer(modifier = Modifier.height(80.dp)) }
         }
-
-        item { Spacer(modifier = Modifier.height(56.dp)) }
     }
 }
 
@@ -341,14 +350,15 @@ fun AppointmentsList(
 fun AppointmentCard(
     appointmentWithDetails: AppointmentWithDetails,
     onEditClick: () -> Unit,
-    onDeleteClick: () -> Unit
+    onDeleteClick: () -> Unit,
+    onItemClick: () -> Unit
 ) {
     val appointment = appointmentWithDetails.appointment
     val visitor = appointmentWithDetails.visitor
     var showMenu by remember { mutableStateOf(false) }
 
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth().clickable { onItemClick() },
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceVariant
         ),
@@ -469,38 +479,14 @@ fun StatusBadge(status: String, overdue: Boolean) {
 }
 
 
-@Composable
-fun EmptyState(modifier: Modifier = Modifier) {
-    Column(
-        modifier = modifier.padding(32.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Icon(
-            imageVector = Icons.Default.EventNote,
-            contentDescription = null,
-            modifier = Modifier.size(64.dp),
-            tint = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-        Spacer(modifier = Modifier.height(16.dp))
-        Text(
-            text = stringResource(Res.string.empty_appointments_title),
-            style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-        Text(
-            text = stringResource(Res.string.empty_appointments_subtitle),
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-    }
-}
+ 
 
 @Composable
 fun HandleEvents(
     events: Flow<LastVisitorsEvent>,
     onNavigateToCreateAppointment: () -> Unit,
-    onNavigateToEditAppointment: (Long) -> Unit
+    onNavigateToEditAppointment: (Long) -> Unit,
+    onNavigateToVisitorDetails: (Long) -> Unit
 ) {
     val scope = rememberCoroutineScope()
     events.collectWithLifecycleAware {
@@ -514,6 +500,12 @@ fun HandleEvents(
             is LastVisitorsEvent.NavigateToEditAppointment -> {
                 scope.launch {
                     onNavigateToEditAppointment(it.appointmentId)
+                }
+            }
+            
+            is LastVisitorsEvent.NavigateToVisitorDetails -> {
+                scope.launch {
+                    onNavigateToVisitorDetails(it.visitorId)
                 }
             }
         }

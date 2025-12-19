@@ -30,4 +30,3 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun appointmentDao(): AppointmentDao
     abstract fun messageDao(): MessageDao
 }
-

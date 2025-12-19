@@ -5,4 +5,5 @@ sealed interface SettingsEvent {
     data object NavigateToBusinessSelection : SettingsEvent
     data object BusinessDeleted : SettingsEvent
     data object NavigateToNotifications : SettingsEvent
+    data object NavigateToMessages : SettingsEvent
 }

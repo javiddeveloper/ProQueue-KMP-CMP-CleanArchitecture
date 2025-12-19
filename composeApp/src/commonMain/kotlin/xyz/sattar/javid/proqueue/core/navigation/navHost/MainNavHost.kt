@@ -28,7 +28,10 @@ import xyz.sattar.javid.proqueue.feature.lastVisitors.LastVisitorsScreen
 import xyz.sattar.javid.proqueue.feature.visitorSelection.VisitorSelectionScreen
 import xyz.sattar.javid.proqueue.feature.settings.SettingsScreen
 import xyz.sattar.javid.proqueue.feature.notifications.NotificationsScreen
+import xyz.sattar.javid.proqueue.feature.messages.MessagesScreen
 import androidx.navigation.toRoute
+
+import xyz.sattar.javid.proqueue.feature.visitorDetails.VisitorDetailsScreen
 
 @Composable
 fun MainNavHost(
@@ -112,6 +115,9 @@ fun MainNavHost(
                     },
                     onNavigateToEditAppointment = { appointmentId ->
                         navController.navigate(AppScreens.CreateAppointment(appointmentId = appointmentId))
+                    },
+                    onNavigateToVisitorDetails = { visitorId ->
+                        navController.navigate(AppScreens.VisitorDetails(visitorId))
                     }
                 )
             }
@@ -119,7 +125,7 @@ fun MainNavHost(
             composable<AppScreens.VisitorSelection> {
                 VisitorSelectionScreen(
                     onNavigateToCreateAppointment = { visitorId ->
-                        navController.navigate(AppScreens.CreateAppointment(visitorId))
+                        navController.navigate(AppScreens.CreateAppointment(visitorId = visitorId))
                     },
                     onNavigateToEditVisitor = { visitorId ->
                         navController.navigate(AppScreens.EditVisitor(visitorId))
@@ -139,6 +145,9 @@ fun MainNavHost(
                     onChangeBusiness = onChangeBusiness,
                     onNavigateToNotifications = {
                         navController.navigate(AppScreens.Notifications)
+                    },
+                    onNavigateToMessages = {
+                        navController.navigate(AppScreens.Messages)
                     }
                 )
             }
@@ -147,6 +156,25 @@ fun MainNavHost(
                 NotificationsScreen(
                     onNavigateBack = {
                         navController.popBackStack()
+                    }
+                )
+            }
+
+            composable<AppScreens.Messages> {
+                MessagesScreen(
+                    onNavigateBack = { navController.popBackStack() }
+                )
+            }
+
+            composable<AppScreens.VisitorDetails> { backStackEntry ->
+                val args = backStackEntry.toRoute<AppScreens.VisitorDetails>()
+                VisitorDetailsScreen(
+                    visitorId = args.visitorId,
+                    onNavigateBack = {
+                        navController.popBackStack()
+                    },
+                    onNavigateToCreateAppointment = { visitorId ->
+                        navController.navigate(AppScreens.CreateAppointment(visitorId))
                     }
                 )
             }

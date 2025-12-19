@@ -23,6 +23,7 @@ data class MessageEntity(
     val appointmentId: Long,
     val messageType: String, // SMS, WHATSAPP, TELEGRAM
     val content: String,
-    val sentAt: Long
+    val sentAt: Long,
+    val businessTitle: String
 ) {
 }

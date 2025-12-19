@@ -65,7 +65,9 @@ class CreateAppointmentUseCase(
                             customerName = visitor.fullName,
                             businessName = business.title,
                             triggerAtMillis = triggerTime,
-                            minutesBefore = minutes
+                            minutesBefore = minutes,
+                            businessId = businessId,
+                            visitorId = visitorId
                         )
                     }
                 }

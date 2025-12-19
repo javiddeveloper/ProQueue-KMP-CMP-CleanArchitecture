@@ -9,13 +9,15 @@ import xyz.sattar.javid.proqueue.domain.usecase.GetTodayAppointmentsUseCase
 import xyz.sattar.javid.proqueue.domain.usecase.RemoveAppointmentUseCase
 import xyz.sattar.javid.proqueue.domain.usecase.MarkAppointmentCompletedUseCase
 import xyz.sattar.javid.proqueue.domain.usecase.MarkAppointmentNoShowUseCase
+import xyz.sattar.javid.proqueue.domain.usecase.SendMessageUseCase
 import kotlin.time.ExperimentalTime
 
 class LastVisitorsViewModel(
     private val getTodayAppointmentsUseCase: GetTodayAppointmentsUseCase,
     private val removeAppointmentUseCase: RemoveAppointmentUseCase,
     private val markAppointmentCompletedUseCase: MarkAppointmentCompletedUseCase,
-    private val markAppointmentNoShowUseCase: MarkAppointmentNoShowUseCase
+    private val markAppointmentNoShowUseCase: MarkAppointmentNoShowUseCase,
+    private val sendMessageUseCase: SendMessageUseCase
 ) : BaseViewModel<LastVisitorsState, LastVisitorsState.PartialState, LastVisitorsEvent, LastVisitorsIntent>(
     initialState = LastVisitorsState()
 ) {
@@ -38,6 +40,22 @@ class LastVisitorsViewModel(
             }
             is LastVisitorsIntent.OnTabSelected -> flow {
                 emit(LastVisitorsState.PartialState.TabSelected(intent.index))
+            }
+            is LastVisitorsIntent.OnAppointmentClick -> {
+                sendEvent(LastVisitorsEvent.NavigateToVisitorDetails(intent.visitorId))
+            }
+            is LastVisitorsIntent.OnSendMessage -> flow {
+                try {
+                    val success = sendMessageUseCase(
+                        appointmentId = intent.appointmentId,
+                        type = intent.type,
+                        content = intent.content,
+                        businessTitle = intent.businessTitle
+                    )
+                    if (!success) emit(LastVisitorsState.PartialState.ShowMessage("خطا در ثبت پیام"))
+                } catch (e: Exception) {
+                    emit(LastVisitorsState.PartialState.ShowMessage(e.message ?: "خطا در ثبت پیام"))
+                }
             }
         }
     }
