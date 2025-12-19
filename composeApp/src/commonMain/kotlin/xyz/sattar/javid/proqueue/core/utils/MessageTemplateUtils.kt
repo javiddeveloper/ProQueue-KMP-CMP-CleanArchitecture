@@ -5,6 +5,7 @@ import xyz.sattar.javid.proqueue.core.prefs.PreferencesManager
 fun buildReminderMessage(
     businessId: Long,
     businessTitle: String,
+    businessAddress: String = "",
     visitorName: String,
     appointmentMillis: Long,
     reminderMinutes: String = PreferencesManager.getNotificationReminderMinutes().toString()
@@ -16,8 +17,8 @@ fun buildReminderMessage(
     return template
         .replace("{visitor}", visitorName)
         .replace("{business}", businessTitle)
+        .replace("{address}", businessAddress)
         .replace("{date}", date)
         .replace("{time}", time)
         .replace("{minutes}", reminderMinutes)
 }
-

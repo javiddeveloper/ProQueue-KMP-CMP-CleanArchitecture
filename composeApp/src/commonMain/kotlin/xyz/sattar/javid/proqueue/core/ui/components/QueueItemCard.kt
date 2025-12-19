@@ -64,7 +64,7 @@ fun QueueItemCard(
     onRemove: () -> Unit,
     onComplete: () -> Unit,
     onNoShow: () -> Unit,
-    onSendMessage: (String) -> Unit,
+    onSendMessage: (appointmentId: Long, type: String, content: String, businessTitle: String) -> Unit,
     onItemClick: () -> Unit = {}
 ) {
     Card(
@@ -160,17 +160,19 @@ fun QueueItemCard(
                         leadingIcon = { Icon(Icons.Default.Message, contentDescription = null) },
                         onClick = {
                             showMenu = false
-                            val businessTitle =
-                                BusinessStateHolder.selectedBusiness.value?.title ?: "--"
+                            val business = BusinessStateHolder.selectedBusiness.value
+                            val businessTitle = business?.title ?: "--"
+                            val businessAddress = business?.address ?: "--"
                             val message = buildReminderMessage(
                                 businessId = item.appointment.businessId,
                                 businessTitle = businessTitle,
+                                businessAddress = businessAddress,
                                 visitorName = item.visitorName,
                                 appointmentMillis = item.appointment.appointmentDate,
                                 reminderMinutes = waitingText,
                             )
                             openSms(formatPhoneNumberForAction(item.visitorPhone), message)
-                            onSendMessage("SMS")
+                            onSendMessage(item.appointment.id, "SMS", message, businessTitle)
                         }
                     )
                     DropdownMenuItem(
@@ -183,32 +185,36 @@ fun QueueItemCard(
                         },
                         onClick = {
                             showMenu = false
-                            val businessTitle =
-                                BusinessStateHolder.selectedBusiness.value?.title ?: "--"
+                            val business = BusinessStateHolder.selectedBusiness.value
+                            val businessTitle = business?.title ?: "--"
+                            val businessAddress = business?.address ?: "--"
                             val message = buildReminderMessage(
                                 businessId = item.appointment.businessId,
                                 businessTitle = businessTitle,
+                                businessAddress = businessAddress,
                                 visitorName = item.visitorName,
                                 appointmentMillis = item.appointment.appointmentDate
                             )
                             openWhatsApp(formatPhoneNumberForAction(item.visitorPhone), message)
-                            onSendMessage("WHATSAPP")
+                            onSendMessage(item.appointment.id, "WHATSAPP", message, businessTitle)
                         })
                     DropdownMenuItem(
                         text = { Text(stringResource(Res.string.telegram)) },
                         leadingIcon = { Icon(Icons.Default.Send, contentDescription = null) },
                         onClick = {
                             showMenu = false
-                            val businessTitle =
-                                BusinessStateHolder.selectedBusiness.value?.title ?: "--"
+                            val business = BusinessStateHolder.selectedBusiness.value
+                            val businessTitle = business?.title ?: "--"
+                            val businessAddress = business?.address ?: "--"
                             val message = buildReminderMessage(
                                 businessId = item.appointment.businessId,
                                 businessTitle = businessTitle,
+                                businessAddress = businessAddress,
                                 visitorName = item.visitorName,
                                 appointmentMillis = item.appointment.appointmentDate
                             )
                             openTelegram(formatPhoneNumberForAction(item.visitorPhone), message)
-                            onSendMessage("TELEGRAM")
+                            onSendMessage(item.appointment.id, "TELEGRAM", message, businessTitle)
                         })
                     DropdownMenuItem(
                         text = { Text(stringResource(Res.string.phone_call)) },
