@@ -9,6 +9,7 @@ fun MessageEntity.toDomain() = Message(
     messageType = messageType,
     content = content,
     sentAt = sentAt,
+    businessTitle = businessTitle
 )
 
 fun Message.toEntity() = MessageEntity(
@@ -17,5 +18,5 @@ fun Message.toEntity() = MessageEntity(
     messageType = messageType,
     content = content,
     sentAt = sentAt,
+    businessTitle = businessTitle
 )
-

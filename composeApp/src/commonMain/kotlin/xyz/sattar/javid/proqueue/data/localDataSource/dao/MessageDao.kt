@@ -20,4 +20,15 @@ interface MessageDao {
         ORDER BY Message.sentAt DESC
     """)
     suspend fun getMessagesForVisitorAndBusiness(visitorId: Long, businessId: Long): List<MessageEntity>
+
+    @Query("DELETE FROM Message WHERE id = :id")
+    suspend fun deleteMessage(id: Long): Int
+
+    @Query("""
+        DELETE FROM Message 
+        WHERE appointmentId IN (
+            SELECT id FROM Appointment WHERE visitorId = :visitorId
+        )
+    """)
+    suspend fun deleteMessagesByVisitorId(visitorId: Long): Int
 }

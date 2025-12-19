@@ -33,4 +33,20 @@ class MessageRepositoryImpl(
             emptyList()
         }
     }
+
+    override suspend fun deleteMessage(id: Long): Boolean {
+        return try {
+            messageDao.deleteMessage(id) > 0
+        } catch (e: Exception) {
+            false
+        }
+    }
+
+    override suspend fun deleteMessagesByVisitorId(visitorId: Long): Boolean {
+        return try {
+            messageDao.deleteMessagesByVisitorId(visitorId) >= 0
+        } catch (e: Exception) {
+            false
+        }
+    }
 }
