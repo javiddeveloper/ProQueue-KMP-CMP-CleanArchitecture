@@ -1,5 +1,6 @@
 package xyz.sattar.javid.proqueue.feature.messages
 
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -27,10 +28,8 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -41,6 +40,7 @@ import proqueue.composeapp.generated.resources.messages_title
 import proqueue.composeapp.generated.resources.messages_tokens_label
 import proqueue.composeapp.generated.resources.messages_preview_label
 import proqueue.composeapp.generated.resources.messages_save
+import xyz.sattar.javid.proqueue.core.ui.components.AppButton
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -79,12 +79,16 @@ fun MessagesScreen(
                 fontWeight = FontWeight.Bold
             )
 
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                TokenChip(label = "{visitor}") { viewModel.sendIntent(MessagesIntent.InsertToken("{visitor}")) }
-                TokenChip(label = "{business}") { viewModel.sendIntent(MessagesIntent.InsertToken("{business}")) }
-                TokenChip(label = "{date}") { viewModel.sendIntent(MessagesIntent.InsertToken("{date}")) }
-                TokenChip(label = "{time}") { viewModel.sendIntent(MessagesIntent.InsertToken("{time}")) }
-                TokenChip(label = "{minutes}") { viewModel.sendIntent(MessagesIntent.InsertToken("{minutes}")) }
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.fillMaxWidth()
+                    .horizontalScroll(rememberScrollState()),
+            ) {
+                MessageToken.values().forEach { token ->
+                    TokenChip(label = token.label) {
+                        viewModel.sendIntent(MessagesIntent.InsertToken(token.token))
+                    }
+                }
             }
 
             OutlinedTextField(
@@ -104,15 +108,22 @@ fun MessagesScreen(
 
             Text(text = uiState.preview, style = MaterialTheme.typography.bodyLarge)
 
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                SuggestionChip(onClick = { viewModel.sendIntent(MessagesIntent.ApplyReadyTemplate(defaultTemplates()[0])) }, label = { Text("Template 1") })
-                SuggestionChip(onClick = { viewModel.sendIntent(MessagesIntent.ApplyReadyTemplate(defaultTemplates()[1])) }, label = { Text("Template 2") })
-                SuggestionChip(onClick = { viewModel.sendIntent(MessagesIntent.ApplyReadyTemplate(defaultTemplates()[2])) }, label = { Text("Template 3") })
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier
+                    .horizontalScroll(rememberScrollState()),
+            ) {
+                uiState.readyTemplates.forEachIndexed { index, tpl ->
+                    SuggestionChip(
+                        onClick = { viewModel.sendIntent(MessagesIntent.ApplyReadyTemplate(tpl)) },
+                        label = { Text("الگو ${index + 1}") }
+                    )
+                }
             }
 
-            Button(onClick = { viewModel.sendIntent(MessagesIntent.Save) }) {
-                Text(text = stringResource(Res.string.messages_save))
-            }
+            AppButton(
+                text = stringResource(Res.string.messages_save),
+                onClick = { viewModel.sendIntent(MessagesIntent.Save) })
 
             Spacer(modifier = Modifier.height(80.dp))
         }
@@ -124,9 +135,11 @@ private fun TokenChip(label: String, onClick: () -> Unit) {
     SuggestionChip(onClick = onClick, label = { Text(label) })
 }
 
-private fun defaultTemplates(): List<String> = listOf(
-    "با سلام {visitor} عزیز؛ نوبت شما در {business} ساعت {time} می‌باشد. لطفاً حدود {minutes} دقیقه دیگر حضور داشته باشید.",
-    "{visitor} عزیز؛ یادآوری نوبت: {date} ساعت {time} در {business}. لطفاً {minutes} دقیقه زودتر تشریف بیاورید.",
-    "دوست عزیز {visitor}؛ نوبت شما در {business}، {date} - {time}. حضور شما تا {minutes} دقیقه دیگر لازم است."
-)
-
+enum class MessageToken(val label: String, val token: String) {
+    Visitor("نام مشتری", "{visitor}"),
+    Business("نام کسب‌وکار", "{business}"),
+    Address("آدرس", "{address}"),
+    Date("تاریخ", "{date}"),
+    Time("ساعت", "{time}"),
+    Minutes("دقیقه یادآوری", "{minutes}")
+}
