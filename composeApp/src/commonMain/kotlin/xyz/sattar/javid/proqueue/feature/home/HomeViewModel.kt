@@ -5,6 +5,7 @@ import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
 import xyz.sattar.javid.proqueue.core.state.BusinessStateHolder
 import xyz.sattar.javid.proqueue.core.ui.BaseViewModel
+import xyz.sattar.javid.proqueue.core.utils.DateTimeUtils
 import xyz.sattar.javid.proqueue.domain.model.AppointmentWithDetails
 import xyz.sattar.javid.proqueue.domain.usecase.*
 import kotlin.time.Clock
@@ -76,9 +77,9 @@ class HomeViewModel(
     }
 
     private fun calculateQueueTimes(appointments: List<AppointmentWithDetails>): List<QueueItem> {
-        var currentTime = 0L
-        // If first appointment is in the future, start from there.
-        // Otherwise start from now.
+        var currentTime = DateTimeUtils.systemCurrentMilliseconds()
+        // If first appointment is in the future, start from its scheduled time.
+        // Otherwise, chain from 'now' so waiting time reflects real queue position.
         
         return appointments.map { item ->
             val appointment = item.appointment

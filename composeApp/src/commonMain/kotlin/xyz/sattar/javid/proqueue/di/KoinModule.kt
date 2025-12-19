@@ -40,6 +40,7 @@ import xyz.sattar.javid.proqueue.feature.home.HomeViewModel
 import xyz.sattar.javid.proqueue.feature.lastVisitors.LastVisitorsViewModel
 import xyz.sattar.javid.proqueue.feature.notifications.NotificationsViewModel
 import xyz.sattar.javid.proqueue.feature.visitorDetails.VisitorDetailsViewModel
+import xyz.sattar.javid.proqueue.feature.messages.MessagesViewModel
 import xyz.sattar.javid.proqueue.feature.settings.SettingsViewModel
 import xyz.sattar.javid.proqueue.feature.visitorSelection.VisitorSelectionViewModel
 
@@ -114,4 +115,5 @@ val appModule: Module = module {
     viewModel { NotificationsViewModel(get(), get()) }
     viewModel { BusinessListViewModel(get()) }
     viewModel { VisitorDetailsViewModel(get(), get(), get()) }
+    viewModel { MessagesViewModel() }
 }
