@@ -28,7 +28,7 @@ class HomeViewModel(
             is HomeIntent.RemoveAppointment -> removeAppointment(intent.appointmentId)
             is HomeIntent.MarkAppointmentCompleted -> markCompleted(intent.appointmentId)
             is HomeIntent.MarkAppointmentNoShow -> markNoShow(intent.appointmentId)
-            is HomeIntent.SendMessage -> sendMessage(intent.appointmentId, intent.type)
+            is HomeIntent.SendMessage -> sendMessage(intent.appointmentId, intent.type, intent.content, intent.businessTitle)
         }
     }
 
@@ -120,8 +120,8 @@ class HomeViewModel(
         emitAll(loadData())
     }
 
-    private fun sendMessage(appointmentId: Long, type: String): Flow<HomeState.PartialState> = flow {
-        sendMessageUseCase(appointmentId, type)
+    private fun sendMessage(appointmentId: Long, type: String, content: String, businessTitle: String): Flow<HomeState.PartialState> = flow {
+        sendMessageUseCase(appointmentId, type, content, businessTitle)
         emitAll(loadData())
     }
 }
