@@ -50,6 +50,14 @@
     <string name="status_no_show">عدم حضور</string>
     <string name="status_cancelled">لغو شده</string>
     <string name="to_label">تا</string>
+
+    <!-- Visitor Details Screen -->
+    <string name="visitor_details_title">جزئیات مراجع</string>
+    <string name="history_title">سوابق</string>
+    <string name="messages_tab">پیام‌ها</string>
+    <string name="appointments_tab">نوبت‌ها</string>
+    <string name="empty_messages_title">هنوز پیامی ثبت نشده</string>
+    <string name="empty_messages_subtitle">از گزینه‌های تماس بالا می‌توانید پیام ارسال کنید</string>
     
     <!-- Settings Screen -->
     <string name="theme_appearance">تم و ظاهر</string>

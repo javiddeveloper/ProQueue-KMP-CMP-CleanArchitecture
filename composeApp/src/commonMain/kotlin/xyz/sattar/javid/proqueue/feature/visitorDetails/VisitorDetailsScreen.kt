@@ -9,6 +9,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -63,8 +64,16 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.lerp
 import kotlinx.coroutines.flow.Flow
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import proqueue.composeapp.generated.resources.Res
+import proqueue.composeapp.generated.resources.appointments_tab
+import proqueue.composeapp.generated.resources.business_name
+import proqueue.composeapp.generated.resources.contact_options
+import proqueue.composeapp.generated.resources.empty_messages_subtitle
+import proqueue.composeapp.generated.resources.empty_messages_title
+import proqueue.composeapp.generated.resources.messages_tab
+import proqueue.composeapp.generated.resources.visitor_details_title
 import proqueue.composeapp.generated.resources.whatsapp
 import xyz.sattar.javid.proqueue.core.ui.collectWithLifecycleAware
 import xyz.sattar.javid.proqueue.core.ui.components.EmptyState
@@ -121,7 +130,7 @@ fun VisitorDetailsScreenContent(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("جزئیات مراجع") },
+                title = { Text(stringResource(Res.string.visitor_details_title)) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null)
@@ -142,7 +151,7 @@ fun VisitorDetailsScreenContent(
             val listState = rememberLazyListState()
             var selectedTabIndex by remember { mutableStateOf(0) }
 
-            val maxHeight = 300.dp
+            val maxHeight = 250.dp
             val minHeight = 0.dp
             val density = LocalDensity.current
             val collapseRangePx = with(density) { (maxHeight - minHeight).toPx() }
@@ -195,34 +204,37 @@ fun VisitorDetailsScreenContent(
                         )
                     ) {
                         SectionTabs(
-                            labels = listOf("ارسال پیام", "نوبت‌ها"),
+                            labels = listOf(
+                                stringResource(Res.string.messages_tab),
+                                stringResource(Res.string.appointments_tab)
+                            ),
                             selectedIndex = selectedTabIndex,
                             onSelected = { selectedTabIndex = it },
                             modifier = Modifier.fillMaxWidth()
                         )
                     }
+                    Spacer(modifier = Modifier.height(8.dp))
 
                     LazyColumn(
                         modifier = Modifier.fillMaxSize(),
                         state = listState,
-                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 16.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
                         if (selectedTabIndex == 0) {
                             if (uiState.messages.isEmpty()) {
                                 item {
                                     EmptyState(
-                                        modifier = Modifier.fillMaxWidth().padding(32.dp),
+                                        modifier = Modifier.fillMaxWidth().padding(16.dp),
                                         icon = Icons.Default.Message,
-                                        title = "هنوز پیامی برای این مخاطب ثبت نشده",
-                                        subtitle = "از گزینه‌های ارتباطی بالا می‌توانید پیام ارسال کنید"
+                                        title = stringResource(Res.string.empty_messages_title),
+                                        subtitle = stringResource(Res.string.empty_messages_subtitle)
                                     )
                                 }
                             } else {
                                 items(uiState.messages) { message ->
                                     Card(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .padding(horizontal = 16.dp),
+                                        modifier = Modifier.fillMaxWidth(),
                                         shape = RoundedCornerShape(8.dp),
                                         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
                                     ) {
@@ -261,9 +273,7 @@ fun VisitorDetailsScreenContent(
                             } else {
                                 items(uiState.appointments) { item ->
                                     Card(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .padding(horizontal = 16.dp),
+                                        modifier = Modifier.fillMaxWidth(),
                                         shape = RoundedCornerShape(8.dp),
                                         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
                                     ) {
@@ -285,7 +295,7 @@ fun VisitorDetailsScreenContent(
                                                 )
                                                 Spacer(modifier = Modifier.height(4.dp))
                                                 Text(
-                                                    text = "کسب‌وکار: ${item.business.title}",
+                                                    text = "${stringResource(Res.string.business_name)}: ${item.business.title}",
                                                     style = MaterialTheme.typography.labelSmall,
                                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                                 )
@@ -327,7 +337,7 @@ fun VisitorInfoHeader(visitor: Visitor) {
 fun CommunicationSection(visitor: Visitor) {
     Column(modifier = Modifier.fillMaxWidth()) {
         Text(
-            text = "ارتباط با ${visitor.fullName}",
+            text = stringResource(Res.string.contact_options),
             style = MaterialTheme.typography.titleSmall,
             color = MaterialTheme.colorScheme.primary,
             fontWeight = FontWeight.Bold
