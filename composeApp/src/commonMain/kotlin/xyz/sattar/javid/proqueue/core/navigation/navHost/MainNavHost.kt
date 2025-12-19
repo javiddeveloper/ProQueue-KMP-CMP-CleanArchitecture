@@ -28,6 +28,7 @@ import xyz.sattar.javid.proqueue.feature.lastVisitors.LastVisitorsScreen
 import xyz.sattar.javid.proqueue.feature.visitorSelection.VisitorSelectionScreen
 import xyz.sattar.javid.proqueue.feature.settings.SettingsScreen
 import xyz.sattar.javid.proqueue.feature.notifications.NotificationsScreen
+import xyz.sattar.javid.proqueue.feature.messages.MessagesScreen
 import androidx.navigation.toRoute
 
 import xyz.sattar.javid.proqueue.feature.visitorDetails.VisitorDetailsScreen
@@ -144,6 +145,9 @@ fun MainNavHost(
                     onChangeBusiness = onChangeBusiness,
                     onNavigateToNotifications = {
                         navController.navigate(AppScreens.Notifications)
+                    },
+                    onNavigateToMessages = {
+                        navController.navigate(AppScreens.Messages)
                     }
                 )
             }
@@ -153,6 +157,12 @@ fun MainNavHost(
                     onNavigateBack = {
                         navController.popBackStack()
                     }
+                )
+            }
+
+            composable<AppScreens.Messages> {
+                MessagesScreen(
+                    onNavigateBack = { navController.popBackStack() }
                 )
             }
 
