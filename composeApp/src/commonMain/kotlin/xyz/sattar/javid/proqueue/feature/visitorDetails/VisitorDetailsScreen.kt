@@ -28,6 +28,13 @@ import androidx.compose.material.icons.filled.Call
 import androidx.compose.material.icons.filled.EventNote
 import androidx.compose.material.icons.filled.Message
 import androidx.compose.material.icons.filled.Send
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.Button
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -40,6 +47,7 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -54,10 +62,10 @@ import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -76,6 +84,8 @@ import proqueue.composeapp.generated.resources.messages_tab
 import proqueue.composeapp.generated.resources.visitor_details_title
 import proqueue.composeapp.generated.resources.whatsapp
 import xyz.sattar.javid.proqueue.core.ui.collectWithLifecycleAware
+import xyz.sattar.javid.proqueue.core.state.BusinessStateHolder
+import xyz.sattar.javid.proqueue.core.utils.buildReminderMessage
 import xyz.sattar.javid.proqueue.core.ui.components.EmptyState
 import xyz.sattar.javid.proqueue.core.ui.components.SectionTabs
 import xyz.sattar.javid.proqueue.core.utils.DateTimeUtils
@@ -135,7 +145,10 @@ fun VisitorDetailsScreenContent(
                     IconButton(onClick = onNavigateBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null)
                     }
-                }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.background
+                )
             )
         },
         snackbarHost = { SnackbarHost(snackbarHostState) }
@@ -148,9 +161,56 @@ fun VisitorDetailsScreenContent(
             var visible by remember { mutableStateOf(false) }
             LaunchedEffect(Unit) { visible = true }
 
-            val listState = rememberLazyListState()
             var selectedTabIndex by remember { mutableStateOf(0) }
 
+            var showMessageSheet by remember { mutableStateOf(false) }
+            val sheetState = rememberModalBottomSheetState()
+            var messageBody by remember { mutableStateOf("") }
+            var currentChannel by remember { mutableStateOf("SMS") }
+            var currentAppointmentId by remember { mutableStateOf(0L) }
+
+            if (showMessageSheet) {
+                ModalBottomSheet(
+                    onDismissRequest = { showMessageSheet = false },
+                    sheetState = sheetState
+                ) {
+                    Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
+                        Text(
+                            text = "متن پیام",
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        OutlinedTextField(
+                            value = messageBody,
+                            onValueChange = { messageBody = it },
+                            modifier = Modifier.fillMaxWidth(),
+                            minLines = 4,
+                            maxLines = 8
+                        )
+                        Spacer(modifier = Modifier.height(12.dp))
+                        Button(onClick = {
+                            when (currentChannel) {
+                                "SMS" -> openSms(formatPhoneNumberForAction(uiState.visitor.phoneNumber), messageBody)
+                                "WHATSAPP" -> openWhatsApp(formatPhoneNumberForAction(uiState.visitor.phoneNumber), messageBody)
+                                "TELEGRAM" -> openTelegram(formatPhoneNumberForAction(uiState.visitor.phoneNumber), messageBody)
+                            }
+                            onIntent(
+                                VisitorDetailsIntent.OnSendMessage(
+                                    appointmentId = currentAppointmentId,
+                                    type = currentChannel,
+                                    content = messageBody,
+                                    businessTitle = BusinessStateHolder.selectedBusiness.value?.title ?: "--"
+                                )
+                            )
+                            showMessageSheet = false
+                        }) {
+                            Text(text = "ارسال ${channelLabel(currentChannel)}")
+                        }
+                    }
+                }
+            }
+
+            val listState = rememberLazyListState()
             val maxHeight = 250.dp
             val minHeight = 0.dp
             val density = LocalDensity.current
@@ -193,25 +253,38 @@ fun VisitorDetailsScreenContent(
                         ) {
                             VisitorInfoHeader(uiState.visitor)
                             Spacer(modifier = Modifier.height(16.dp))
-                            CommunicationSection(uiState.visitor)
+                            CommunicationSection(
+                                visitor = uiState.visitor,
+                                appointments = uiState.appointments,
+                                onSendMessage = { appointmentId, type, content, businessTitle ->
+                                    onIntent(
+                                        VisitorDetailsIntent.OnSendMessage(
+                                            appointmentId = appointmentId,
+                                            type = type,
+                                            content = content,
+                                            businessTitle = businessTitle
+                                        )
+                                    )
+                                },
+                                onComposeMessage = { channel ->
+                                    val business = BusinessStateHolder.selectedBusiness.value
+                                    val businessTitle = business?.title ?: "--"
+                                    val businessAddress = business?.address ?: "--"
+                                    val targetAppointment = pickTargetAppointment(uiState.appointments)
+                                    currentAppointmentId = targetAppointment?.appointment?.id ?: 0L
+                                    currentChannel = channel
+                                    messageBody = buildReminderMessage(
+                                        businessId = business?.id ?: 0L,
+                                        businessTitle = businessTitle,
+                                        businessAddress = businessAddress,
+                                        visitorName = uiState.visitor.fullName,
+                                        appointmentMillis = targetAppointment?.appointment?.appointmentDate
+                                            ?: DateTimeUtils.systemCurrentMilliseconds()
+                                    )
+                                    showMessageSheet = true
+                                }
+                            )
                         }
-                    }
-
-                    AnimatedVisibility(
-                        visible = visible,
-                        enter = slideInVertically(initialOffsetY = { 50 }) + fadeIn(
-                            animationSpec = tween(durationMillis = 500, delayMillis = 200)
-                        )
-                    ) {
-                        SectionTabs(
-                            labels = listOf(
-                                stringResource(Res.string.messages_tab),
-                                stringResource(Res.string.appointments_tab)
-                            ),
-                            selectedIndex = selectedTabIndex,
-                            onSelected = { selectedTabIndex = it },
-                            modifier = Modifier.fillMaxWidth()
-                        )
                     }
                     Spacer(modifier = Modifier.height(8.dp))
 
@@ -221,92 +294,128 @@ fun VisitorDetailsScreenContent(
                         contentPadding = PaddingValues(horizontal = 16.dp, vertical = 16.dp),
                         verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                        if (selectedTabIndex == 0) {
-                            if (uiState.messages.isEmpty()) {
-                                item {
-                                    EmptyState(
-                                        modifier = Modifier.fillMaxWidth().padding(16.dp),
-                                        icon = Icons.Default.Message,
-                                        title = stringResource(Res.string.empty_messages_title),
-                                        subtitle = stringResource(Res.string.empty_messages_subtitle)
-                                    )
-                                }
-                            } else {
-                                items(uiState.messages) { message ->
-                                    Card(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        shape = RoundedCornerShape(8.dp),
-                                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
-                                    ) {
-                                        Column(modifier = Modifier.padding(12.dp)) {
-                                            Row(
-                                                modifier = Modifier.fillMaxWidth(),
-                                                horizontalArrangement = Arrangement.SpaceBetween
-                                            ) {
-                                                Text(
-                                                    text = message.messageType,
-                                                    style = MaterialTheme.typography.labelSmall,
-                                                    color = MaterialTheme.colorScheme.primary
-                                                )
-                                                Text(
-                                                    text = DateTimeUtils.formatDate(message.sentAt),
-                                                    style = MaterialTheme.typography.labelSmall,
-                                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                                )
-                                            }
-                                            Spacer(modifier = Modifier.height(4.dp))
-                                            Text(text = message.content, style = MaterialTheme.typography.bodyMedium)
-                                        }
-                                    }
-                                }
+                    item {
+                        AnimatedVisibility(
+                            visible = visible,
+                            enter = slideInVertically(initialOffsetY = { 50 }) + fadeIn(
+                                animationSpec = tween(durationMillis = 500, delayMillis = 200)
+                            )
+                        ) {
+                            SectionTabs(
+                                labels = listOf(
+                                    stringResource(Res.string.messages_tab),
+                                    stringResource(Res.string.appointments_tab)
+                                ),
+                                selectedIndex = selectedTabIndex,
+                                onSelected = { selectedTabIndex = it },
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        }
+                    }
+
+                    if (selectedTabIndex == 0) {
+                        if (uiState.messages.isEmpty()) {
+                            item {
+                                EmptyState(
+                                    modifier = Modifier.fillMaxWidth().padding(16.dp),
+                                    icon = Icons.Default.Message,
+                                    title = stringResource(Res.string.empty_messages_title),
+                                    subtitle = stringResource(Res.string.empty_messages_subtitle)
+                                )
                             }
                         } else {
-                            if (uiState.appointments.isEmpty()) {
-                                item {
-                                    EmptyState(
-                                        modifier = Modifier.fillMaxWidth().padding(32.dp),
-                                        icon = Icons.Default.EventNote,
-                                        title = "برای این مخاطب در این کسب‌وکار نوبتی ثبت نشده",
-                                        subtitle = "از صفحه ایجاد نوبت می‌توانید نوبت جدید ثبت کنید"
-                                    )
-                                }
-                            } else {
-                                items(uiState.appointments) { item ->
-                                    Card(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        shape = RoundedCornerShape(8.dp),
-                                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
-                                    ) {
+                            items(uiState.messages) { message ->
+                                Card(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    shape = RoundedCornerShape(8.dp),
+                                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer)
+                                ) {
+                                    Column(modifier = Modifier.padding(12.dp)) {
                                         Row(
-                                            modifier = Modifier.padding(12.dp).fillMaxWidth(),
+                                            modifier = Modifier.fillMaxWidth(),
                                             horizontalArrangement = Arrangement.SpaceBetween,
                                             verticalAlignment = Alignment.CenterVertically
                                         ) {
-                                            Column {
+                                            Text(
+                                                text = message.messageType,
+                                                style = MaterialTheme.typography.labelSmall,
+                                                color = MaterialTheme.colorScheme.primary
+                                            )
+                                            Row(verticalAlignment = Alignment.CenterVertically) {
                                                 Text(
-                                                    text = DateTimeUtils.formatDate(item.appointment.appointmentDate),
-                                                    style = MaterialTheme.typography.bodyMedium,
-                                                    fontWeight = FontWeight.Bold
-                                                )
-                                                Text(
-                                                    text = DateTimeUtils.formatTime(item.appointment.appointmentDate),
-                                                    style = MaterialTheme.typography.bodySmall,
-                                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                                )
-                                                Spacer(modifier = Modifier.height(4.dp))
-                                                Text(
-                                                    text = "${stringResource(Res.string.business_name)}: ${item.business.title}",
+                                                    text = DateTimeUtils.formatDateTime(message.sentAt),
                                                     style = MaterialTheme.typography.labelSmall,
                                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                                 )
+                                                var showMenu by remember { mutableStateOf(false) }
+                                                IconButton(onClick = { showMenu = true }) {
+                                                    Icon(Icons.Default.MoreVert, contentDescription = null)
+                                                }
+                                                DropdownMenu(expanded = showMenu, onDismissRequest = { showMenu = false }) {
+                                                    DropdownMenuItem(
+                                                        text = { Text("حذف") },
+                                                        onClick = {
+                                                            showMenu = false
+                                                            onIntent(VisitorDetailsIntent.DeleteMessage(message.id))
+                                                        }
+                                                    )
+                                                }
                                             }
-                                            StatusBadge(status = item.appointment.status, overdue = false)
                                         }
+                                        Spacer(modifier = Modifier.height(4.dp))
+                                        Text(
+                                            text = "${stringResource(Res.string.business_name)}: ${message.businessTitle}",
+                                            style = MaterialTheme.typography.labelSmall,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                        Spacer(modifier = Modifier.height(4.dp))
+                                        Text(text = message.content, style = MaterialTheme.typography.bodyMedium)
+                                    }
+                                }
+                            }
+                        }
+                    } else {
+                        if (uiState.appointments.isEmpty()) {
+                            item {
+                                EmptyState(
+                                    modifier = Modifier.fillMaxWidth().padding(32.dp),
+                                    icon = Icons.Default.EventNote,
+                                    title = "برای این مخاطب در این کسب‌وکار نوبتی ثبت نشده",
+                                    subtitle = "از صفحه ایجاد نوبت می‌توانید نوبت جدید ثبت کنید"
+                                )
+                            }
+                        } else {
+                            items(uiState.appointments) { item ->
+                                Card(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    shape = RoundedCornerShape(8.dp),
+                                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer)
+                                ) {
+                                    Row(
+                                        modifier = Modifier.padding(12.dp).fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Column {
+                                            Text(
+                                                text = DateTimeUtils.formatDateTime(item.appointment.appointmentDate),
+                                                style = MaterialTheme.typography.bodyMedium,
+                                                fontWeight = FontWeight.Bold
+                                            )
+                                            Spacer(modifier = Modifier.height(4.dp))
+                                            Text(
+                                                text = "${stringResource(Res.string.business_name)}: ${item.business.title}",
+                                                style = MaterialTheme.typography.labelSmall,
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                            )
+                                        }
+                                        StatusBadge(status = item.appointment.status, overdue = false)
                                     }
                                 }
                             }
                         }
                     }
+                }
                 }
             }
         }
@@ -334,7 +443,12 @@ fun VisitorInfoHeader(visitor: Visitor) {
 }
 
 @Composable
-fun CommunicationSection(visitor: Visitor) {
+fun CommunicationSection(
+    visitor: Visitor,
+    appointments: List<AppointmentWithDetails>,
+    onSendMessage: (appointmentId: Long, type: String, content: String, businessTitle: String) -> Unit,
+    onComposeMessage: (channel: String) -> Unit
+) {
     Column(modifier = Modifier.fillMaxWidth()) {
         Text(
             text = stringResource(Res.string.contact_options),
@@ -355,20 +469,76 @@ fun CommunicationSection(visitor: Visitor) {
             CommunicationButton(
                 icon = Icons.Default.Message,
                 label = "پیامک",
-                onClick = { openSms(formatPhoneNumberForAction(visitor.phoneNumber)) }
+                onClick = {
+                    val business = BusinessStateHolder.selectedBusiness.value
+                    val businessTitle = business?.title ?: "--"
+                    val businessAddress = business?.address ?: "--"
+                    val targetAppointment = pickTargetAppointment(appointments)
+                    val appointmentId = targetAppointment?.appointment?.id ?: 0L
+                    val content = buildReminderMessage(
+                        businessId = business?.id ?: 0L,
+                        businessTitle = businessTitle,
+                        businessAddress = businessAddress,
+                        visitorName = visitor.fullName,
+                        appointmentMillis = targetAppointment?.appointment?.appointmentDate
+                            ?: DateTimeUtils.systemCurrentMilliseconds()
+                    )
+                    onComposeMessage("SMS")
+                }
             )
             CommunicationButton(
                 icon = Res.drawable.whatsapp,
                 label = "واتساپ",
-                onClick = { openWhatsApp(formatPhoneNumberForAction(visitor.phoneNumber)) }
+                onClick = {
+                    val business = BusinessStateHolder.selectedBusiness.value
+                    val businessTitle = business?.title ?: "--"
+                    val businessAddress = business?.address ?: "--"
+                    val targetAppointment = pickTargetAppointment(appointments)
+                    val appointmentId = targetAppointment?.appointment?.id ?: 0L
+                    val content = buildReminderMessage(
+                        businessId = business?.id ?: 0L,
+                        businessTitle = businessTitle,
+                        businessAddress = businessAddress,
+                        visitorName = visitor.fullName,
+                        appointmentMillis = targetAppointment?.appointment?.appointmentDate
+                            ?: DateTimeUtils.systemCurrentMilliseconds()
+                    )
+                    onComposeMessage("WHATSAPP")
+                }
             )
             CommunicationButton(
-                icon = Icons.Default.Send, // Placeholder for Telegram
+                icon = Icons.Default.Send,
                 label = "تلگرام",
-                onClick = { openTelegram(formatPhoneNumberForAction(visitor.phoneNumber)) }
+                onClick = {
+                    val business = BusinessStateHolder.selectedBusiness.value
+                    val businessTitle = business?.title ?: "--"
+                    val businessAddress = business?.address ?: "--"
+                    val targetAppointment = pickTargetAppointment(appointments)
+                    val appointmentId = targetAppointment?.appointment?.id ?: 0L
+                    val content = buildReminderMessage(
+                        businessId = business?.id ?: 0L,
+                        businessTitle = businessTitle,
+                        businessAddress = businessAddress,
+                        visitorName = visitor.fullName,
+                        appointmentMillis = targetAppointment?.appointment?.appointmentDate
+                            ?: DateTimeUtils.systemCurrentMilliseconds()
+                    )
+                    onComposeMessage("TELEGRAM")
+                }
             )
         }
     }
+}
+
+private fun pickTargetAppointment(appointments: List<AppointmentWithDetails>): AppointmentWithDetails? {
+    if (appointments.isEmpty()) return null
+    val now = DateTimeUtils.systemCurrentMilliseconds()
+    val upcoming = appointments
+        .filter { it.appointment.appointmentDate >= now && it.appointment.status == "WAITING" }
+        .sortedBy { it.appointment.appointmentDate }
+        .firstOrNull()
+    if (upcoming != null) return upcoming
+    return appointments.maxByOrNull { it.appointment.appointmentDate }
 }
 
 @Composable
@@ -530,4 +700,10 @@ fun HandleEffects(
             VisitorDetailsEvent.NavigateBack -> onNavigateBack()
         }
     }
+}
+private fun channelLabel(channel: String): String = when (channel) {
+    "SMS" -> "پیامک"
+    "WHATSAPP" -> "واتساپ"
+    "TELEGRAM" -> "تلگرام"
+    else -> channel
 }

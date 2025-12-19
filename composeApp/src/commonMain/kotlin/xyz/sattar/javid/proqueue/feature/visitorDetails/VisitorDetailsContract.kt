@@ -25,6 +25,13 @@ data class VisitorDetailsState(
 sealed class VisitorDetailsIntent {
     data class LoadVisitorDetails(val visitorId: Long) : VisitorDetailsIntent()
     object BackPress : VisitorDetailsIntent()
+    data class OnSendMessage(
+        val appointmentId: Long,
+        val type: String,
+        val content: String,
+        val businessTitle: String
+    ) : VisitorDetailsIntent()
+    data class DeleteMessage(val id: Long) : VisitorDetailsIntent()
 }
 
 sealed class VisitorDetailsEvent {

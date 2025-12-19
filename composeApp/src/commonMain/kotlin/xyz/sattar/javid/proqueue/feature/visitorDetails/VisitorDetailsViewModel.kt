@@ -7,12 +7,14 @@ import xyz.sattar.javid.proqueue.core.ui.BaseViewModel
 import xyz.sattar.javid.proqueue.domain.AppointmentRepository
 import xyz.sattar.javid.proqueue.domain.MessageRepository
 import xyz.sattar.javid.proqueue.domain.VisitorRepository
+import xyz.sattar.javid.proqueue.domain.usecase.SendMessageUseCase
 import xyz.sattar.javid.proqueue.feature.visitorDetails.VisitorDetailsState.PartialState
 
 class VisitorDetailsViewModel(
     private val visitorRepository: VisitorRepository,
     private val appointmentRepository: AppointmentRepository,
-    private val messageRepository: MessageRepository
+    private val messageRepository: MessageRepository,
+    private val sendMessageUseCase: SendMessageUseCase
 ) : BaseViewModel<VisitorDetailsState, PartialState, VisitorDetailsEvent, VisitorDetailsIntent>(
     initialState = VisitorDetailsState()
 ) {
@@ -22,6 +24,54 @@ class VisitorDetailsViewModel(
             is VisitorDetailsIntent.LoadVisitorDetails -> loadVisitorDetails(intent.visitorId)
             VisitorDetailsIntent.BackPress -> {
                 sendEvent(VisitorDetailsEvent.NavigateBack)
+            }
+            is VisitorDetailsIntent.OnSendMessage -> flow {
+                try {
+                    val success = sendMessageUseCase(
+                        appointmentId = intent.appointmentId,
+                        type = intent.type,
+                        content = intent.content,
+                        businessTitle = intent.businessTitle
+                    )
+                    if (!success) emit(PartialState.ShowMessage("خطا در ثبت پیام"))
+
+                    val visitor = uiState.value.visitor
+                    val business = BusinessStateHolder.selectedBusiness.value
+                    if (visitor != null && business != null) {
+                        val updatedMessages = messageRepository.getMessagesForVisitorAndBusiness(visitor.id, business.id)
+                        emit(
+                            PartialState.DetailsLoaded(
+                                visitor = visitor,
+                                appointments = uiState.value.appointments,
+                                messages = updatedMessages
+                            )
+                        )
+                    }
+                } catch (e: Exception) {
+                    emit(PartialState.ShowMessage(e.message ?: "خطا در ثبت پیام"))
+                }
+            }
+            is VisitorDetailsIntent.DeleteMessage -> flow {
+                try {
+                    val success = messageRepository.deleteMessage(intent.id)
+                    if (!success) {
+                        emit(PartialState.ShowMessage("حذف پیام با خطا مواجه شد"))
+                    }
+                    val visitor = uiState.value.visitor
+                    val business = BusinessStateHolder.selectedBusiness.value
+                    if (visitor != null && business != null) {
+                        val updatedMessages = messageRepository.getMessagesForVisitorAndBusiness(visitor.id, business.id)
+                        emit(
+                            PartialState.DetailsLoaded(
+                                visitor = visitor,
+                                appointments = uiState.value.appointments,
+                                messages = updatedMessages
+                            )
+                        )
+                    }
+                } catch (e: Exception) {
+                    emit(PartialState.ShowMessage(e.message ?: "خطا در حذف پیام"))
+                }
             }
         }
     }
