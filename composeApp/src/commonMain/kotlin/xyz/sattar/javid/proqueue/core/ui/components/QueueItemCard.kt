@@ -8,51 +8,55 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Call
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Message
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Divider
-import androidx.compose.material3.Surface
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import androidx.compose.foundation.shape.RoundedCornerShape
+import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import proqueue.composeapp.generated.resources.Res
-import proqueue.composeapp.generated.resources.to_label
-import proqueue.composeapp.generated.resources.contact_options
-import proqueue.composeapp.generated.resources.sms
-import proqueue.composeapp.generated.resources.whatsapp
-import proqueue.composeapp.generated.resources.telegram
-import proqueue.composeapp.generated.resources.phone_call
-import proqueue.composeapp.generated.resources.overdue_time
 import proqueue.composeapp.generated.resources.complete_action
-import proqueue.composeapp.generated.resources.no_show_action
+import proqueue.composeapp.generated.resources.contact_options
 import proqueue.composeapp.generated.resources.delete_appointment
+import proqueue.composeapp.generated.resources.no_show_action
+import proqueue.composeapp.generated.resources.overdue_time
+import proqueue.composeapp.generated.resources.phone_call
+import proqueue.composeapp.generated.resources.sms
+import proqueue.composeapp.generated.resources.telegram
+import proqueue.composeapp.generated.resources.to_label
+import proqueue.composeapp.generated.resources.whatsapp
+import xyz.sattar.javid.proqueue.core.state.BusinessStateHolder
 import xyz.sattar.javid.proqueue.core.utils.DateTimeUtils
-import xyz.sattar.javid.proqueue.core.utils.openSms
-import xyz.sattar.javid.proqueue.core.utils.openWhatsApp
-import xyz.sattar.javid.proqueue.core.utils.openTelegram
-import xyz.sattar.javid.proqueue.core.utils.openPhoneDial
-import xyz.sattar.javid.proqueue.feature.home.QueueItem
-
+import xyz.sattar.javid.proqueue.core.utils.buildReminderMessage
 import xyz.sattar.javid.proqueue.core.utils.formatPhoneNumberForAction
+import xyz.sattar.javid.proqueue.core.utils.openPhoneDial
+import xyz.sattar.javid.proqueue.core.utils.openSms
+import xyz.sattar.javid.proqueue.core.utils.openTelegram
+import xyz.sattar.javid.proqueue.core.utils.openWhatsApp
+import xyz.sattar.javid.proqueue.feature.home.QueueItem
 
 @Composable
 fun QueueItemCard(
@@ -102,7 +106,7 @@ fun QueueItemCard(
                     color = MaterialTheme.colorScheme.onSurface
                 )
                 Text(
-                    text = "$endTimeOnly ${stringResource(Res.string.to_label)} $startTimeOnly",
+                    text = "$startTimeOnly ${stringResource(Res.string.to_label)} $endTimeOnly",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.primary
                 )
@@ -110,10 +114,23 @@ fun QueueItemCard(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            val overdue = DateTimeUtils.systemCurrentMilliseconds() > item.estimatedEndTime && item.appointment.status == "WAITING"
-            Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
-                val waitingText = if (overdue) stringResource(Res.string.overdue_time) else DateTimeUtils.calculateWaitingTime(item.estimatedStartTime)
-                Surface(shape = RoundedCornerShape(6.dp), color = (if (overdue) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.secondary).copy(alpha = 0.12f)) {
+            val overdue =
+                DateTimeUtils.systemCurrentMilliseconds() > item.estimatedEndTime && item.appointment.status == "WAITING"
+            val waitingText =
+                if (overdue) stringResource(Res.string.overdue_time) else DateTimeUtils.calculateWaitingTime(
+                    item.estimatedStartTime
+                )
+
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Surface(
+                    shape = RoundedCornerShape(6.dp),
+                    color = (if (overdue) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.secondary).copy(
+                        alpha = 0.12f
+                    )
+                ) {
                     Text(
                         text = waitingText,
                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
@@ -138,27 +155,64 @@ fun QueueItemCard(
                     )
                 }
                 DropdownMenu(expanded = showMenu, onDismissRequest = { showMenu = false }) {
-                    DropdownMenuItem(text = { Text(stringResource(Res.string.sms)) }, onClick = {
-                        showMenu = false
-                        openSms(formatPhoneNumberForAction(item.visitorPhone))
-                        onSendMessage("SMS")
-                    })
                     DropdownMenuItem(
-                        text = { Text(stringResource(Res.string.whatsapp)) },
+                        text = { Text(stringResource(Res.string.sms)) },
+                        leadingIcon = { Icon(Icons.Default.Message, contentDescription = null) },
                         onClick = {
                             showMenu = false
-                            openWhatsApp(formatPhoneNumberForAction(item.visitorPhone))
+                            val businessTitle =
+                                BusinessStateHolder.selectedBusiness.value?.title ?: "--"
+                            val message = buildReminderMessage(
+                                businessId = item.appointment.businessId,
+                                businessTitle = businessTitle,
+                                visitorName = item.visitorName,
+                                appointmentMillis = item.appointment.appointmentDate,
+                                reminderMinutes = waitingText,
+                            )
+                            openSms(formatPhoneNumberForAction(item.visitorPhone), message)
+                            onSendMessage("SMS")
+                        }
+                    )
+                    DropdownMenuItem(
+                        text = { Text(stringResource(Res.string.whatsapp)) },
+                        leadingIcon = {
+                            Icon(
+                                painterResource(Res.drawable.whatsapp),
+                                contentDescription = null
+                            )
+                        },
+                        onClick = {
+                            showMenu = false
+                            val businessTitle =
+                                BusinessStateHolder.selectedBusiness.value?.title ?: "--"
+                            val message = buildReminderMessage(
+                                businessId = item.appointment.businessId,
+                                businessTitle = businessTitle,
+                                visitorName = item.visitorName,
+                                appointmentMillis = item.appointment.appointmentDate
+                            )
+                            openWhatsApp(formatPhoneNumberForAction(item.visitorPhone), message)
                             onSendMessage("WHATSAPP")
                         })
                     DropdownMenuItem(
                         text = { Text(stringResource(Res.string.telegram)) },
+                        leadingIcon = { Icon(Icons.Default.Send, contentDescription = null) },
                         onClick = {
                             showMenu = false
-                            openTelegram(formatPhoneNumberForAction(item.visitorPhone))
+                            val businessTitle =
+                                BusinessStateHolder.selectedBusiness.value?.title ?: "--"
+                            val message = buildReminderMessage(
+                                businessId = item.appointment.businessId,
+                                businessTitle = businessTitle,
+                                visitorName = item.visitorName,
+                                appointmentMillis = item.appointment.appointmentDate
+                            )
+                            openTelegram(formatPhoneNumberForAction(item.visitorPhone), message)
                             onSendMessage("TELEGRAM")
                         })
                     DropdownMenuItem(
                         text = { Text(stringResource(Res.string.phone_call)) },
+                        leadingIcon = { Icon(Icons.Default.Call, contentDescription = null) },
                         onClick = {
                             showMenu = false
                             openPhoneDial(item.visitorPhone)
