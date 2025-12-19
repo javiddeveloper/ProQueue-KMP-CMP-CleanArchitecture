@@ -82,7 +82,7 @@ val appModule: Module = module {
     factory { VisitorUpsertUseCase(get()) }
     factory { GetAllVisitorsUseCase(get()) }
     factory { GetVisitorByIdUseCase(get()) }
-    factory { DeleteVisitorUseCase(get(), get()) }
+    factory { DeleteVisitorUseCase(get(), get(), get()) }
 
     // States
     factory { CreateBusinessState() }
@@ -107,13 +107,14 @@ val appModule: Module = module {
             get(), // GetTodayAppointmentsUseCase
             get(), // RemoveAppointmentUseCase
             get(), // MarkAppointmentCompletedUseCase
-            get()  // MarkAppointmentNoShowUseCase
+            get(), // MarkAppointmentNoShowUseCase
+            get()  // SendMessageUseCase
         )
     }
     viewModel { VisitorSelectionViewModel(get(), get()) }
     viewModel { SettingsViewModel(get()) }
     viewModel { NotificationsViewModel(get(), get()) }
     viewModel { BusinessListViewModel(get()) }
-    viewModel { VisitorDetailsViewModel(get(), get(), get()) }
+    viewModel { VisitorDetailsViewModel(get(), get(), get(), get()) }
     viewModel { MessagesViewModel() }
 }
