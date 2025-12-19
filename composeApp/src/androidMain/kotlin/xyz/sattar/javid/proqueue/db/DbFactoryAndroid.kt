@@ -29,6 +29,7 @@ object DbFactoryAndroid: RoomDatabaseConstructor<AppDatabase> {
         )
             .setDriver(BundledSQLiteDriver())
             .setQueryCoroutineContext(Dispatchers.IO)
+            .fallbackToDestructiveMigration()
             .build()
 
     }
