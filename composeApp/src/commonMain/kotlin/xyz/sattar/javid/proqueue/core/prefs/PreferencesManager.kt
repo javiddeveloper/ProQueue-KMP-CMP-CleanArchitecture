@@ -13,5 +13,8 @@ expect object PreferencesManager {
     suspend fun setDefaultBusinessId(id: Long?)
     suspend fun setNotificationsEnabled(enabled: Boolean)
     suspend fun setNotificationReminderMinutes(minutes: Int)
+    fun messageTemplate(businessId: Long): Flow<String?>
+    suspend fun setMessageTemplate(businessId: Long, template: String)
+    fun getMessageTemplate(businessId: Long): String?
+    fun getNotificationReminderMinutes(): Int
 }
-
