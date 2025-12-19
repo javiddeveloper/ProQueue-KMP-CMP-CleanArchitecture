@@ -231,7 +231,16 @@ fun LastVisitorsScreenContent(
                                             onNoShow = {
                                                 onIntent(LastVisitorsIntent.OnMarkNoShow(queueItem.appointment.id))
                                             },
-                                            onSendMessage = { _ -> },
+                                            onSendMessage = { appointmentId, type, content, businessTitle ->
+                                                onIntent(
+                                                    LastVisitorsIntent.OnSendMessage(
+                                                        appointmentId = appointmentId,
+                                                        type = type,
+                                                        content = content,
+                                                        businessTitle = businessTitle
+                                                    )
+                                                )
+                                            },
                                             onItemClick = {
                                                 onIntent(LastVisitorsIntent.OnAppointmentClick(queueItem.appointment.visitorId))
                                             }
