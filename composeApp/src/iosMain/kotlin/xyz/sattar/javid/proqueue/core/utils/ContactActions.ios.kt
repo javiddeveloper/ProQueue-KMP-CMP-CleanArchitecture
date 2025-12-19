@@ -13,16 +13,19 @@ actual fun openUrl(url: String) {
     }
 }
 
-actual fun openSms(phone: String) {
-    openUrl("sms:${formatPhoneNumberForAction(phone)}")
+actual fun openSms(phone: String, message: String?) {
+    val body = if (message != null) "&body=" + message.replace(" ", "%20") else ""
+    openUrl("sms:${formatPhoneNumberForAction(phone)}$body")
 }
 
-actual fun openWhatsApp(phone: String) {
-    openUrl("https://wa.me/${formatPhoneNumberForAction(phone)}")
+actual fun openWhatsApp(phone: String, message: String?) {
+    val text = if (message != null) "?text=" + message.replace(" ", "%20") else ""
+    openUrl("https://wa.me/${formatPhoneNumberForAction(phone)}$text")
 }
 
-actual fun openTelegram(phone: String) {
-    openUrl("https://t.me/${formatPhoneNumberForAction(phone)}")
+actual fun openTelegram(phone: String, message: String?) {
+    val text = if (message != null) "?url=&text=" + message.replace(" ", "%20") else ""
+    openUrl("https://t.me/share/url$text")
 }
 
 actual fun openPhoneDial(phone: String) {
