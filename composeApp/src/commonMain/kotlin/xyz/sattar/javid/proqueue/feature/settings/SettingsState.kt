@@ -6,7 +6,7 @@ import androidx.compose.runtime.Immutable
 data class SettingsState(
     val isLoading: Boolean = false,
     val businessName: String? = null,
-    val appVersion: String = "1.0.0",
+    val appVersion: String = "1.3.0",
     val message: String? = null
 ) {
     sealed class PartialState {
