@@ -131,4 +131,13 @@
     <string name="error_saving_appointment">خطا در ذخیره نوبت</string>
     <string name="operation_error">خطا در عملیات</string>
     <string name="error_loading_visitors">خطا در بارگذاری لیست مراجعین</string>
+    
+    <!-- Messages Feature -->
+    <string name="messages_menu_item">پیام‌ها</string>
+    <string name="messages_ready_subtitle">پیام‌های آماده</string>
+    <string name="messages_title">قالب پیام یادآوری</string>
+    <string name="messages_tokens_label">درج مقادیر پویا</string>
+    <string name="messages_preview_label">پیش‌نمایش</string>
+    <string name="messages_save">ذخیره قالب</string>
+    <string name="reminder_minutes">دقیقه یادآوری</string>
 </resources>
