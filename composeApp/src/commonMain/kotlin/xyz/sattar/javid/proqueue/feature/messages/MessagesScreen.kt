@@ -24,6 +24,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SuggestionChip
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -31,6 +33,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -39,6 +42,7 @@ import org.koin.compose.viewmodel.koinViewModel
 import proqueue.composeapp.generated.resources.Res
 import proqueue.composeapp.generated.resources.messages_preview_label
 import proqueue.composeapp.generated.resources.messages_save
+import proqueue.composeapp.generated.resources.messages_shape_label
 import proqueue.composeapp.generated.resources.messages_title
 import proqueue.composeapp.generated.resources.messages_tokens_label
 
@@ -49,12 +53,21 @@ fun MessagesScreen(
     onNavigateBack: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    LaunchedEffect(uiState.message) {
+        val msg = uiState.message
+        if (msg != null) {
+            snackbarHostState.showSnackbar(msg)
+        }
+    }
 
     LaunchedEffect(Unit) {
         viewModel.sendIntent(MessagesIntent.Load)
     }
 
     Scaffold(
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         topBar = {
             TopAppBar(
                 title = { Text(stringResource(Res.string.messages_title)) },
@@ -128,7 +141,7 @@ fun MessagesScreen(
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     Text(
-                        text = "الگوی پیام",
+                        text = stringResource(Res.string.message_text),
                         style = MaterialTheme.typography.titleSmall,
                         color = MaterialTheme.colorScheme.primary,
                         fontWeight = FontWeight.Bold
@@ -173,18 +186,31 @@ fun MessagesScreen(
                 elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
                 shape = MaterialTheme.shapes.medium
             ) {
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(16.dp)
-                        .horizontalScroll(rememberScrollState()),
+                        .padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    uiState.readyTemplates.forEachIndexed { index, tpl ->
-                        SuggestionChip(
-                            onClick = { viewModel.sendIntent(MessagesIntent.ApplyReadyTemplate(tpl)) },
-                            label = { Text("الگو ${index + 1}") }
-                        )
+                    Text(
+                        text = stringResource(Res.string.messages_shape_label),
+                        style = MaterialTheme.typography.titleSmall,
+                        color = MaterialTheme.colorScheme.primary,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .horizontalScroll(rememberScrollState()),
+                    ) {
+                        uiState.readyTemplates.forEachIndexed { index, tpl ->
+
+                            SuggestionChip(
+                                onClick = { viewModel.sendIntent(MessagesIntent.ApplyReadyTemplate(tpl)) },
+                                label = { Text("الگو ${index + 1}") }
+                            )
+                        }
                     }
                 }
             }
