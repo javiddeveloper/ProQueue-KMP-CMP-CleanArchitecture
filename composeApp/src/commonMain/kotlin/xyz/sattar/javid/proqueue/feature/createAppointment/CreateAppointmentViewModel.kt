@@ -54,6 +54,7 @@ class CreateAppointmentViewModel(
                         intent.visitorId,
                         intent.appointmentDate,
                         intent.serviceDuration,
+                        intent.description,
                         intent.force
                     )
                 )
@@ -92,6 +93,7 @@ class CreateAppointmentViewModel(
                     appointmentDate = partialState.appointmentDate,
                     serviceDuration = partialState.serviceDuration
                         ?: BusinessStateHolder.selectedBusiness.value?.defaultServiceDuration,
+                    description = partialState.description,
                     editingAppointmentId = partialState.appointmentId,
                     isLoading = false
                 )
@@ -130,6 +132,7 @@ class CreateAppointmentViewModel(
                             visitorId = appointment.visitorId,
                             appointmentDate = appointment.appointmentDate,
                             serviceDuration = appointment.serviceDuration,
+                            description = appointment.description,
                             appointmentId = appointment.id
                         )
                     )
@@ -149,6 +152,7 @@ class CreateAppointmentViewModel(
         visitorId: Long,
         appointmentDate: Long,
         serviceDuration: Int?,
+        description: String?,
         force: Boolean
     ): Flow<CreateAppointmentState.PartialState> = flow {
         emit(CreateAppointmentState.PartialState.IsLoading(true))
@@ -186,14 +190,16 @@ class CreateAppointmentViewModel(
                 updateAppointmentUseCase(
                     appointmentId = editingId,
                     date = appointmentDate,
-                    duration = serviceDuration
+                    duration = serviceDuration,
+                    description = description
                 )
             } else {
                 createAppointmentUseCase(
                     businessId = business.id,
                     visitorId = visitorId,
                     appointmentDate = appointmentDate,
-                    serviceDuration = serviceDuration
+                    serviceDuration = serviceDuration,
+                    description = description
                 ) > 0
             }
             if (success) {

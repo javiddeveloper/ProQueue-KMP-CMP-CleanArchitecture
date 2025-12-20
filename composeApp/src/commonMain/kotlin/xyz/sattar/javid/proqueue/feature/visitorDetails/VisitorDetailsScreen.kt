@@ -414,10 +414,17 @@ fun VisitorDetailsScreenContent(
                                             )
                                             Spacer(modifier = Modifier.height(4.dp))
                                             Text(
-                                                text = "${stringResource(Res.string.business_name)}: ${item.business.title}",
+                                                text = item.business.title,
                                                 style = MaterialTheme.typography.labelSmall,
                                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                                             )
+                                            item.appointment.description?.let {
+                                                Spacer(modifier = Modifier.height(8.dp))
+                                                Text(
+                                                    text = it,
+                                                    style = MaterialTheme.typography.bodyMedium,
+                                                )
+                                            }
                                         }
                                         StatusBadge(status = item.appointment.status, overdue = false)
                                     }

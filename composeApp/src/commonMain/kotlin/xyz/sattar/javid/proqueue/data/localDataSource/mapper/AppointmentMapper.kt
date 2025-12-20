@@ -12,6 +12,7 @@ fun AppointmentEntity.toDomain() = Appointment(
     appointmentDate = appointmentDate,
     serviceDuration = serviceDuration,
     status = status,
+    description = description,
     createdAt = createdAt,
     updatedAt = updatedAt,
 )
@@ -23,6 +24,7 @@ fun Appointment.toEntity() = AppointmentEntity(
     appointmentDate = appointmentDate,
     serviceDuration = serviceDuration,
     status = status,
+    description = description,
     createdAt = createdAt,
     updatedAt = updatedAt,
 )
@@ -32,4 +34,3 @@ fun AppointmentWithDetailsEntity.toDomain() = AppointmentWithDetails(
     visitor = visitor.toDomain(),
     business = business.toDomain()
 )
-

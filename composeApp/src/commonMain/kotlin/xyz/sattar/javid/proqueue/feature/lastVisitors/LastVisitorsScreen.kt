@@ -529,7 +529,8 @@ fun PreviewLastVisitorsScreen() {
                             serviceDuration = 30,
                             status = "WAITING",
                             createdAt = 0,
-                            updatedAt = 0
+                            updatedAt = 0,
+                            description = ""
                         ),
                         visitor = Visitor(
                             id = 1,

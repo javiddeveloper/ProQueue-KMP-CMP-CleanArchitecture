@@ -88,6 +88,7 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.graphics.Color
+import proqueue.composeapp.generated.resources.appointment_description
 
 @Composable
 fun CreateAppointmentScreen(
@@ -139,6 +140,7 @@ fun CreateAppointmentScreenContent(
     var serviceDuration by remember { mutableStateOf(uiState.serviceDuration?.toString() ?: "30") }
     var serviceDurationError by remember { mutableStateOf<String?>(null) }
     var showTimeDialog by remember { mutableStateOf(false) }
+    var description by remember { mutableStateOf(uiState.description ?: "") }
 
     LaunchedEffect(uiState) {
         if (uiState.selectedVisitorId != null) {
@@ -156,6 +158,9 @@ fun CreateAppointmentScreenContent(
         }
         if (uiState.serviceDuration != null) {
             serviceDuration = uiState.serviceDuration.toString()
+        }
+        if (uiState.description != null) {
+            description = uiState.description ?: ""
         }
     }
 
@@ -345,7 +350,30 @@ fun CreateAppointmentScreenContent(
 
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    
+                    // Description
+                    Text(
+                        text = stringResource(Res.string.appointment_description),
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold
+                    )
+
+                    AppTextField(
+                        value = description,
+                        onValueChange = { description = it },
+                        modifier = Modifier.fillMaxWidth(),
+                        maxLine = 3,
+                        maxLength = 200,
+                        leadingIcon = {
+                            Icon(
+                                imageVector = Icons.Default.Edit,
+                                contentDescription = null,
+                                modifier = Modifier.size(24.dp),
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        },
+                        enabled = !uiState.isLoading,
+                    )
+                    Spacer(modifier = Modifier.weight(1f))
 
                     // Create/Update Button
                     val serviceDurationErrorMsg = stringResource(Res.string.service_duration_error)
@@ -363,7 +391,8 @@ fun CreateAppointmentScreenContent(
                                             selectedDate,
                                             selectedTime
                                         ),
-                                        serviceDuration = duration
+                                        serviceDuration = duration,
+                                        description = description.ifEmpty { null }
                                     )
                                 )
                             }
@@ -424,6 +453,7 @@ fun CreateAppointmentScreenContent(
                                                 selectedTime
                                             ),
                                             serviceDuration = duration,
+                                            description = description.ifEmpty { null },
                                             force = true
                                         )
                                     )

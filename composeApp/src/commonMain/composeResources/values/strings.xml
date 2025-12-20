@@ -110,6 +110,7 @@
     <string name="select_visitor">انتخاب مراجع</string>
     <string name="appointment_time">زمان نوبت</string>
     <string name="service_duration_minutes">مدت زمان سرویس (دقیقه)</string>
+    <string name="appointment_description">توضیحات نوبت (اختیاری)</string>
     <string name="example_30">مثال: 30</string>
     <string name="edit_appointment">ویرایش نوبت</string>
     <string name="appointment_create_action">ایجاد نوبت</string>

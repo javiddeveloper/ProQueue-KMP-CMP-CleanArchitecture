@@ -7,6 +7,7 @@ data class Appointment(
     val appointmentDate: Long,
     val serviceDuration: Int?,
     val status: String,
+    val description: String?,
     val createdAt: Long,
     val updatedAt: Long,
 )

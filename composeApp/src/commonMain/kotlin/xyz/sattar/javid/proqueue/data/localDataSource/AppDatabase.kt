@@ -21,7 +21,7 @@ internal const val dbFileName = "proQueue.db"
         AppointmentEntity::class,
         MessageEntity::class
     ],
-    version = 1
+    version = 2
 )
 @ConstructedBy(DbFactory::class)
 abstract class AppDatabase : RoomDatabase() {
