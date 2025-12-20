@@ -193,8 +193,9 @@ fun QueueItemCard(
                                 businessTitle = businessTitle,
                                 businessAddress = businessAddress,
                                 visitorName = item.visitorName,
-                                appointmentMillis = item.appointment.appointmentDate
-                            )
+                                appointmentMillis = item.appointment.appointmentDate,
+                                reminderMinutes = waitingText,
+                                )
                             openWhatsApp(formatPhoneNumberForAction(item.visitorPhone), message)
                             onSendMessage(item.appointment.id, "WHATSAPP", message, businessTitle)
                         })
@@ -211,8 +212,9 @@ fun QueueItemCard(
                                 businessTitle = businessTitle,
                                 businessAddress = businessAddress,
                                 visitorName = item.visitorName,
-                                appointmentMillis = item.appointment.appointmentDate
-                            )
+                                appointmentMillis = item.appointment.appointmentDate,
+                                reminderMinutes = waitingText,
+                                )
                             openTelegram(formatPhoneNumberForAction(item.visitorPhone), message)
                             onSendMessage(item.appointment.id, "TELEGRAM", message, businessTitle)
                         })
