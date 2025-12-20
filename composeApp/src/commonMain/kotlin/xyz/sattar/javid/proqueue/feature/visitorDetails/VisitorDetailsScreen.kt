@@ -757,6 +757,7 @@ fun MessageItemCard(
                 Icon(
                     imageVector = Icons.Default.Message,
                     contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Spacer(modifier = Modifier.padding(start = 8.dp))
                 Text(
