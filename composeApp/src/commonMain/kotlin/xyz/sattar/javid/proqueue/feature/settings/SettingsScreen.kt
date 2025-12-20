@@ -95,8 +95,12 @@ import xyz.sattar.javid.proqueue.core.utils.openWhatsApp
 import xyz.sattar.javid.proqueue.ui.theme.AppTheme
 import xyz.sattar.javid.proqueue.core.prefs.PreferencesManager
 import proqueue.composeapp.generated.resources.main_icon
+import proqueue.composeapp.generated.resources.messages_auto_item
+import proqueue.composeapp.generated.resources.messages_auto_subtitle
 import proqueue.composeapp.generated.resources.messages_menu_item
 import proqueue.composeapp.generated.resources.messages_ready_subtitle
+import proqueue.composeapp.generated.resources.reminders_notifications_item
+import proqueue.composeapp.generated.resources.reminders_notifications_subtitle
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -446,43 +450,43 @@ fun SettingsScreenContent(
             }
 
             // Settings Options
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.surface
-                        )
-                    ) {
-                        Column(
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                        {
-                            SettingsItem(
-                                icon = Icons.Default.Palette,
-                                title = stringResource(Res.string.theme_appearance),
-                                subtitle = stringResource(Res.string.theme_settings),
-                                onClick = onThemeToggle
-                            )
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surface
+                )
+            ) {
+                Column(
+                    modifier = Modifier.fillMaxWidth()
+                )
+                {
 
-                            HorizontalDivider()
-
-                            SettingsItem(
-                                icon = Icons.Default.Message,
-                                title = stringResource(Res.string.messages_menu_item),
-                                subtitle = stringResource(Res.string.messages_ready_subtitle),
-                                onClick = { onIntent(SettingsIntent.OnMessagesClick) }
-                            )
-
-                            HorizontalDivider()
-
-                            SettingsItem(
-                                icon = Icons.Default.Notifications,
-                                title = stringResource(Res.string.notifications),
-                                subtitle = stringResource(Res.string.manage_notifications),
-                                onClick = { onIntent(SettingsIntent.OnNotificationsClick) }
-                            )
+                    SettingsItem(
+                        icon = Icons.Default.Message,
+                        title = stringResource(Res.string.messages_auto_item),
+                        subtitle = stringResource(Res.string.messages_auto_subtitle),
+                        onClick = { onIntent(SettingsIntent.OnMessagesClick) }
+                    )
 
                     HorizontalDivider()
 
+                    SettingsItem(
+                        icon = Icons.Default.Notifications,
+                        title = stringResource(Res.string.reminders_notifications_item),
+                        subtitle = stringResource(Res.string.reminders_notifications_subtitle),
+                        onClick = { onIntent(SettingsIntent.OnNotificationsClick) }
+                    )
+
+                    HorizontalDivider()
+
+                    SettingsItem(
+                        icon = Icons.Default.Palette,
+                        title = stringResource(Res.string.theme_appearance),
+                        subtitle = stringResource(Res.string.theme_settings),
+                        onClick = onThemeToggle
+                    )
+
+                    HorizontalDivider()
                     SettingsItem(
                         icon = Icons.Default.Info,
                         title = stringResource(Res.string.contact_me),
@@ -583,6 +587,7 @@ fun HandleEvents(
                     onNavigateToNotifications()
                 }
             }
+
             SettingsEvent.NavigateToMessages -> {
                 scope.launch { onNavigateToMessages() }
             }
