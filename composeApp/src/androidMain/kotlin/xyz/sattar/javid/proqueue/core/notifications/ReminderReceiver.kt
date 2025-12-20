@@ -75,7 +75,7 @@ class ReminderReceiver : BroadcastReceiver() {
         // Using system default icon if specific resource is not found to avoid compilation errors
         // In a real app, use R.drawable.ic_notification or similar
         val notification = NotificationCompat.Builder(context, channelId)
-            .setSmallIcon(android.R.drawable.ic_dialog_info)
+            .setSmallIcon(R.drawable.main_icon)
             .setContentTitle("یادآوری نوبت")
             .setContentText("نوبت $customerName در $businessName تا $minutesBefore دقیقه دیگر نزدیک هست برای اطلاع رسانی نوبت اینجا را لمس کنید")
             .setStyle(
