@@ -15,10 +15,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.EventNote
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -28,10 +28,8 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -47,7 +45,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
@@ -69,9 +66,9 @@ import proqueue.composeapp.generated.resources.to_label
 import proqueue.composeapp.generated.resources.total_visitors_count
 import proqueue.composeapp.generated.resources.visitors_tab
 import xyz.sattar.javid.proqueue.core.ui.collectWithLifecycleAware
+import xyz.sattar.javid.proqueue.core.ui.components.EmptyState
 import xyz.sattar.javid.proqueue.core.ui.components.QueueItemCard
 import xyz.sattar.javid.proqueue.core.ui.components.SectionTabs
-import xyz.sattar.javid.proqueue.core.ui.components.EmptyState
 import xyz.sattar.javid.proqueue.core.utils.DateTimeUtils
 import xyz.sattar.javid.proqueue.domain.model.Appointment
 import xyz.sattar.javid.proqueue.domain.model.AppointmentWithDetails
@@ -352,10 +349,10 @@ fun AppointmentCard(
     onEditClick: () -> Unit,
     onDeleteClick: () -> Unit,
     onItemClick: () -> Unit
-) {
-    val appointment = appointmentWithDetails.appointment
-    val visitor = appointmentWithDetails.visitor
-    var showMenu by remember { mutableStateOf(false) }
+    ) {
+        val appointment = appointmentWithDetails.appointment
+        val visitor = appointmentWithDetails.visitor
+        var showMenu by remember { mutableStateOf(false) }
 
     Card(
         modifier = Modifier.fillMaxWidth().clickable { onItemClick() },
@@ -434,18 +431,28 @@ fun AppointmentCard(
                     )
 
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    androidx.compose.material3.Surface(
-                        shape = RoundedCornerShape(6.dp),
-                        color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.12f)
-                    ) {
+                    StatusBadge(status = appointment.status, overdue = overdue)
+                }
+
+                val description = appointment.description
+                if (!description.isNullOrBlank()) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    HorizontalDivider()
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            imageVector = Icons.Default.Edit,
+                            contentDescription = null,
+                            modifier = Modifier.size(16.dp),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Spacer(modifier = Modifier.size(8.dp))
                         Text(
-                            text = waitingOrOverdueText,
-                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                            style = MaterialTheme.typography.labelSmall,
-                            color = if (overdue) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.secondary
+                            text = description,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurface
                         )
                     }
-                    StatusBadge(status = appointment.status, overdue = overdue)
                 }
             }
 
@@ -479,7 +486,7 @@ fun StatusBadge(status: String, overdue: Boolean) {
 }
 
 
- 
+
 
 @Composable
 fun HandleEvents(
@@ -502,7 +509,7 @@ fun HandleEvents(
                     onNavigateToEditAppointment(it.appointmentId)
                 }
             }
-            
+
             is LastVisitorsEvent.NavigateToVisitorDetails -> {
                 scope.launch {
                     onNavigateToVisitorDetails(it.visitorId)

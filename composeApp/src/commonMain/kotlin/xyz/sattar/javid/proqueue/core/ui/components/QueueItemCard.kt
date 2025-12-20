@@ -106,7 +106,7 @@ fun QueueItemCard(
                     color = MaterialTheme.colorScheme.onSurface
                 )
                 Text(
-                    text = "$startTimeOnly ${stringResource(Res.string.to_label)} $endTimeOnly",
+                    text = "$endTimeOnly ${stringResource(Res.string.to_label)} $startTimeOnly",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.primary
                 )

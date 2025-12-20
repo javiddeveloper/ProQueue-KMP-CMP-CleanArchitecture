@@ -141,4 +141,8 @@
     <string name="messages_preview_label">پیش‌نمایش</string>
     <string name="messages_save">ذخیره قالب</string>
     <string name="reminder_minutes">دقیقه یادآوری</string>
+    <string name="message_text">متن پیام</string>
+    <string name="send">ارسال</string>
+    <string name="visitor_no_appointments_title">برای این مخاطب در این کسب‌وکار نوبتی ثبت نشده</string>
+    <string name="visitor_no_appointments_subtitle">از صفحه ایجاد نوبت می‌توانید نوبت جدید ثبت کنید</string>
 </resources>
