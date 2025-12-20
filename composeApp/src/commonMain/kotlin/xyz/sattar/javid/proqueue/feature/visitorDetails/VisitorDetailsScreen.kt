@@ -250,11 +250,29 @@ fun VisitorDetailsScreenContent(
                         available: Offset,
                         source: NestedScrollSource
                     ): Offset {
-                        val delta = available.y
-                        val newOffset = (headerOffset - delta).coerceIn(0f, collapseRangePx)
-                        val consumed = headerOffset - newOffset
-                        headerOffset = newOffset
-                        return Offset(0f, consumed)
+                        val deltaY = available.y
+                        val isScrollingUp = deltaY < 0
+                        val isAtTop = listState.firstVisibleItemIndex == 0 && listState.firstVisibleItemScrollOffset == 0
+                        if (isScrollingUp && isAtTop) {
+                            val newOffset = (headerOffset - deltaY).coerceIn(0f, collapseRangePx)
+                            val consumed = headerOffset - newOffset
+                            headerOffset = newOffset
+                            return Offset(0f, consumed)
+                        }
+                        return Offset.Zero
+                    }
+
+                    override fun onPostScroll(consumed: Offset, available: Offset, source: NestedScrollSource): Offset {
+                        val deltaY = available.y
+                        val isScrollingDown = deltaY > 0
+                        val isAtTop = listState.firstVisibleItemIndex == 0 && listState.firstVisibleItemScrollOffset == 0
+                        if (isScrollingDown && isAtTop) {
+                            val newOffset = (headerOffset - deltaY).coerceIn(0f, collapseRangePx)
+                            val consumedY = headerOffset - newOffset
+                            headerOffset = newOffset
+                            return Offset(0f, consumedY)
+                        }
+                        return Offset.Zero
                     }
                 }
             }
@@ -339,23 +357,16 @@ fun VisitorDetailsScreenContent(
                         contentPadding = PaddingValues(horizontal = 16.dp, vertical = 16.dp),
                         verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                        item {
-                            AnimatedVisibility(
-                                visible = visible,
-                                enter = slideInVertically(initialOffsetY = { 50 }) + fadeIn(
-                                    animationSpec = tween(durationMillis = 500, delayMillis = 200)
-                                )
-                            ) {
-                                SectionTabs(
-                                    labels = listOf(
-                                        stringResource(Res.string.messages_tab),
-                                        stringResource(Res.string.appointments_tab)
-                                    ),
-                                    selectedIndex = selectedTabIndex,
-                                    onSelected = { selectedTabIndex = it },
-                                    modifier = Modifier.fillMaxWidth()
-                                )
-                            }
+                        stickyHeader {
+                            SectionTabs(
+                                labels = listOf(
+                                    stringResource(Res.string.messages_tab),
+                                    stringResource(Res.string.appointments_tab)
+                                ),
+                                selectedIndex = selectedTabIndex,
+                                onSelected = { selectedTabIndex = it },
+                                modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.background)
+                            )
                         }
 
                         if (selectedTabIndex == 0) {
