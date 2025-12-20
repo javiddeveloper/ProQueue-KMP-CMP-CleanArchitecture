@@ -114,28 +114,21 @@ fun QueueItemCard(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            val overdue =
-                DateTimeUtils.systemCurrentMilliseconds() > item.estimatedEndTime && item.appointment.status == "WAITING"
-            val waitingText =
-                if (overdue) stringResource(Res.string.overdue_time) else DateTimeUtils.calculateWaitingTime(
-                    item.estimatedStartTime
-                )
-
             Row(
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Surface(
                     shape = RoundedCornerShape(6.dp),
-                    color = (if (overdue) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.secondary).copy(
+                    color = (if (item.overdue) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.secondary).copy(
                         alpha = 0.12f
                     )
                 ) {
                     Text(
-                        text = waitingText,
+                        text = item.waitingText,
                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
                         style = MaterialTheme.typography.labelSmall,
-                        color = if (overdue) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.secondary
+                        color = if (item.overdue) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.secondary
                     )
                 }
             }
@@ -169,7 +162,7 @@ fun QueueItemCard(
                                 businessAddress = businessAddress,
                                 visitorName = item.visitorName,
                                 appointmentMillis = item.appointment.appointmentDate,
-                                reminderMinutes = waitingText,
+                                reminderMinutes = item.waitingText,
                             )
                             openSms(formatPhoneNumberForAction(item.visitorPhone), message)
                             onSendMessage(item.appointment.id, "SMS", message, businessTitle)
@@ -194,7 +187,7 @@ fun QueueItemCard(
                                 businessAddress = businessAddress,
                                 visitorName = item.visitorName,
                                 appointmentMillis = item.appointment.appointmentDate,
-                                reminderMinutes = waitingText,
+                                reminderMinutes = item.waitingText,
                                 )
                             openWhatsApp(formatPhoneNumberForAction(item.visitorPhone), message)
                             onSendMessage(item.appointment.id, "WHATSAPP", message, businessTitle)
@@ -213,7 +206,7 @@ fun QueueItemCard(
                                 businessAddress = businessAddress,
                                 visitorName = item.visitorName,
                                 appointmentMillis = item.appointment.appointmentDate,
-                                reminderMinutes = waitingText,
+                                reminderMinutes = item.waitingText,
                                 )
                             openTelegram(formatPhoneNumberForAction(item.visitorPhone), message)
                             onSendMessage(item.appointment.id, "TELEGRAM", message, businessTitle)

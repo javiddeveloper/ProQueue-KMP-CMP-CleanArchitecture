@@ -11,7 +11,7 @@ fun buildReminderMessage(
     reminderMinutes: String = PreferencesManager.getNotificationReminderMinutes().toString()
 ): String {
     val template = PreferencesManager.getMessageTemplate(businessId)
-        ?: "با سلام {visitor} عزیز؛ نوبت شما در {business} ساعت {time} می‌باشد. لطفاً حدود {minutes} دقیقه دیگر حضور داشته باشید."
+        ?: "با سلام {visitor} عزیز؛ نوبت شما در {business} ساعت {time} می‌باشد. لطفاً حدود {minutes} دقیقه دیگر حضور داشته باشید. آدرس {address}"
     val date = DateTimeUtils.formatDate(appointmentMillis)
     val time = DateTimeUtils.formatTime(appointmentMillis)
     return template
