@@ -40,6 +40,7 @@ import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import proqueue.composeapp.generated.resources.Res
+import proqueue.composeapp.generated.resources.message_text
 import proqueue.composeapp.generated.resources.messages_preview_label
 import proqueue.composeapp.generated.resources.messages_save
 import proqueue.composeapp.generated.resources.messages_shape_label

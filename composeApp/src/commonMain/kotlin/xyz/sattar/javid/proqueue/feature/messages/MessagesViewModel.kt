@@ -68,7 +68,7 @@ class MessagesViewModel :
             return@flow
         }
         PreferencesManager.setMessageTemplate(business.id, uiState.value.template)
-        emit(MessagesState.PartialState.ShowMessage("ذخیره شد"))
+        emit(MessagesState.PartialState.ShowMessage("تنظیمات ذخیره شد"))
     }
 
     override fun reduceState(
