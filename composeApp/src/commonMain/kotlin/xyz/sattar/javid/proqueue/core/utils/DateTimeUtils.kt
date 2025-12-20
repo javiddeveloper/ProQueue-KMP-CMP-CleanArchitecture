@@ -92,6 +92,16 @@ object DateTimeUtils {
         return "$hoursPart$separator$minutesPart زمان انتظار"
     }
 
+    fun calculateWaitingOrOverdueText(
+        appointmentDate: Long,
+        serviceDurationMinutes: Int,
+        status: String
+    ): String {
+        val endTime = appointmentDate + serviceDurationMinutes * 60 * 1000L
+        val overdue = systemCurrentMilliseconds() > endTime && status == "WAITING"
+        return if (overdue) "زمان رد شده" else calculateWaitingTime(appointmentDate)
+    }
+
     fun formatDate(timestamp: Long): String {
         val instant = Instant.fromEpochMilliseconds(timestamp)
         val localDateTime = instant.toLocalDateTime(TimeZone.currentSystemDefault())

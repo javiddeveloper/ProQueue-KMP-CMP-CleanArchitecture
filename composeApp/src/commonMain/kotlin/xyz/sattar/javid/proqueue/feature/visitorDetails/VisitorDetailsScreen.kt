@@ -108,7 +108,6 @@ fun VisitorDetailsScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
-    val scope = rememberCoroutineScope()
 
     LaunchedEffect(visitorId) {
         viewModel.sendIntent(VisitorDetailsIntent.LoadVisitorDetails(visitorId))
@@ -273,13 +272,24 @@ fun VisitorDetailsScreenContent(
                                     val targetAppointment = pickTargetAppointment(uiState.appointments)
                                     currentAppointmentId = targetAppointment?.appointment?.id ?: 0L
                                     currentChannel = channel
+                                    val appointmentMillis = targetAppointment?.appointment?.appointmentDate
+                                        ?: DateTimeUtils.systemCurrentMilliseconds()
+                                    val serviceDurationMinutes = targetAppointment?.appointment?.serviceDuration
+                                        ?: targetAppointment?.business?.defaultServiceDuration
+                                        ?: 15
+                                    val status = targetAppointment?.appointment?.status ?: "WAITING"
+                                    val waitingText = DateTimeUtils.calculateWaitingOrOverdueText(
+                                        appointmentMillis,
+                                        serviceDurationMinutes,
+                                        status
+                                    )
                                     messageBody = buildReminderMessage(
                                         businessId = business?.id ?: 0L,
                                         businessTitle = businessTitle,
                                         businessAddress = businessAddress,
                                         visitorName = uiState.visitor.fullName,
-                                        appointmentMillis = targetAppointment?.appointment?.appointmentDate
-                                            ?: DateTimeUtils.systemCurrentMilliseconds()
+                                        appointmentMillis = appointmentMillis,
+                                        reminderMinutes = waitingText
                                     )
                                     showMessageSheet = true
                                 }
@@ -475,13 +485,24 @@ fun CommunicationSection(
                     val businessAddress = business?.address ?: "--"
                     val targetAppointment = pickTargetAppointment(appointments)
                     val appointmentId = targetAppointment?.appointment?.id ?: 0L
+                    val appointmentMillis = targetAppointment?.appointment?.appointmentDate
+                        ?: DateTimeUtils.systemCurrentMilliseconds()
+                    val serviceDurationMinutes = targetAppointment?.appointment?.serviceDuration
+                        ?: targetAppointment?.business?.defaultServiceDuration
+                        ?: 15
+                    val status = targetAppointment?.appointment?.status ?: "WAITING"
+                    val waitingText = DateTimeUtils.calculateWaitingOrOverdueText(
+                        appointmentMillis,
+                        serviceDurationMinutes,
+                        status
+                    )
                     val content = buildReminderMessage(
                         businessId = business?.id ?: 0L,
                         businessTitle = businessTitle,
                         businessAddress = businessAddress,
                         visitorName = visitor.fullName,
-                        appointmentMillis = targetAppointment?.appointment?.appointmentDate
-                            ?: DateTimeUtils.systemCurrentMilliseconds()
+                        appointmentMillis = appointmentMillis,
+                        reminderMinutes = waitingText
                     )
                     onComposeMessage("SMS")
                 }
@@ -495,13 +516,24 @@ fun CommunicationSection(
                     val businessAddress = business?.address ?: "--"
                     val targetAppointment = pickTargetAppointment(appointments)
                     val appointmentId = targetAppointment?.appointment?.id ?: 0L
+                    val appointmentMillis = targetAppointment?.appointment?.appointmentDate
+                        ?: DateTimeUtils.systemCurrentMilliseconds()
+                    val serviceDurationMinutes = targetAppointment?.appointment?.serviceDuration
+                        ?: targetAppointment?.business?.defaultServiceDuration
+                        ?: 15
+                    val status = targetAppointment?.appointment?.status ?: "WAITING"
+                    val waitingText = DateTimeUtils.calculateWaitingOrOverdueText(
+                        appointmentMillis,
+                        serviceDurationMinutes,
+                        status
+                    )
                     val content = buildReminderMessage(
                         businessId = business?.id ?: 0L,
                         businessTitle = businessTitle,
                         businessAddress = businessAddress,
                         visitorName = visitor.fullName,
-                        appointmentMillis = targetAppointment?.appointment?.appointmentDate
-                            ?: DateTimeUtils.systemCurrentMilliseconds()
+                        appointmentMillis = appointmentMillis,
+                        reminderMinutes = waitingText
                     )
                     onComposeMessage("WHATSAPP")
                 }
@@ -515,13 +547,24 @@ fun CommunicationSection(
                     val businessAddress = business?.address ?: "--"
                     val targetAppointment = pickTargetAppointment(appointments)
                     val appointmentId = targetAppointment?.appointment?.id ?: 0L
+                    val appointmentMillis = targetAppointment?.appointment?.appointmentDate
+                        ?: DateTimeUtils.systemCurrentMilliseconds()
+                    val serviceDurationMinutes = targetAppointment?.appointment?.serviceDuration
+                        ?: targetAppointment?.business?.defaultServiceDuration
+                        ?: 15
+                    val status = targetAppointment?.appointment?.status ?: "WAITING"
+                    val waitingText = DateTimeUtils.calculateWaitingOrOverdueText(
+                        appointmentMillis,
+                        serviceDurationMinutes,
+                        status
+                    )
                     val content = buildReminderMessage(
                         businessId = business?.id ?: 0L,
                         businessTitle = businessTitle,
                         businessAddress = businessAddress,
                         visitorName = visitor.fullName,
-                        appointmentMillis = targetAppointment?.appointment?.appointmentDate
-                            ?: DateTimeUtils.systemCurrentMilliseconds()
+                        appointmentMillis = appointmentMillis,
+                        reminderMinutes = waitingText
                     )
                     onComposeMessage("TELEGRAM")
                 }
