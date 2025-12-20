@@ -61,12 +61,13 @@ class AppointmentRepositoryImpl(
     }
 
     @OptIn(ExperimentalTime::class)
-    override suspend fun updateAppointment(appointmentId: Long, date: Long, duration: Int?): Boolean {
+    override suspend fun updateAppointment(appointmentId: Long, date: Long, duration: Int?, description: String?): Boolean {
         return try {
             appointmentDao.updateAppointment(
                 appointmentId,
                 date,
                 duration,
+                description,
                 Clock.System.now().toEpochMilliseconds()
             )
             true

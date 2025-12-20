@@ -7,8 +7,11 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
@@ -27,7 +30,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -39,6 +41,7 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
+import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.viewmodel.koinViewModel
 import proqueue.composeapp.generated.resources.Res
 import proqueue.composeapp.generated.resources.enable_notifications
@@ -49,6 +52,7 @@ import proqueue.composeapp.generated.resources.save_settings
 import proqueue.composeapp.generated.resources.settings_saved
 import xyz.sattar.javid.proqueue.core.permissions.rememberNotificationPermissionLauncher
 import xyz.sattar.javid.proqueue.core.ui.collectWithLifecycleAware
+import xyz.sattar.javid.proqueue.ui.theme.AppTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -119,9 +123,13 @@ fun NotificationsScreenContent(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .padding(16.dp),
+                .padding(start = 16.dp, end = 16.dp)
+                .imePadding()
+                .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+            Spacer(modifier = Modifier.height(8.dp))
+
             // Settings Card
             Card(
                 colors = CardDefaults.cardColors(
@@ -136,7 +144,7 @@ fun NotificationsScreenContent(
                         .padding(16.dp),
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    // Enable Notifications Switch
+
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
@@ -182,6 +190,7 @@ fun NotificationsScreenContent(
                     style = MaterialTheme.typography.titleMedium
                 )
             }
+            Spacer(modifier = Modifier.height(16.dp))
         }
     }
 }
@@ -200,5 +209,17 @@ fun HandleEffects(
             NotificationsEvent.ShowSavedConfirmation -> showSnackbar(savedMessage)
             NotificationsEvent.RequestPermission -> onRequestPermission()
         }
+    }
+}
+@Preview(showBackground = true)
+@Composable
+fun PreviewNotificationsScreen() {
+    AppTheme {
+        NotificationsScreenContent(
+            uiState = NotificationsState(),
+            snackbarHostState = remember { SnackbarHostState() },
+            onNavigateBack = {},
+            onIntent = { }
+        )
     }
 }

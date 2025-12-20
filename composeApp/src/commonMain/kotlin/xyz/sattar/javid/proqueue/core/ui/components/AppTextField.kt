@@ -91,7 +91,7 @@ fun AppTextField(
                 unfocusedContainerColor = MaterialTheme.colorScheme.surface
             ),
             shape = RoundedCornerShape(12.dp),
-            singleLine = true,
+            singleLine = maxLine == 1,
             enabled = enabled,
         )
 

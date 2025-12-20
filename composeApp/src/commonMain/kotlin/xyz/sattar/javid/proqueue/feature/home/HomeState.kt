@@ -1,6 +1,7 @@
 package xyz.sattar.javid.proqueue.feature.home
 
 import androidx.compose.runtime.Immutable
+import xyz.sattar.javid.proqueue.core.utils.DateTimeUtils
 import xyz.sattar.javid.proqueue.domain.model.Appointment
 import xyz.sattar.javid.proqueue.domain.model.Business
 import xyz.sattar.javid.proqueue.domain.model.Message
@@ -29,7 +30,12 @@ data class QueueItem(
     val estimatedStartTime: Long,
     val estimatedEndTime: Long,
     val messages: List<Message> = emptyList()
-)
+){
+    val overdue = DateTimeUtils.systemCurrentMilliseconds() > estimatedEndTime && appointment.status == "WAITING"
+    val waitingText =
+        if (overdue) "زمان رد شده"
+        else DateTimeUtils.calculateWaitingTime(estimatedStartTime)
+}
 
 data class DashboardStats(
     val totalAppointments: Int = 0,

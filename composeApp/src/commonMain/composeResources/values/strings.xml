@@ -100,8 +100,8 @@
     <string name="create_new_visitor">ایجاد مراجع جدید</string>
     <string name="visitor_delete_title">حذف مراجع</string>
     <string name="visitor_delete_message">آیا از حذف این مراجع اطمینان دارید؟ \nتمام نوبت‌ها و پیام های این مراجع در همه کسب‌وکارها حذف خواهند شد.</string>
-    <string name="no_visitors_found">مرجعی ثبت نشده است</string>
-    <string name="create_first_visitor">اولین مرجع را ایجاد کنید</string>
+    <string name="no_visitors_found">مراجعی ثبت نشده است</string>
+    <string name="create_first_visitor">اولین مراجع را ایجاد کنید</string>
 
     <!-- Create Visitor / Appointment -->
     <string name="edit_visitor">ویرایش مراجع</string>
@@ -110,6 +110,7 @@
     <string name="select_visitor">انتخاب مراجع</string>
     <string name="appointment_time">زمان نوبت</string>
     <string name="service_duration_minutes">مدت زمان سرویس (دقیقه)</string>
+    <string name="appointment_description">توضیحات نوبت (اختیاری)</string>
     <string name="example_30">مثال: 30</string>
     <string name="edit_appointment">ویرایش نوبت</string>
     <string name="appointment_create_action">ایجاد نوبت</string>
@@ -137,7 +138,16 @@
     <string name="messages_ready_subtitle">پیام‌های آماده</string>
     <string name="messages_title">قالب پیام یادآوری</string>
     <string name="messages_tokens_label">درج مقادیر پویا</string>
+    <string name="messages_shape_label">الگوهای آماده</string>
     <string name="messages_preview_label">پیش‌نمایش</string>
     <string name="messages_save">ذخیره قالب</string>
     <string name="reminder_minutes">دقیقه یادآوری</string>
+    <string name="message_text">متن پیام</string>
+    <string name="send">ارسال</string>
+    <string name="visitor_no_appointments_title">برای این مخاطب در این کسب‌وکار نوبتی ثبت نشده</string>
+    <string name="visitor_no_appointments_subtitle">از صفحه ایجاد نوبت می‌توانید نوبت جدید ثبت کنید</string>
+    <string name="messages_auto_item">پیام‌های خودکار</string>
+    <string name="messages_auto_subtitle">ارسال پیام آماده برای یادآوری مراجعین</string>
+    <string name="reminders_notifications_item">اعلان یادآوری</string>
+    <string name="reminders_notifications_subtitle">یادآوری خودکار به مراجع نزدیک زمان نوبت</string>
 </resources>

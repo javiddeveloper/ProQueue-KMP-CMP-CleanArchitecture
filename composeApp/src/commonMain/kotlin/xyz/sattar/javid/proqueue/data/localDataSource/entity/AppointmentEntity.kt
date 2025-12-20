@@ -36,6 +36,7 @@ data class AppointmentEntity(
     val appointmentDate: Long, // timestamp کامل (روز + ساعت)
     val serviceDuration: Int? = null, // null = استفاده از defaultServiceDuration
     val status: String = "WAITING", // WAITING, IN_PROGRESS, COMPLETED, NO_SHOW, CANCELLED
+    val description: String? = null,
     val createdAt: Long,
     val updatedAt: Long
 )

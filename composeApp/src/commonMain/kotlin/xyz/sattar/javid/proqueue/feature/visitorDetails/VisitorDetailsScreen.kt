@@ -25,10 +25,12 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Call
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.EventNote
 import androidx.compose.material.icons.filled.Message
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Button
@@ -65,6 +67,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
@@ -78,10 +81,18 @@ import proqueue.composeapp.generated.resources.Res
 import proqueue.composeapp.generated.resources.appointments_tab
 import proqueue.composeapp.generated.resources.business_name
 import proqueue.composeapp.generated.resources.contact_options
+import proqueue.composeapp.generated.resources.delete
 import proqueue.composeapp.generated.resources.empty_messages_subtitle
 import proqueue.composeapp.generated.resources.empty_messages_title
+import proqueue.composeapp.generated.resources.message_text
 import proqueue.composeapp.generated.resources.messages_tab
+import proqueue.composeapp.generated.resources.phone_call
+import proqueue.composeapp.generated.resources.send
+import proqueue.composeapp.generated.resources.sms
+import proqueue.composeapp.generated.resources.telegram
 import proqueue.composeapp.generated.resources.visitor_details_title
+import proqueue.composeapp.generated.resources.visitor_no_appointments_subtitle
+import proqueue.composeapp.generated.resources.visitor_no_appointments_title
 import proqueue.composeapp.generated.resources.whatsapp
 import xyz.sattar.javid.proqueue.core.ui.collectWithLifecycleAware
 import xyz.sattar.javid.proqueue.core.state.BusinessStateHolder
@@ -108,7 +119,6 @@ fun VisitorDetailsScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
-    val scope = rememberCoroutineScope()
 
     LaunchedEffect(visitorId) {
         viewModel.sendIntent(VisitorDetailsIntent.LoadVisitorDetails(visitorId))
@@ -176,7 +186,7 @@ fun VisitorDetailsScreenContent(
                 ) {
                     Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
                         Text(
-                            text = "متن پیام",
+                            text = stringResource(Res.string.message_text),
                             style = MaterialTheme.typography.titleMedium
                         )
                         Spacer(modifier = Modifier.height(8.dp))
@@ -190,21 +200,39 @@ fun VisitorDetailsScreenContent(
                         Spacer(modifier = Modifier.height(12.dp))
                         Button(onClick = {
                             when (currentChannel) {
-                                "SMS" -> openSms(formatPhoneNumberForAction(uiState.visitor.phoneNumber), messageBody)
-                                "WHATSAPP" -> openWhatsApp(formatPhoneNumberForAction(uiState.visitor.phoneNumber), messageBody)
-                                "TELEGRAM" -> openTelegram(formatPhoneNumberForAction(uiState.visitor.phoneNumber), messageBody)
+                                "SMS" -> openSms(
+                                    formatPhoneNumberForAction(uiState.visitor.phoneNumber),
+                                    messageBody
+                                )
+
+                                "WHATSAPP" -> openWhatsApp(
+                                    formatPhoneNumberForAction(uiState.visitor.phoneNumber),
+                                    messageBody
+                                )
+
+                                "TELEGRAM" -> openTelegram(
+                                    formatPhoneNumberForAction(uiState.visitor.phoneNumber),
+                                    messageBody
+                                )
                             }
                             onIntent(
                                 VisitorDetailsIntent.OnSendMessage(
                                     appointmentId = currentAppointmentId,
                                     type = currentChannel,
                                     content = messageBody,
-                                    businessTitle = BusinessStateHolder.selectedBusiness.value?.title ?: "--"
+                                    businessTitle = BusinessStateHolder.selectedBusiness.value?.title
+                                        ?: "--"
                                 )
                             )
                             showMessageSheet = false
                         }) {
-                            Text(text = "ارسال ${channelLabel(currentChannel)}")
+                            Text(
+                                text = "${stringResource(Res.string.send)} ${
+                                    channelLabel(
+                                        currentChannel
+                                    )
+                                }"
+                            )
                         }
                     }
                 }
@@ -218,12 +246,33 @@ fun VisitorDetailsScreenContent(
             var headerOffset by remember { mutableStateOf(0f) }
             val nestedScrollConnection = remember {
                 object : NestedScrollConnection {
-                    override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
-                        val delta = available.y
-                        val newOffset = (headerOffset - delta).coerceIn(0f, collapseRangePx)
-                        val consumed = headerOffset - newOffset
-                        headerOffset = newOffset
-                        return Offset(0f, consumed)
+                    override fun onPreScroll(
+                        available: Offset,
+                        source: NestedScrollSource
+                    ): Offset {
+                        val deltaY = available.y
+                        val isScrollingUp = deltaY < 0
+                        val isAtTop = listState.firstVisibleItemIndex == 0 && listState.firstVisibleItemScrollOffset == 0
+                        if (isScrollingUp && isAtTop) {
+                            val newOffset = (headerOffset - deltaY).coerceIn(0f, collapseRangePx)
+                            val consumed = headerOffset - newOffset
+                            headerOffset = newOffset
+                            return Offset(0f, consumed)
+                        }
+                        return Offset.Zero
+                    }
+
+                    override fun onPostScroll(consumed: Offset, available: Offset, source: NestedScrollSource): Offset {
+                        val deltaY = available.y
+                        val isScrollingDown = deltaY > 0
+                        val isAtTop = listState.firstVisibleItemIndex == 0 && listState.firstVisibleItemScrollOffset == 0
+                        if (isScrollingDown && isAtTop) {
+                            val newOffset = (headerOffset - deltaY).coerceIn(0f, collapseRangePx)
+                            val consumedY = headerOffset - newOffset
+                            headerOffset = newOffset
+                            return Offset(0f, consumedY)
+                        }
+                        return Offset.Zero
                     }
                 }
             }
@@ -270,16 +319,30 @@ fun VisitorDetailsScreenContent(
                                     val business = BusinessStateHolder.selectedBusiness.value
                                     val businessTitle = business?.title ?: "--"
                                     val businessAddress = business?.address ?: "--"
-                                    val targetAppointment = pickTargetAppointment(uiState.appointments)
+                                    val targetAppointment =
+                                        pickTargetAppointment(uiState.appointments)
                                     currentAppointmentId = targetAppointment?.appointment?.id ?: 0L
                                     currentChannel = channel
+                                    val appointmentMillis =
+                                        targetAppointment?.appointment?.appointmentDate
+                                            ?: DateTimeUtils.systemCurrentMilliseconds()
+                                    val serviceDurationMinutes =
+                                        targetAppointment?.appointment?.serviceDuration
+                                            ?: targetAppointment?.business?.defaultServiceDuration
+                                            ?: 15
+                                    val status = targetAppointment?.appointment?.status ?: "WAITING"
+                                    val waitingText = DateTimeUtils.calculateWaitingOrOverdueText(
+                                        appointmentMillis,
+                                        serviceDurationMinutes,
+                                        status
+                                    )
                                     messageBody = buildReminderMessage(
                                         businessId = business?.id ?: 0L,
                                         businessTitle = businessTitle,
                                         businessAddress = businessAddress,
                                         visitorName = uiState.visitor.fullName,
-                                        appointmentMillis = targetAppointment?.appointment?.appointmentDate
-                                            ?: DateTimeUtils.systemCurrentMilliseconds()
+                                        appointmentMillis = appointmentMillis,
+                                        reminderMinutes = waitingText
                                     )
                                     showMessageSheet = true
                                 }
@@ -294,13 +357,7 @@ fun VisitorDetailsScreenContent(
                         contentPadding = PaddingValues(horizontal = 16.dp, vertical = 16.dp),
                         verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                    item {
-                        AnimatedVisibility(
-                            visible = visible,
-                            enter = slideInVertically(initialOffsetY = { 50 }) + fadeIn(
-                                animationSpec = tween(durationMillis = 500, delayMillis = 200)
-                            )
-                        ) {
+                        stickyHeader {
                             SectionTabs(
                                 labels = listOf(
                                     stringResource(Res.string.messages_tab),
@@ -308,114 +365,56 @@ fun VisitorDetailsScreenContent(
                                 ),
                                 selectedIndex = selectedTabIndex,
                                 onSelected = { selectedTabIndex = it },
-                                modifier = Modifier.fillMaxWidth()
+                                modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.background)
                             )
                         }
-                    }
 
-                    if (selectedTabIndex == 0) {
-                        if (uiState.messages.isEmpty()) {
-                            item {
-                                EmptyState(
-                                    modifier = Modifier.fillMaxWidth().padding(16.dp),
-                                    icon = Icons.Default.Message,
-                                    title = stringResource(Res.string.empty_messages_title),
-                                    subtitle = stringResource(Res.string.empty_messages_subtitle)
-                                )
-                            }
-                        } else {
-                            items(uiState.messages) { message ->
-                                Card(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    shape = RoundedCornerShape(8.dp),
-                                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer)
-                                ) {
-                                    Column(modifier = Modifier.padding(12.dp)) {
-                                        Row(
-                                            modifier = Modifier.fillMaxWidth(),
-                                            horizontalArrangement = Arrangement.SpaceBetween,
-                                            verticalAlignment = Alignment.CenterVertically
-                                        ) {
-                                            Text(
-                                                text = message.messageType,
-                                                style = MaterialTheme.typography.labelSmall,
-                                                color = MaterialTheme.colorScheme.primary
-                                            )
-                                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                                Text(
-                                                    text = DateTimeUtils.formatDateTime(message.sentAt),
-                                                    style = MaterialTheme.typography.labelSmall,
-                                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                        if (selectedTabIndex == 0) {
+                            if (uiState.messages.isEmpty()) {
+                                item {
+                                    EmptyState(
+                                        modifier = Modifier.fillMaxWidth().padding(16.dp),
+                                        icon = Icons.Default.Message,
+                                        title = stringResource(Res.string.empty_messages_title),
+                                        subtitle = stringResource(Res.string.empty_messages_subtitle)
+                                    )
+                                }
+                            } else {
+                                items(uiState.messages) { message ->
+                                    MessageItemCard(
+                                        message = message,
+                                        onDeleteClick = {
+                                            onIntent(
+                                                VisitorDetailsIntent.DeleteMessage(
+                                                    message.id
                                                 )
-                                                var showMenu by remember { mutableStateOf(false) }
-                                                IconButton(onClick = { showMenu = true }) {
-                                                    Icon(Icons.Default.MoreVert, contentDescription = null)
-                                                }
-                                                DropdownMenu(expanded = showMenu, onDismissRequest = { showMenu = false }) {
-                                                    DropdownMenuItem(
-                                                        text = { Text("حذف") },
-                                                        onClick = {
-                                                            showMenu = false
-                                                            onIntent(VisitorDetailsIntent.DeleteMessage(message.id))
-                                                        }
-                                                    )
-                                                }
-                                            }
+                                            )
                                         }
-                                        Spacer(modifier = Modifier.height(4.dp))
-                                        Text(
-                                            text = "${stringResource(Res.string.business_name)}: ${message.businessTitle}",
-                                            style = MaterialTheme.typography.labelSmall,
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                                        )
-                                        Spacer(modifier = Modifier.height(4.dp))
-                                        Text(text = message.content, style = MaterialTheme.typography.bodyMedium)
-                                    }
+                                    )
                                 }
                             }
-                        }
-                    } else {
-                        if (uiState.appointments.isEmpty()) {
-                            item {
-                                EmptyState(
-                                    modifier = Modifier.fillMaxWidth().padding(32.dp),
-                                    icon = Icons.Default.EventNote,
-                                    title = "برای این مخاطب در این کسب‌وکار نوبتی ثبت نشده",
-                                    subtitle = "از صفحه ایجاد نوبت می‌توانید نوبت جدید ثبت کنید"
-                                )
-                            }
                         } else {
-                            items(uiState.appointments) { item ->
-                                Card(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    shape = RoundedCornerShape(8.dp),
-                                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer)
-                                ) {
-                                    Row(
-                                        modifier = Modifier.padding(12.dp).fillMaxWidth(),
-                                        horizontalArrangement = Arrangement.SpaceBetween,
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        Column {
-                                            Text(
-                                                text = DateTimeUtils.formatDateTime(item.appointment.appointmentDate),
-                                                style = MaterialTheme.typography.bodyMedium,
-                                                fontWeight = FontWeight.Bold
-                                            )
-                                            Spacer(modifier = Modifier.height(4.dp))
-                                            Text(
-                                                text = "${stringResource(Res.string.business_name)}: ${item.business.title}",
-                                                style = MaterialTheme.typography.labelSmall,
-                                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                                            )
-                                        }
-                                        StatusBadge(status = item.appointment.status, overdue = false)
-                                    }
+                            if (uiState.appointments.isEmpty()) {
+                                item {
+                                    EmptyState(
+                                        modifier = Modifier.fillMaxWidth().padding(32.dp),
+                                        icon = Icons.Default.EventNote,
+                                        title = stringResource(Res.string.visitor_no_appointments_title),
+                                        subtitle = stringResource(Res.string.visitor_no_appointments_subtitle)
+                                    )
+                                }
+                            } else {
+                                items(uiState.appointments) { appointment ->
+                                    xyz.sattar.javid.proqueue.feature.lastVisitors.AppointmentCard(
+                                        appointmentWithDetails = appointment,
+                                        onEditClick = {},
+                                        onDeleteClick = {},
+                                        onItemClick = {}
+                                    )
                                 }
                             }
                         }
                     }
-                }
                 }
             }
         }
@@ -463,65 +462,98 @@ fun CommunicationSection(
         ) {
             CommunicationButton(
                 icon = Icons.Default.Call,
-                label = "تماس",
+                label = stringResource(Res.string.phone_call),
                 onClick = { openPhoneDial(visitor.phoneNumber) }
             )
             CommunicationButton(
                 icon = Icons.Default.Message,
-                label = "پیامک",
+                label = stringResource(Res.string.sms),
                 onClick = {
                     val business = BusinessStateHolder.selectedBusiness.value
                     val businessTitle = business?.title ?: "--"
                     val businessAddress = business?.address ?: "--"
                     val targetAppointment = pickTargetAppointment(appointments)
                     val appointmentId = targetAppointment?.appointment?.id ?: 0L
+                    val appointmentMillis = targetAppointment?.appointment?.appointmentDate
+                        ?: DateTimeUtils.systemCurrentMilliseconds()
+                    val serviceDurationMinutes = targetAppointment?.appointment?.serviceDuration
+                        ?: targetAppointment?.business?.defaultServiceDuration
+                        ?: 15
+                    val status = targetAppointment?.appointment?.status ?: "WAITING"
+                    val waitingText = DateTimeUtils.calculateWaitingOrOverdueText(
+                        appointmentMillis,
+                        serviceDurationMinutes,
+                        status
+                    )
                     val content = buildReminderMessage(
                         businessId = business?.id ?: 0L,
                         businessTitle = businessTitle,
                         businessAddress = businessAddress,
                         visitorName = visitor.fullName,
-                        appointmentMillis = targetAppointment?.appointment?.appointmentDate
-                            ?: DateTimeUtils.systemCurrentMilliseconds()
+                        appointmentMillis = appointmentMillis,
+                        reminderMinutes = waitingText
                     )
                     onComposeMessage("SMS")
                 }
             )
             CommunicationButton(
                 icon = Res.drawable.whatsapp,
-                label = "واتساپ",
+                label = stringResource(Res.string.whatsapp),
                 onClick = {
                     val business = BusinessStateHolder.selectedBusiness.value
                     val businessTitle = business?.title ?: "--"
                     val businessAddress = business?.address ?: "--"
                     val targetAppointment = pickTargetAppointment(appointments)
                     val appointmentId = targetAppointment?.appointment?.id ?: 0L
+                    val appointmentMillis = targetAppointment?.appointment?.appointmentDate
+                        ?: DateTimeUtils.systemCurrentMilliseconds()
+                    val serviceDurationMinutes = targetAppointment?.appointment?.serviceDuration
+                        ?: targetAppointment?.business?.defaultServiceDuration
+                        ?: 15
+                    val status = targetAppointment?.appointment?.status ?: "WAITING"
+                    val waitingText = DateTimeUtils.calculateWaitingOrOverdueText(
+                        appointmentMillis,
+                        serviceDurationMinutes,
+                        status
+                    )
                     val content = buildReminderMessage(
                         businessId = business?.id ?: 0L,
                         businessTitle = businessTitle,
                         businessAddress = businessAddress,
                         visitorName = visitor.fullName,
-                        appointmentMillis = targetAppointment?.appointment?.appointmentDate
-                            ?: DateTimeUtils.systemCurrentMilliseconds()
+                        appointmentMillis = appointmentMillis,
+                        reminderMinutes = waitingText
                     )
                     onComposeMessage("WHATSAPP")
                 }
             )
             CommunicationButton(
                 icon = Icons.Default.Send,
-                label = "تلگرام",
+                label = stringResource(Res.string.telegram),
                 onClick = {
                     val business = BusinessStateHolder.selectedBusiness.value
                     val businessTitle = business?.title ?: "--"
                     val businessAddress = business?.address ?: "--"
                     val targetAppointment = pickTargetAppointment(appointments)
                     val appointmentId = targetAppointment?.appointment?.id ?: 0L
+                    val appointmentMillis = targetAppointment?.appointment?.appointmentDate
+                        ?: DateTimeUtils.systemCurrentMilliseconds()
+                    val serviceDurationMinutes = targetAppointment?.appointment?.serviceDuration
+                        ?: targetAppointment?.business?.defaultServiceDuration
+                        ?: 15
+                    val status = targetAppointment?.appointment?.status ?: "WAITING"
+                    val waitingText = DateTimeUtils.calculateWaitingOrOverdueText(
+                        appointmentMillis,
+                        serviceDurationMinutes,
+                        status
+                    )
                     val content = buildReminderMessage(
                         businessId = business?.id ?: 0L,
                         businessTitle = businessTitle,
                         businessAddress = businessAddress,
                         visitorName = visitor.fullName,
-                        appointmentMillis = targetAppointment?.appointment?.appointmentDate
-                            ?: DateTimeUtils.systemCurrentMilliseconds()
+                        appointmentMillis = appointmentMillis,
+                        reminderMinutes = waitingText
                     )
                     onComposeMessage("TELEGRAM")
                 }
@@ -559,8 +591,19 @@ fun CommunicationButton(
             contentAlignment = Alignment.Center
         ) {
             when (icon) {
-                is ImageVector -> Icon(icon, contentDescription = label, tint = MaterialTheme.colorScheme.primary)
-                is org.jetbrains.compose.resources.DrawableResource -> Icon(painterResource(icon), contentDescription = label, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(24.dp))
+                is ImageVector -> Icon(
+                    icon,
+                    contentDescription = label,
+                    tint = MaterialTheme.colorScheme.primary
+                )
+
+                is org.jetbrains.compose.resources.DrawableResource -> Icon(
+                    painterResource(icon),
+                    contentDescription = label,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(24.dp)
+                )
+
                 else -> Icon(Icons.Default.Send, contentDescription = label) // Fallback
             }
         }
@@ -582,16 +625,16 @@ fun HistorySection(appointments: List<AppointmentWithDetails>, messages: List<Me
             fontWeight = FontWeight.Bold
         )
         Spacer(modifier = Modifier.height(8.dp))
-        
+
         SectionTabs(
             labels = tabs,
             selectedIndex = selectedTabIndex,
             onSelected = { selectedTabIndex = it },
             modifier = Modifier.fillMaxWidth()
         )
-        
+
         Spacer(modifier = Modifier.height(16.dp))
-        
+
         when (selectedTabIndex) {
             0 -> MessagesList(messages)
             1 -> AppointmentsList(appointments)
@@ -605,37 +648,16 @@ fun MessagesList(messages: List<Message>) {
         EmptyState(
             modifier = Modifier.fillMaxWidth().padding(32.dp),
             icon = Icons.Default.Message,
-            title = "هنوز پیامی برای این مخاطب ثبت نشده",
-            subtitle = "از گزینه‌های ارتباطی بالا می‌توانید پیام ارسال کنید"
+            title = stringResource(Res.string.empty_messages_title),
+            subtitle = stringResource(Res.string.empty_messages_subtitle)
         )
     } else {
         LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
             items(messages) { message ->
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(8.dp),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
-                ) {
-                    Column(modifier = Modifier.padding(12.dp)) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            Text(
-                                text = message.messageType,
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.primary
-                            )
-                            Text(
-                                text = DateTimeUtils.formatDate(message.sentAt),
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Text(text = message.content, style = MaterialTheme.typography.bodyMedium)
-                    }
-                }
+                MessageItemCard(
+                    message = message,
+                    onDeleteClick = {}
+                )
             }
         }
     }
@@ -647,43 +669,18 @@ fun AppointmentsList(appointments: List<AppointmentWithDetails>) {
         EmptyState(
             modifier = Modifier.fillMaxWidth().padding(32.dp),
             icon = Icons.Default.EventNote,
-            title = "برای این مخاطب در این کسب‌وکار نوبتی ثبت نشده",
-            subtitle = "از صفحه ایجاد نوبت می‌توانید نوبت جدید ثبت کنید"
+            title = stringResource(Res.string.visitor_no_appointments_title),
+            subtitle = stringResource(Res.string.visitor_no_appointments_subtitle)
         )
     } else {
         LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            items(appointments) { item ->
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(8.dp),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
-                ) {
-                    Row(
-                        modifier = Modifier.padding(12.dp).fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Column {
-                            Text(
-                                text = DateTimeUtils.formatDate(item.appointment.appointmentDate),
-                                style = MaterialTheme.typography.bodyMedium,
-                                fontWeight = FontWeight.Bold
-                            )
-                            Text(
-                                text = DateTimeUtils.formatTime(item.appointment.appointmentDate),
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                            Spacer(modifier = Modifier.height(4.dp))
-                            Text(
-                                text = "کسب‌وکار: ${item.business.title}",
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                        StatusBadge(status = item.appointment.status, overdue = false)
-                    }
-                }
+            items(appointments) { appointment ->
+                xyz.sattar.javid.proqueue.feature.lastVisitors.AppointmentCard(
+                    appointmentWithDetails = appointment,
+                    onEditClick = {},
+                    onDeleteClick = {},
+                    onItemClick = {}
+                )
             }
         }
     }
@@ -701,9 +698,105 @@ fun HandleEffects(
         }
     }
 }
+
+@Composable
 private fun channelLabel(channel: String): String = when (channel) {
-    "SMS" -> "پیامک"
-    "WHATSAPP" -> "واتساپ"
-    "TELEGRAM" -> "تلگرام"
+    "SMS" -> stringResource(Res.string.sms)
+    "WHATSAPP" -> stringResource(Res.string.whatsapp)
+    "TELEGRAM" -> stringResource(Res.string.telegram)
     else -> channel
+}
+
+@Composable
+fun MessageItemCard(
+    message: Message,
+    onDeleteClick: () -> Unit
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(8.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer)
+    ) {
+        Column(modifier = Modifier.padding(12.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = DateTimeUtils.formatDateTime(message.sentAt),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = message.businessTitle,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    var showMenu by remember { mutableStateOf(false) }
+                    IconButton(onClick = { showMenu = true }) {
+                        Icon(Icons.Default.MoreVert, contentDescription = null)
+                    }
+                    DropdownMenu(expanded = showMenu, onDismissRequest = { showMenu = false }) {
+                        DropdownMenuItem(
+                            text = {
+
+                                Text(
+                                    stringResource(Res.string.delete),
+                                    color = MaterialTheme.colorScheme.error
+                                )
+                            },
+                            onClick = {
+                                showMenu = false
+                                onDeleteClick()
+                            },
+                            leadingIcon = {
+                                Icon(
+                                    imageVector = Icons.Default.Delete,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.error,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                            }
+                        )
+                    }
+                }
+            }
+            Spacer(modifier = Modifier.height(8.dp))
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    imageVector = Icons.Default.Message,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Spacer(modifier = Modifier.padding(start = 8.dp))
+                Text(
+                    text = message.content,
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
+            Spacer(modifier = Modifier.height(8.dp))
+            val color = mediaColor(message.messageType)
+            androidx.compose.material3.Surface(
+                shape = RoundedCornerShape(6.dp),
+                color = color.copy(alpha = 0.12f)
+            ) {
+                Text(
+                    text = channelLabel(message.messageType),
+                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = color
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun mediaColor(type: String): Color = when (type) {
+    "WHATSAPP" -> Color(0xFF25D366)
+    "TELEGRAM" -> Color(0xFF229ED9)
+    "SMS" -> Color(0xFF0B5FFF)
+    else -> MaterialTheme.colorScheme.onSurfaceVariant
 }

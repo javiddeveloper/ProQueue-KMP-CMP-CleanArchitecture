@@ -68,7 +68,7 @@ class MessagesViewModel :
             return@flow
         }
         PreferencesManager.setMessageTemplate(business.id, uiState.value.template)
-        emit(MessagesState.PartialState.ShowMessage("ذخیره شد"))
+        emit(MessagesState.PartialState.ShowMessage("تنظیمات ذخیره شد"))
     }
 
     override fun reduceState(
@@ -101,7 +101,7 @@ class MessagesViewModel :
         val business = BusinessStateHolder.selectedBusiness.value
         val businessTitle = business?.title ?: "کسب‌وکار شما"
         val address = business?.address ?: "--"
-        val visitorName = "سارا عزیز"
+        val visitorName = "سارا"
         val time = DateTimeUtils.formatTimeNow()
         val date = DateTimeUtils.formatMillisDateOnly(
             DateTimeUtils.systemCurrentMilliseconds()
@@ -117,11 +117,10 @@ class MessagesViewModel :
 
 
     private fun defaultTemplates(): List<String> = listOf(
-        "با سلام {visitor} عزیز؛ نوبت شما در {business} ساعت {time} می‌باشد.{minutes} شما می یاشد لطفا در زمان مقرر حضور داشته باشید.",
-        "{visitor} عزیز؛ یادآوری نوبت: {date} ساعت {time} در {business}. لطفاً {minutes} دقیقه زودتر تشریف بیاورید.",
+        "با سلام {visitor} عزیز؛ نوبت شما در {business} ساعت {time} می‌باشد. زمان تقریبی انتظار شما {minutes} دقیقه می یاشد لطفا در زمان مقرر حضور داشته باشید.",
         "دوست عزیز {visitor}؛ نوبت شما در {business}، {date} - {time}. حضور شما تا {minutes} دقیقه دیگر لازم است.",
-        "{visitor} گرامی؛ زمان نوبت شما در {business} برای {date} ساعت {time} تنظیم شد. لطفاً {minutes} دقیقه زودتر حضور داشته باشید.",
-        "{visitor} عزیز، نوبت شما در {business} نزدیک است. تاریخ: {date}، ساعت: {time}. لطفاً {minutes} دقیقه قبل مراجعه کنید.",
+        "{visitor} گرامی؛ زمان نوبت شما در {business} برای {date} ساعت {time} تنظیم شد. لطفاً {minutes} دقیقه دیگر حضور داشته باشید.",
+        "{visitor} عزیز، نوبت شما در {business} نزدیک است. تاریخ: {date}، ساعت: {time}. لطفاً {minutes} دقیقه دیگر مراجعه کنید.",
         "یادآوری: {visitor} عزیز، نوبت شما در {business} در تاریخ {date} و ساعت {time} است. حضور شما تا {minutes} دقیقه دیگر ضروری است."
     )
 }
