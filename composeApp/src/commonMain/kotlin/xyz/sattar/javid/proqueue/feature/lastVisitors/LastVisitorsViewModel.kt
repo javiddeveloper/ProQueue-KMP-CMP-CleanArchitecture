@@ -12,12 +12,15 @@ import xyz.sattar.javid.proqueue.domain.usecase.MarkAppointmentNoShowUseCase
 import xyz.sattar.javid.proqueue.domain.usecase.SendMessageUseCase
 import kotlin.time.ExperimentalTime
 
+import xyz.sattar.javid.proqueue.domain.usecase.GenerateReminderMessageUseCase
+
 class LastVisitorsViewModel(
     private val getTodayAppointmentsUseCase: GetTodayAppointmentsUseCase,
     private val removeAppointmentUseCase: RemoveAppointmentUseCase,
     private val markAppointmentCompletedUseCase: MarkAppointmentCompletedUseCase,
     private val markAppointmentNoShowUseCase: MarkAppointmentNoShowUseCase,
-    private val sendMessageUseCase: SendMessageUseCase
+    private val sendMessageUseCase: SendMessageUseCase,
+    private val generateReminderMessageUseCase: GenerateReminderMessageUseCase
 ) : BaseViewModel<LastVisitorsState, LastVisitorsState.PartialState, LastVisitorsEvent, LastVisitorsIntent>(
     initialState = LastVisitorsState()
 ) {
@@ -87,6 +90,26 @@ class LastVisitorsViewModel(
 
     override fun createErrorState(message: String): LastVisitorsState.PartialState =
         LastVisitorsState.PartialState.ShowMessage(message)
+
+    fun generateReminderMessage(
+        businessId: Long,
+        businessTitle: String,
+        businessAddress: String,
+        visitorName: String,
+        appointmentMillis: Long,
+        reminderMinutes: String,
+        serviceDuration: Int?
+    ): String {
+        return generateReminderMessageUseCase(
+            businessId = businessId,
+            businessTitle = businessTitle,
+            businessAddress = businessAddress,
+            visitorName = visitorName,
+            appointmentMillis = appointmentMillis,
+            reminderMinutes = reminderMinutes,
+            serviceDuration = serviceDuration
+        )
+    }
 
     @OptIn(ExperimentalTime::class)
     private fun loadAppointments(): Flow<LastVisitorsState.PartialState> = flow {

@@ -7,6 +7,7 @@ import xyz.sattar.javid.proqueue.core.ui.BaseViewModel
 import xyz.sattar.javid.proqueue.domain.AppointmentRepository
 import xyz.sattar.javid.proqueue.domain.MessageRepository
 import xyz.sattar.javid.proqueue.domain.VisitorRepository
+import xyz.sattar.javid.proqueue.domain.usecase.GenerateReminderMessageUseCase
 import xyz.sattar.javid.proqueue.domain.usecase.SendMessageUseCase
 import xyz.sattar.javid.proqueue.feature.visitorDetails.VisitorDetailsState.PartialState
 
@@ -14,7 +15,8 @@ class VisitorDetailsViewModel(
     private val visitorRepository: VisitorRepository,
     private val appointmentRepository: AppointmentRepository,
     private val messageRepository: MessageRepository,
-    private val sendMessageUseCase: SendMessageUseCase
+    private val sendMessageUseCase: SendMessageUseCase,
+    private val generateReminderMessageUseCase: GenerateReminderMessageUseCase
 ) : BaseViewModel<VisitorDetailsState, PartialState, VisitorDetailsEvent, VisitorDetailsIntent>(
     initialState = VisitorDetailsState()
 ) {
@@ -90,6 +92,26 @@ class VisitorDetailsViewModel(
                 isLoading = false
             )
         }
+    }
+
+    fun generateReminderMessage(
+        businessId: Long,
+        businessTitle: String,
+        businessAddress: String,
+        visitorName: String,
+        appointmentMillis: Long,
+        reminderMinutes: String,
+        serviceDuration: Int?
+    ): String {
+        return generateReminderMessageUseCase(
+            businessId = businessId,
+            businessTitle = businessTitle,
+            businessAddress = businessAddress,
+            visitorName = visitorName,
+            appointmentMillis = appointmentMillis,
+            reminderMinutes = reminderMinutes,
+            serviceDuration = serviceDuration
+        )
     }
 
     override fun createErrorState(message: String): PartialState = PartialState.ShowMessage(message)

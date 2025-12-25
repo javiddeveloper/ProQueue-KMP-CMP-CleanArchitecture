@@ -17,6 +17,7 @@ import xyz.sattar.javid.proqueue.domain.usecase.CheckAppointmentConflictUseCase
 import xyz.sattar.javid.proqueue.domain.usecase.CreateAppointmentUseCase
 import xyz.sattar.javid.proqueue.domain.usecase.DeleteBusinessUseCase
 import xyz.sattar.javid.proqueue.domain.usecase.DeleteVisitorUseCase
+import xyz.sattar.javid.proqueue.domain.usecase.GenerateReminderMessageUseCase
 import xyz.sattar.javid.proqueue.domain.usecase.GetAllVisitorsUseCase
 import xyz.sattar.javid.proqueue.domain.usecase.GetAppointmentByIdUseCase
 import xyz.sattar.javid.proqueue.domain.usecase.GetTodayAppointmentsUseCase
@@ -77,6 +78,7 @@ val appModule: Module = module {
 
     // Message UseCases
     factory { SendMessageUseCase(get()) }
+    factory { GenerateReminderMessageUseCase() }
 
     // Visitor UseCases
     factory { VisitorUpsertUseCase(get()) }
@@ -108,13 +110,14 @@ val appModule: Module = module {
             get(), // RemoveAppointmentUseCase
             get(), // MarkAppointmentCompletedUseCase
             get(), // MarkAppointmentNoShowUseCase
-            get()  // SendMessageUseCase
+            get(),  // SendMessageUseCase
+            get()   // GenerateReminderMessageUseCase
         )
     }
     viewModel { VisitorSelectionViewModel(get(), get()) }
     viewModel { SettingsViewModel(get()) }
     viewModel { NotificationsViewModel(get(), get()) }
     viewModel { BusinessListViewModel(get()) }
-    viewModel { VisitorDetailsViewModel(get(), get(), get(), get()) }
-    viewModel { MessagesViewModel() }
+    viewModel { VisitorDetailsViewModel(get(), get(), get(), get(), get()) }
+    viewModel { MessagesViewModel(get()) }
 }

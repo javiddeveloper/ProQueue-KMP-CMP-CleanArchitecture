@@ -100,7 +100,8 @@ fun LastVisitorsScreen(
 
     LastVisitorsScreenContent(
         uiState = uiState,
-        onIntent = viewModel::sendIntent
+        onIntent = viewModel::sendIntent,
+        onGenerateMessage = viewModel::generateReminderMessage
     )
 }
 
@@ -109,7 +110,8 @@ fun LastVisitorsScreen(
 fun LastVisitorsScreenContent(
     modifier: Modifier = Modifier,
     uiState: LastVisitorsState,
-    onIntent: (LastVisitorsIntent) -> Unit
+    onIntent: (LastVisitorsIntent) -> Unit,
+    onGenerateMessage: (Long, String, String, String, Long, String, Int?) -> String
 ) {
     Scaffold(
         contentWindowInsets = WindowInsets(0),
@@ -240,7 +242,8 @@ fun LastVisitorsScreenContent(
                                             },
                                             onItemClick = {
                                                 onIntent(LastVisitorsIntent.OnAppointmentClick(queueItem.appointment.visitorId))
-                                            }
+                                            },
+                                            onGenerateMessage = onGenerateMessage
                                         )
                                     }
                                     item { Spacer(modifier = Modifier.height(80.dp)) }
@@ -524,46 +527,46 @@ fun HandleEvents(
 @Composable
 fun PreviewLastVisitorsScreen() {
     AppTheme {
-        LastVisitorsScreenContent(
-            uiState = LastVisitorsState(
-                appointments = listOf(
-                    AppointmentWithDetails(
-                        appointment = Appointment(
-                            id = 1,
-                            businessId = 1,
-                            visitorId = 1,
-                            appointmentDate = DateTimeUtils.systemCurrentMilliseconds(),
-                            serviceDuration = 30,
-                            status = "WAITING",
-                            createdAt = 0,
-                            updatedAt = 0,
-                            description = ""
-                        ),
-                        visitor = Visitor(
-                            id = 1,
-                            fullName = "علی احمدی",
-                            phoneNumber = "09121234567",
-                            createdAt = 0
-                        ),
-                        business = Business(
-                            id = 1,
-                            title = "آرایشگاه",
-                            phone = "",
-                            address = "",
-                            logoPath = "",
-                            defaultServiceDuration = 30,
-                            workStartHour = 9,
-                            workEndHour = 17,
-                            notificationEnabled = false,
-                            notificationTypes = "",
-                            notificationMinutesBefore = 30,
-                            createdAt = 0
-                        )
-                    )
-                ),
-                totalCount = 1
-            ),
-            onIntent = {}
-        )
+//        LastVisitorsScreenContent(
+//            uiState = LastVisitorsState(
+//                appointments = listOf(
+//                    AppointmentWithDetails(
+//                        appointment = Appointment(
+//                            id = 1,
+//                            businessId = 1,
+//                            visitorId = 1,
+//                            appointmentDate = DateTimeUtils.systemCurrentMilliseconds(),
+//                            serviceDuration = 30,
+//                            status = "WAITING",
+//                            createdAt = 0,
+//                            updatedAt = 0,
+//                            description = ""
+//                        ),
+//                        visitor = Visitor(
+//                            id = 1,
+//                            fullName = "علی احمدی",
+//                            phoneNumber = "09121234567",
+//                            createdAt = 0
+//                        ),
+//                        business = Business(
+//                            id = 1,
+//                            title = "آرایشگاه",
+//                            phone = "",
+//                            address = "",
+//                            logoPath = "",
+//                            defaultServiceDuration = 30,
+//                            workStartHour = 9,
+//                            workEndHour = 17,
+//                            notificationEnabled = false,
+//                            notificationTypes = "",
+//                            notificationMinutesBefore = 30,
+//                            createdAt = 0
+//                        )
+//                    )
+//                ),
+//                totalCount = 1
+//            ),
+//            onIntent = {}
+//        )
     }
 }

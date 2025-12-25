@@ -42,7 +42,6 @@ import proqueue.composeapp.generated.resources.complete_action
 import proqueue.composeapp.generated.resources.contact_options
 import proqueue.composeapp.generated.resources.delete_appointment
 import proqueue.composeapp.generated.resources.no_show_action
-import proqueue.composeapp.generated.resources.overdue_time
 import proqueue.composeapp.generated.resources.phone_call
 import proqueue.composeapp.generated.resources.sms
 import proqueue.composeapp.generated.resources.telegram
@@ -50,7 +49,6 @@ import proqueue.composeapp.generated.resources.to_label
 import proqueue.composeapp.generated.resources.whatsapp
 import xyz.sattar.javid.proqueue.core.state.BusinessStateHolder
 import xyz.sattar.javid.proqueue.core.utils.DateTimeUtils
-import xyz.sattar.javid.proqueue.core.utils.buildReminderMessage
 import xyz.sattar.javid.proqueue.core.utils.formatPhoneNumberForAction
 import xyz.sattar.javid.proqueue.core.utils.openPhoneDial
 import xyz.sattar.javid.proqueue.core.utils.openSms
@@ -65,7 +63,8 @@ fun QueueItemCard(
     onComplete: () -> Unit,
     onNoShow: () -> Unit,
     onSendMessage: (appointmentId: Long, type: String, content: String, businessTitle: String) -> Unit,
-    onItemClick: () -> Unit = {}
+    onItemClick: () -> Unit = {},
+    onGenerateMessage: (Long, String, String, String, Long, String, Int?) -> String
 ) {
     Card(
         modifier = Modifier.fillMaxWidth().clickable { onItemClick() },
@@ -156,13 +155,14 @@ fun QueueItemCard(
                             val business = BusinessStateHolder.selectedBusiness.value
                             val businessTitle = business?.title ?: "--"
                             val businessAddress = business?.address ?: "--"
-                            val message = buildReminderMessage(
-                                businessId = item.appointment.businessId,
-                                businessTitle = businessTitle,
-                                businessAddress = businessAddress,
-                                visitorName = item.visitorName,
-                                appointmentMillis = item.appointment.appointmentDate,
-                                reminderMinutes = item.waitingText,
+                            val message = onGenerateMessage(
+                                /* businessId = */ item.appointment.businessId,
+                                /* businessTitle = */ businessTitle,
+                                /* businessAddress = */ businessAddress,
+                                /* visitorName = */ item.visitorName,
+                                /* appointmentMillis = */ item.appointment.appointmentDate,
+                                /* reminderMinutes = */ item.waitingText,
+                                /* serviceDuration = */ item.appointment.serviceDuration,
                             )
                             openSms(formatPhoneNumberForAction(item.visitorPhone), message)
                             onSendMessage(item.appointment.id, "SMS", message, businessTitle)
@@ -181,13 +181,14 @@ fun QueueItemCard(
                             val business = BusinessStateHolder.selectedBusiness.value
                             val businessTitle = business?.title ?: "--"
                             val businessAddress = business?.address ?: "--"
-                            val message = buildReminderMessage(
-                                businessId = item.appointment.businessId,
-                                businessTitle = businessTitle,
-                                businessAddress = businessAddress,
-                                visitorName = item.visitorName,
-                                appointmentMillis = item.appointment.appointmentDate,
-                                reminderMinutes = item.waitingText,
+                            val message = onGenerateMessage(
+                                /* businessId = */ item.appointment.businessId,
+                                /* businessTitle = */ businessTitle,
+                                /* businessAddress = */ businessAddress,
+                                /* visitorName = */ item.visitorName,
+                                /* appointmentMillis = */ item.appointment.appointmentDate,
+                                /* reminderMinutes = */ item.waitingText,
+                                /* serviceDuration = */ item.appointment.serviceDuration,
                                 )
                             openWhatsApp(formatPhoneNumberForAction(item.visitorPhone), message)
                             onSendMessage(item.appointment.id, "WHATSAPP", message, businessTitle)
@@ -200,14 +201,15 @@ fun QueueItemCard(
                             val business = BusinessStateHolder.selectedBusiness.value
                             val businessTitle = business?.title ?: "--"
                             val businessAddress = business?.address ?: "--"
-                            val message = buildReminderMessage(
-                                businessId = item.appointment.businessId,
-                                businessTitle = businessTitle,
-                                businessAddress = businessAddress,
-                                visitorName = item.visitorName,
-                                appointmentMillis = item.appointment.appointmentDate,
-                                reminderMinutes = item.waitingText,
-                                )
+                            val message = onGenerateMessage(
+                                /* businessId = */ item.appointment.businessId,
+                                /* businessTitle = */ businessTitle,
+                                /* businessAddress = */ businessAddress,
+                                /* visitorName = */ item.visitorName,
+                                /* appointmentMillis = */ item.appointment.appointmentDate,
+                                /* reminderMinutes = */ item.waitingText,
+                                /* serviceDuration = */ item.appointment.serviceDuration,
+                            )
                             openTelegram(formatPhoneNumberForAction(item.visitorPhone), message)
                             onSendMessage(item.appointment.id, "TELEGRAM", message, businessTitle)
                         })

@@ -8,12 +8,16 @@ fun buildReminderMessage(
     businessAddress: String = "",
     visitorName: String,
     appointmentMillis: Long,
-    reminderMinutes: String = PreferencesManager.getNotificationReminderMinutes().toString()
+    reminderMinutes: String = PreferencesManager.getNotificationReminderMinutes().toString(),
+    serviceDuration: Int?
 ): String {
     val template = PreferencesManager.getMessageTemplate(businessId)
-        ?: "با سلام {visitor} عزیز؛ نوبت شما در {business} ساعت {time} می‌باشد. لطفاً حدود {minutes} دقیقه دیگر حضور داشته باشید. آدرس {address}"
+        ?: "با سلام {visitor} عزیز 🌹؛ یادآوری نوبت شما در {business} برای ساعت {time}. مدت زمان خدمت به شما حدود {duration} است. لطفاً تا {minutes} دقیقه دیگر در محل حضور داشته باشید."
+
     val date = DateTimeUtils.formatDate(appointmentMillis)
     val time = DateTimeUtils.formatTime(appointmentMillis)
+    val duration = serviceDuration ?: "مشخص نشده"
+
     return template
         .replace("{visitor}", visitorName)
         .replace("{business}", businessTitle)
@@ -21,4 +25,6 @@ fun buildReminderMessage(
         .replace("{date}", date)
         .replace("{time}", time)
         .replace("{minutes}", reminderMinutes)
+        .replace("{duration}", duration.toString())
+
 }

@@ -131,7 +131,8 @@ fun VisitorDetailsScreen(
         snackbarHostState = snackbarHostState,
         onIntent = viewModel::sendIntent,
         onNavigateBack = onNavigateBack,
-        onNavigateToCreateAppointment = { onNavigateToCreateAppointment(visitorId) }
+        onNavigateToCreateAppointment = { onNavigateToCreateAppointment(visitorId) },
+        onGenerateMessage = viewModel::generateReminderMessage
     )
 }
 
@@ -143,7 +144,8 @@ fun VisitorDetailsScreenContent(
     snackbarHostState: SnackbarHostState,
     onIntent: (VisitorDetailsIntent) -> Unit,
     onNavigateBack: () -> Unit,
-    onNavigateToCreateAppointment: () -> Unit
+    onNavigateToCreateAppointment: () -> Unit,
+    onGenerateMessage: (Long, String, String, String, Long, String, Int?) -> String
 ) {
     Scaffold(
         topBar = {
@@ -198,13 +200,14 @@ fun VisitorDetailsScreenContent(
                     serviceDurationMinutes,
                     status
                 )
-                messageBody = buildReminderMessage(
-                    businessId = business?.id ?: 0L,
-                    businessTitle = businessTitle,
-                    businessAddress = businessAddress,
-                    visitorName = uiState.visitor.fullName,
-                    appointmentMillis = appointmentMillis,
-                    reminderMinutes = waitingText
+                messageBody = onGenerateMessage(
+                    /* businessId = */ business?.id ?: 0L,
+                    /* businessTitle = */ businessTitle,
+                    /* businessAddress = */ businessAddress,
+                    /* visitorName = */ uiState.visitor.fullName,
+                    /* appointmentMillis = */ appointmentMillis,
+                    /* reminderMinutes = */ waitingText,
+                    /* serviceDuration = */ targetAppointment?.appointment?.serviceDuration
                 )
                 showMessageSheet = true
             }
@@ -497,7 +500,8 @@ fun CommunicationSection(
                         businessAddress = businessAddress,
                         visitorName = visitor.fullName,
                         appointmentMillis = appointmentMillis,
-                        reminderMinutes = waitingText
+                        reminderMinutes = waitingText,
+                        serviceDuration = targetAppointment?.appointment?.serviceDuration,
                     )
                     onComposeMessage("SMS")
                 }
@@ -528,7 +532,8 @@ fun CommunicationSection(
                         businessAddress = businessAddress,
                         visitorName = visitor.fullName,
                         appointmentMillis = appointmentMillis,
-                        reminderMinutes = waitingText
+                        reminderMinutes = waitingText,
+                        serviceDuration = targetAppointment?.appointment?.serviceDuration,
                     )
                     onComposeMessage("WHATSAPP")
                 }
@@ -559,7 +564,8 @@ fun CommunicationSection(
                         businessAddress = businessAddress,
                         visitorName = visitor.fullName,
                         appointmentMillis = appointmentMillis,
-                        reminderMinutes = waitingText
+                        reminderMinutes = waitingText,
+                        serviceDuration = targetAppointment?.appointment?.serviceDuration,
                     )
                     onComposeMessage("TELEGRAM")
                 }
@@ -573,8 +579,7 @@ private fun pickTargetAppointment(appointments: List<AppointmentWithDetails>): A
     val now = DateTimeUtils.systemCurrentMilliseconds()
     val upcoming = appointments
         .filter { it.appointment.appointmentDate >= now && it.appointment.status == "WAITING" }
-        .sortedBy { it.appointment.appointmentDate }
-        .firstOrNull()
+        .minByOrNull { it.appointment.appointmentDate }
     if (upcoming != null) return upcoming
     return appointments.maxByOrNull { it.appointment.appointmentDate }
 }

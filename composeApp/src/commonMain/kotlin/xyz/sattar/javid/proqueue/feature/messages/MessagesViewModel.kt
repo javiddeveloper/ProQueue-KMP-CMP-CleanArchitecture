@@ -8,7 +8,11 @@ import xyz.sattar.javid.proqueue.core.state.BusinessStateHolder
 import xyz.sattar.javid.proqueue.core.ui.BaseViewModel
 import xyz.sattar.javid.proqueue.core.utils.DateTimeUtils
 
-class MessagesViewModel :
+import xyz.sattar.javid.proqueue.domain.usecase.GenerateReminderMessageUseCase
+
+class MessagesViewModel(
+    private val generateReminderMessageUseCase: GenerateReminderMessageUseCase
+) :
     BaseViewModel<MessagesState, MessagesState.PartialState, Unit, MessagesIntent>(
         initialState = MessagesState()
     ) {
@@ -101,20 +105,15 @@ class MessagesViewModel :
         val business = BusinessStateHolder.selectedBusiness.value
         val businessTitle = business?.title ?: "کسب‌وکار شما"
         val address = business?.address ?: "--"
-        val duration = "${business?.defaultServiceDuration} دقیقه " ?: "مشخص نشده"
-        val visitorName = "سارا"
-        val time = DateTimeUtils.formatTimeNow()
-        val date = DateTimeUtils.formatMillisDateOnly(
-            DateTimeUtils.systemCurrentMilliseconds()
+        val duration = business?.defaultServiceDuration
+
+        return generateReminderMessageUseCase.generatePreview(
+            template = template,
+            businessTitle = businessTitle,
+            businessAddress = address,
+            serviceDuration = duration,
+            reminderMinutes = minutes
         )
-        return template
-            .replace("{visitor}", visitorName)
-            .replace("{business}", businessTitle)
-            .replace("{address}", address)
-            .replace("{time}", time)
-            .replace("{date}", date)
-            .replace("{minutes}", minutes.toString())
-            .replace("{duration}", duration)
     }
 
 
