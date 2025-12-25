@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -20,9 +19,9 @@ import androidx.compose.material.icons.filled.ChevronLeft
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Factory
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Message
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Palette
-import androidx.compose.material.icons.filled.Message
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -32,6 +31,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -71,21 +71,24 @@ import proqueue.composeapp.generated.resources.delete_business
 import proqueue.composeapp.generated.resources.delete_business_confirmation
 import proqueue.composeapp.generated.resources.google_play
 import proqueue.composeapp.generated.resources.instagram
-import proqueue.composeapp.generated.resources.manage_notifications
+import proqueue.composeapp.generated.resources.main_icon
 import proqueue.composeapp.generated.resources.market
+import proqueue.composeapp.generated.resources.messages_auto_item
+import proqueue.composeapp.generated.resources.messages_auto_subtitle
 import proqueue.composeapp.generated.resources.more_info
 import proqueue.composeapp.generated.resources.notification_title
-import proqueue.composeapp.generated.resources.notifications
+import proqueue.composeapp.generated.resources.reminders_notifications_item
+import proqueue.composeapp.generated.resources.reminders_notifications_subtitle
+import proqueue.composeapp.generated.resources.select_theme
 import proqueue.composeapp.generated.resources.settings_menu_item
 import proqueue.composeapp.generated.resources.smart_queue_management
 import proqueue.composeapp.generated.resources.theme_appearance
-import proqueue.composeapp.generated.resources.theme_settings
-import proqueue.composeapp.generated.resources.whatsapp
-import androidx.compose.material3.RadioButton
-import proqueue.composeapp.generated.resources.select_theme
 import proqueue.composeapp.generated.resources.theme_dark
 import proqueue.composeapp.generated.resources.theme_light
+import proqueue.composeapp.generated.resources.theme_settings
 import proqueue.composeapp.generated.resources.theme_system
+import proqueue.composeapp.generated.resources.whatsapp
+import xyz.sattar.javid.proqueue.core.prefs.PreferencesManager
 import xyz.sattar.javid.proqueue.core.state.AppThemeMode
 import xyz.sattar.javid.proqueue.core.state.ThemeStateHolder
 import xyz.sattar.javid.proqueue.core.ui.collectWithLifecycleAware
@@ -93,14 +96,6 @@ import xyz.sattar.javid.proqueue.core.utils.openInstagram
 import xyz.sattar.javid.proqueue.core.utils.openUrl
 import xyz.sattar.javid.proqueue.core.utils.openWhatsApp
 import xyz.sattar.javid.proqueue.ui.theme.AppTheme
-import xyz.sattar.javid.proqueue.core.prefs.PreferencesManager
-import proqueue.composeapp.generated.resources.main_icon
-import proqueue.composeapp.generated.resources.messages_auto_item
-import proqueue.composeapp.generated.resources.messages_auto_subtitle
-import proqueue.composeapp.generated.resources.messages_menu_item
-import proqueue.composeapp.generated.resources.messages_ready_subtitle
-import proqueue.composeapp.generated.resources.reminders_notifications_item
-import proqueue.composeapp.generated.resources.reminders_notifications_subtitle
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -450,43 +445,43 @@ fun SettingsScreenContent(
             }
 
             // Settings Options
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surface
-                )
-            ) {
-                Column(
-                    modifier = Modifier.fillMaxWidth()
-                )
-                {
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.surface
+                        )
+                    ) {
+                        Column(
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                        {
+                            SettingsItem(
+                                icon = Icons.Default.Palette,
+                                title = stringResource(Res.string.theme_appearance),
+                                subtitle = stringResource(Res.string.theme_settings),
+                                onClick = onThemeToggle
+                            )
 
-                    SettingsItem(
-                        icon = Icons.Default.Message,
-                        title = stringResource(Res.string.messages_auto_item),
-                        subtitle = stringResource(Res.string.messages_auto_subtitle),
-                        onClick = { onIntent(SettingsIntent.OnMessagesClick) }
-                    )
+                            HorizontalDivider()
+
+                            SettingsItem(
+                                icon = Icons.Default.Message,
+                                title = stringResource(Res.string.messages_auto_item),
+                                subtitle = stringResource(Res.string.messages_auto_subtitle),
+                                onClick = { onIntent(SettingsIntent.OnMessagesClick) }
+                            )
+
+                            HorizontalDivider()
+
+                            SettingsItem(
+                                icon = Icons.Default.Notifications,
+                                title = stringResource(Res.string.reminders_notifications_item),
+                                subtitle = stringResource(Res.string.reminders_notifications_subtitle),
+                                onClick = { onIntent(SettingsIntent.OnNotificationsClick) }
+                            )
 
                     HorizontalDivider()
 
-                    SettingsItem(
-                        icon = Icons.Default.Notifications,
-                        title = stringResource(Res.string.reminders_notifications_item),
-                        subtitle = stringResource(Res.string.reminders_notifications_subtitle),
-                        onClick = { onIntent(SettingsIntent.OnNotificationsClick) }
-                    )
-
-                    HorizontalDivider()
-
-                    SettingsItem(
-                        icon = Icons.Default.Palette,
-                        title = stringResource(Res.string.theme_appearance),
-                        subtitle = stringResource(Res.string.theme_settings),
-                        onClick = onThemeToggle
-                    )
-
-                    HorizontalDivider()
                     SettingsItem(
                         icon = Icons.Default.Info,
                         title = stringResource(Res.string.contact_me),
@@ -587,7 +582,6 @@ fun HandleEvents(
                     onNavigateToNotifications()
                 }
             }
-
             SettingsEvent.NavigateToMessages -> {
                 scope.launch { onNavigateToMessages() }
             }
