@@ -243,5 +243,6 @@ enum class MessageToken(val label: String, val token: String) {
     Address("آدرس", "{address}"),
     Date("تاریخ", "{date}"),
     Time("ساعت", "{time}"),
-    Minutes("دقیقه یادآوری", "{minutes}")
+    Minutes("دقیقه یادآوری", "{minutes}"),
+    Duration("زمان سرویس", "{duration}")
 }
