@@ -138,7 +138,6 @@
     <string name="messages_ready_subtitle">پیام‌های آماده</string>
     <string name="messages_title">قالب پیام یادآوری</string>
     <string name="messages_tokens_label">درج مقادیر پویا</string>
-    <string name="messages_shape_label">الگوهای آماده</string>
     <string name="messages_preview_label">پیش‌نمایش</string>
     <string name="messages_save">ذخیره قالب</string>
     <string name="reminder_minutes">دقیقه یادآوری</string>
@@ -149,5 +148,5 @@
     <string name="messages_auto_item">پیام‌های خودکار</string>
     <string name="messages_auto_subtitle">ارسال پیام آماده برای یادآوری مراجعین</string>
     <string name="reminders_notifications_item">اعلان یادآوری</string>
-    <string name="reminders_notifications_subtitle">یادآوری خودکار به مراجع نزدیک زمان نوبت</string>
+    <string name="reminders_notifications_subtitle">یادآوری خودکار به مراجع نزدیک زمان نوبت‌شان</string>
 </resources>
