@@ -30,6 +30,10 @@ import xyz.sattar.javid.proqueue.feature.settings.SettingsScreen
 import xyz.sattar.javid.proqueue.feature.notifications.NotificationsScreen
 import xyz.sattar.javid.proqueue.feature.messages.MessagesScreen
 import androidx.navigation.toRoute
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import xyz.sattar.javid.proqueue.core.navigation.NotificationNavigationManager
+import xyz.sattar.javid.proqueue.core.navigation.NavigationEvent
 
 import xyz.sattar.javid.proqueue.feature.visitorDetails.VisitorDetailsScreen
 
@@ -42,6 +46,17 @@ fun MainNavHost(
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
+
+    val notificationEvent by NotificationNavigationManager.navigationEvent.collectAsState()
+
+    LaunchedEffect(notificationEvent) {
+        notificationEvent?.let { event ->
+            if (event is NavigationEvent.ToVisitorDetails) {
+                navController.navigate(AppScreens.VisitorDetails(event.visitorId, event.openMessageDialog))
+                NotificationNavigationManager.consumeEvent()
+            }
+        }
+    }
 
     val tabs = listOf(
         MainTab.Home,
@@ -170,6 +185,7 @@ fun MainNavHost(
                 val args = backStackEntry.toRoute<AppScreens.VisitorDetails>()
                 VisitorDetailsScreen(
                     visitorId = args.visitorId,
+                    openMessageDialog = args.openMessageDialog,
                     onNavigateBack = {
                         navController.popBackStack()
                     },

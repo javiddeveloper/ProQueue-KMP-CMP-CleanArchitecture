@@ -8,6 +8,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 
 import android.content.Intent
+import xyz.sattar.javid.proqueue.core.navigation.NotificationNavigationManager
+import xyz.sattar.javid.proqueue.core.navigation.NavigationEvent
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -30,15 +32,16 @@ class MainActivity : ComponentActivity() {
         if (intent?.getBooleanExtra("from_notification", false) == true) {
             val businessId = intent.getLongExtra("businessId", -1)
             val visitorId = intent.getLongExtra("visitorId", -1)
-            val customerName = intent.getStringExtra("customerName") ?: ""
-            val businessName = intent.getStringExtra("businessName") ?: ""
-            val minutesBefore = intent.getIntExtra("minutesBefore", 0)
+            val openMessageDialog = intent.getBooleanExtra("openMessageDialog", false)
             
-            android.widget.Toast.makeText(
-                this, 
-                "نوتیفیکیشن: $customerName - $businessName ($minutesBefore دقیقه قبل) [Biz: $businessId, Vis: $visitorId]", 
-                android.widget.Toast.LENGTH_LONG
-            ).show()
+            if (visitorId != -1L) {
+                NotificationNavigationManager.navigate(
+                    NavigationEvent.ToVisitorDetails(
+                        visitorId = visitorId,
+                        openMessageDialog = openMessageDialog
+                    )
+                )
+            }
         }
     }
 }

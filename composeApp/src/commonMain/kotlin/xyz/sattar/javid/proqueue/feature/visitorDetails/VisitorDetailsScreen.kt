@@ -28,47 +28,44 @@ import androidx.compose.material.icons.filled.Call
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.EventNote
 import androidx.compose.material.icons.filled.Message
-import androidx.compose.material.icons.filled.Send
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.Button
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
-import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -79,7 +76,6 @@ import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import proqueue.composeapp.generated.resources.Res
 import proqueue.composeapp.generated.resources.appointments_tab
-import proqueue.composeapp.generated.resources.business_name
 import proqueue.composeapp.generated.resources.contact_options
 import proqueue.composeapp.generated.resources.delete
 import proqueue.composeapp.generated.resources.empty_messages_subtitle
@@ -94,12 +90,12 @@ import proqueue.composeapp.generated.resources.visitor_details_title
 import proqueue.composeapp.generated.resources.visitor_no_appointments_subtitle
 import proqueue.composeapp.generated.resources.visitor_no_appointments_title
 import proqueue.composeapp.generated.resources.whatsapp
-import xyz.sattar.javid.proqueue.core.ui.collectWithLifecycleAware
 import xyz.sattar.javid.proqueue.core.state.BusinessStateHolder
-import xyz.sattar.javid.proqueue.core.utils.buildReminderMessage
+import xyz.sattar.javid.proqueue.core.ui.collectWithLifecycleAware
 import xyz.sattar.javid.proqueue.core.ui.components.EmptyState
 import xyz.sattar.javid.proqueue.core.ui.components.SectionTabs
 import xyz.sattar.javid.proqueue.core.utils.DateTimeUtils
+import xyz.sattar.javid.proqueue.core.utils.buildReminderMessage
 import xyz.sattar.javid.proqueue.core.utils.formatPhoneNumberForAction
 import xyz.sattar.javid.proqueue.core.utils.openPhoneDial
 import xyz.sattar.javid.proqueue.core.utils.openSms
@@ -108,11 +104,11 @@ import xyz.sattar.javid.proqueue.core.utils.openWhatsApp
 import xyz.sattar.javid.proqueue.domain.model.AppointmentWithDetails
 import xyz.sattar.javid.proqueue.domain.model.Message
 import xyz.sattar.javid.proqueue.domain.model.Visitor
-import xyz.sattar.javid.proqueue.feature.lastVisitors.StatusBadge
 
 @Composable
 fun VisitorDetailsScreen(
     visitorId: Long,
+    openMessageDialog: Boolean = false,
     viewModel: VisitorDetailsViewModel = koinViewModel(),
     onNavigateBack: () -> Unit,
     onNavigateToCreateAppointment: (Long) -> Unit
@@ -131,6 +127,7 @@ fun VisitorDetailsScreen(
 
     VisitorDetailsScreenContent(
         uiState = uiState,
+        openMessageDialog = openMessageDialog,
         snackbarHostState = snackbarHostState,
         onIntent = viewModel::sendIntent,
         onNavigateBack = onNavigateBack,
@@ -142,6 +139,7 @@ fun VisitorDetailsScreen(
 @Composable
 fun VisitorDetailsScreenContent(
     uiState: VisitorDetailsState,
+    openMessageDialog: Boolean = false,
     snackbarHostState: SnackbarHostState,
     onIntent: (VisitorDetailsIntent) -> Unit,
     onNavigateBack: () -> Unit,
@@ -178,6 +176,44 @@ fun VisitorDetailsScreenContent(
             var messageBody by remember { mutableStateOf("") }
             var currentChannel by remember { mutableStateOf("SMS") }
             var currentAppointmentId by remember { mutableStateOf(0L) }
+
+            val prepareMessageSheet: (String) -> Unit = { channel ->
+                val business = BusinessStateHolder.selectedBusiness.value
+                val businessTitle = business?.title ?: "--"
+                val businessAddress = business?.address ?: "--"
+                val targetAppointment =
+                    pickTargetAppointment(uiState.appointments)
+                currentAppointmentId = targetAppointment?.appointment?.id ?: 0L
+                currentChannel = channel
+                val appointmentMillis =
+                    targetAppointment?.appointment?.appointmentDate
+                        ?: DateTimeUtils.systemCurrentMilliseconds()
+                val serviceDurationMinutes =
+                    targetAppointment?.appointment?.serviceDuration
+                        ?: targetAppointment?.business?.defaultServiceDuration
+                        ?: 15
+                val status = targetAppointment?.appointment?.status ?: "WAITING"
+                val waitingText = DateTimeUtils.calculateWaitingOrOverdueText(
+                    appointmentMillis,
+                    serviceDurationMinutes,
+                    status
+                )
+                messageBody = buildReminderMessage(
+                    businessId = business?.id ?: 0L,
+                    businessTitle = businessTitle,
+                    businessAddress = businessAddress,
+                    visitorName = uiState.visitor.fullName,
+                    appointmentMillis = appointmentMillis,
+                    reminderMinutes = waitingText
+                )
+                showMessageSheet = true
+            }
+
+            LaunchedEffect(openMessageDialog, uiState.visitor) {
+                if (openMessageDialog && uiState.visitor != null) {
+                    prepareMessageSheet("SMS")
+                }
+            }
 
             if (showMessageSheet) {
                 ModalBottomSheet(
@@ -315,37 +351,7 @@ fun VisitorDetailsScreenContent(
                                         )
                                     )
                                 },
-                                onComposeMessage = { channel ->
-                                    val business = BusinessStateHolder.selectedBusiness.value
-                                    val businessTitle = business?.title ?: "--"
-                                    val businessAddress = business?.address ?: "--"
-                                    val targetAppointment =
-                                        pickTargetAppointment(uiState.appointments)
-                                    currentAppointmentId = targetAppointment?.appointment?.id ?: 0L
-                                    currentChannel = channel
-                                    val appointmentMillis =
-                                        targetAppointment?.appointment?.appointmentDate
-                                            ?: DateTimeUtils.systemCurrentMilliseconds()
-                                    val serviceDurationMinutes =
-                                        targetAppointment?.appointment?.serviceDuration
-                                            ?: targetAppointment?.business?.defaultServiceDuration
-                                            ?: 15
-                                    val status = targetAppointment?.appointment?.status ?: "WAITING"
-                                    val waitingText = DateTimeUtils.calculateWaitingOrOverdueText(
-                                        appointmentMillis,
-                                        serviceDurationMinutes,
-                                        status
-                                    )
-                                    messageBody = buildReminderMessage(
-                                        businessId = business?.id ?: 0L,
-                                        businessTitle = businessTitle,
-                                        businessAddress = businessAddress,
-                                        visitorName = uiState.visitor.fullName,
-                                        appointmentMillis = appointmentMillis,
-                                        reminderMinutes = waitingText
-                                    )
-                                    showMessageSheet = true
-                                }
+                                onComposeMessage = prepareMessageSheet
                             )
                         }
                     }

@@ -61,6 +61,7 @@ class ReminderReceiver : BroadcastReceiver() {
             putExtra("customerName", customerName)
             putExtra("businessName", businessName)
             putExtra("minutesBefore", minutesBefore)
+            putExtra("openMessageDialog", true)
         }
         
         val pendingIntent = if (intent != null) {
